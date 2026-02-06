@@ -168,10 +168,10 @@ fi
 
 if [ "$(uname)" = "Darwin" ]; then
   echo "Applying nix-darwin: $TARGET"
-  if ! sudo -H NIX_HOME_USERNAME="$NIX_HOME_USERNAME" "${NIX_CMD[@]}" --impure run nix-darwin -- switch --flake "$TARGET"; then
+  if ! sudo -H NIX_HOME_USERNAME="$NIX_HOME_USERNAME" "${NIX_CMD[@]}" run --impure nix-darwin -- switch --flake "$TARGET"; then
     if [ "$TARGET" != "$REPO_ROOT_DIR#default" ]; then
       echo "Falling back to default host"
-      sudo -H NIX_HOME_USERNAME="$NIX_HOME_USERNAME" "${NIX_CMD[@]}" --impure run nix-darwin -- switch --flake "$REPO_ROOT_DIR#default"
+      sudo -H NIX_HOME_USERNAME="$NIX_HOME_USERNAME" "${NIX_CMD[@]}" run --impure nix-darwin -- switch --flake "$REPO_ROOT_DIR#default"
     else
       exit 1
     fi
