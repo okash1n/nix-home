@@ -55,6 +55,7 @@
 ### FR-003 シェル再現
 - `zsh` をデフォルトシェルとして利用可能にする。
 - `powerlevel10k` が有効なプロンプトが表示される。
+- 既存 dotfiles の `powerlevel10k` 設定（見た目）を維持する。
 - alias / functions を Nix 管理で復元する。
 - 履歴・補完キャッシュなどの XDG パスを一貫させる。
 - `~/.config/zsh/.zshrc` を Nix 管理で生成する。

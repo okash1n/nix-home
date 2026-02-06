@@ -52,15 +52,7 @@
     fi
   '';
 
-  home.file.".config/zsh/.p10k.zsh".text = ''
-    # Minimal powerlevel10k configuration.
-    typeset -g POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true
-    typeset -g POWERLEVEL9K_MODE="nerdfont-complete"
-    typeset -g POWERLEVEL9K_INSTANT_PROMPT="off"
-
-    typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(os_icon dir vcs newline prompt_char)
-    typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status command_execution_time background_jobs time)
-  '';
+  home.file.".config/zsh/.p10k.zsh".source = ../../home/zsh/p10k.zsh;
 
   programs.home-manager.enable = true;
 }
