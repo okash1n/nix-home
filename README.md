@@ -24,6 +24,7 @@ make init
 - `nix-darwin` + `home-manager` の適用
 - 既存 dotfile 衝突時の自動バックアップ（`*.hm-bak`）
 - Nix Store の自動 GC / 最適化設定の適用（容量増加を抑制）
+- 過去 Nix installer の `*.backup-before-nix` 衝突を自動退避して継続
 
 ## 反映される主な設定
 

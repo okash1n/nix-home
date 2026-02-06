@@ -148,7 +148,28 @@ source_nix_profile() {
 
 source_nix_profile || true
 
+prepare_nix_installer_rc_backups() {
+  local file backup archived ts
+  ts=$(date +%Y%m%d-%H%M%S)
+  for file in /etc/bashrc /etc/bash.bashrc /etc/zshrc; do
+    backup="${file}.backup-before-nix"
+    if ! sudo test -e "$backup"; then
+      continue
+    fi
+
+    if ! sudo test -e "$file"; then
+      sudo cp "$backup" "$file"
+      echo "Restored missing $file from $backup"
+    fi
+
+    archived="${backup}.nix-home-${ts}"
+    sudo mv "$backup" "$archived"
+    echo "Archived stale installer backup: $backup -> $archived"
+  done
+}
+
 if ! command -v nix >/dev/null 2>&1; then
+  prepare_nix_installer_rc_backups
   echo "Installing Nix..."
   curl -fsSL https://nixos.org/nix/install | sh -s -- --daemon --yes --no-modify-profile
   source_nix_profile || true
