@@ -149,5 +149,10 @@ in
     ];
   };
 
+  home.file.".gitconfig".text = ''
+    [include]
+      path = ~/.config/git/config
+  '';
+
   programs.home-manager.enable = true;
 }
