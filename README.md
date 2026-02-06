@@ -21,6 +21,7 @@ make init
 
 - Xcode CLT / GitHub SSH の preflight チェック
 - `dracula-pro` private repository の取得または更新（`~/ghq/github.com/okash1n/dracula-pro`）
+- `zsh` の履歴/キャッシュ用ディレクトリの事前作成（`~/.local/state/zsh` / `~/.cache/zsh`）
 - `nix-darwin` + `home-manager` の適用
 - 既存 dotfile 衝突時の自動バックアップ（`*.hm-bak`）
 - Nix Store の自動 GC / 最適化設定の適用（容量増加を抑制）

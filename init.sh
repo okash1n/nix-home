@@ -16,6 +16,13 @@ exec > >(tee -a "$LOG_FILE") 2>&1
 echo "=== nix-home init ==="
 echo "log: $LOG_FILE"
 
+ensure_shell_state_dirs() {
+  mkdir -p "$HOME/.local/state/zsh"
+  mkdir -p "$HOME/.cache/zsh"
+}
+
+ensure_shell_state_dirs
+
 ensure_xcode_clt() {
   if [ "$(uname)" != "Darwin" ]; then
     return 0
