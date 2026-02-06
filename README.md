@@ -27,6 +27,7 @@ make init
 
 - `zsh` / `powerlevel10k`
 - CLI: `git` `curl` `jq` `fzf` `ghq` `awk` `grep` `sed` `codex` `claude` `gemini`
+- `git` グローバル設定（`user.name` / `user.email` / global ignore）
 - フォント: HackGen NF / LINE Seed JP / IBM Plex Sans JP / IBM Plex Mono
 - `Ghostty` 設定（HackGen + Dracula Pro 配色）
 - `Terminal.app` の `Dracula Pro` 既定プロファイル設定
