@@ -98,42 +98,46 @@ in
 
   home.activation.setupTerminalDraculaPro = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if [ "$(/usr/bin/uname)" = "Darwin" ]; then
-      DRACULA_PRO_ROOT="$HOME/ghq/github.com/okash1n/dracula-pro"
-      THEME_FILE="$DRACULA_PRO_ROOT/themes/terminal-app/Dracula Pro.terminal"
-      STATE_DIR="$HOME/.local/state/nix-home"
-      MARKER_FILE="$STATE_DIR/terminal-dracula-pro.sha256"
-
-      mkdir -p "$STATE_DIR"
-
-      if [ ! -f "$THEME_FILE" ]; then
-        echo "[nix-home] Dracula Pro theme file was not found: $THEME_FILE"
-        echo "[nix-home] Run: ghq get git@github.com:okash1n/dracula-pro.git"
+      if ! /usr/bin/pgrep -x WindowServer >/dev/null 2>&1; then
+        echo "[nix-home] Skipping Terminal.app theme setup (no GUI session)."
       else
-        THEME_HASH=$(/usr/bin/shasum -a 256 "$THEME_FILE" | /usr/bin/awk '{print $1}')
-        APPLIED_HASH=""
-        if [ -f "$MARKER_FILE" ]; then
-          APPLIED_HASH="$(cat "$MARKER_FILE" 2>/dev/null || true)"
+        DRACULA_PRO_ROOT="$HOME/ghq/github.com/okash1n/dracula-pro"
+        THEME_FILE="$DRACULA_PRO_ROOT/themes/terminal-app/Dracula Pro.terminal"
+        STATE_DIR="$HOME/.local/state/nix-home"
+        MARKER_FILE="$STATE_DIR/terminal-dracula-pro.sha256"
+
+        mkdir -p "$STATE_DIR"
+
+        if [ ! -f "$THEME_FILE" ]; then
+          echo "[nix-home] Dracula Pro theme file was not found: $THEME_FILE"
+          echo "[nix-home] Run: ghq get git@github.com:okash1n/dracula-pro.git"
+        else
+          THEME_HASH=$(/usr/bin/shasum -a 256 "$THEME_FILE" | /usr/bin/awk '{print $1}')
+          APPLIED_HASH=""
+          if [ -f "$MARKER_FILE" ]; then
+            APPLIED_HASH="$(cat "$MARKER_FILE" 2>/dev/null || true)"
+          fi
+
+          if [ "$THEME_HASH" != "$APPLIED_HASH" ]; then
+            /usr/bin/open "$THEME_FILE" >/dev/null 2>&1 || true
+            printf "%s\n" "$THEME_HASH" > "$MARKER_FILE"
+          fi
+
+          /usr/bin/defaults write com.apple.Terminal "Default Window Settings" "Dracula Pro" || true
+          /usr/bin/defaults write com.apple.Terminal "Startup Window Settings" "Dracula Pro" || true
+          /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".columnCount 120 || true
+          /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".rowCount 30 || true
+          /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".FontWidthSpacing 1.0 || true
+          /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".FontHeightSpacing 1.0 || true
+
+          /usr/bin/osascript -e 'tell application "Terminal"
+            set font name of settings set "Dracula Pro" to "HackGen Console NF"
+            set font size of settings set "Dracula Pro" to 14
+          end tell' >/dev/null 2>&1 || /usr/bin/osascript -e 'tell application "Terminal"
+            set font name of settings set "Dracula Pro" to "HackGenConsoleNF-Regular"
+            set font size of settings set "Dracula Pro" to 14
+          end tell' >/dev/null 2>&1 || true
         fi
-
-        if [ "$THEME_HASH" != "$APPLIED_HASH" ]; then
-          /usr/bin/open "$THEME_FILE" >/dev/null 2>&1 || true
-          printf "%s\n" "$THEME_HASH" > "$MARKER_FILE"
-        fi
-
-        /usr/bin/defaults write com.apple.Terminal "Default Window Settings" "Dracula Pro" || true
-        /usr/bin/defaults write com.apple.Terminal "Startup Window Settings" "Dracula Pro" || true
-        /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".columnCount 120 || true
-        /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".rowCount 30 || true
-        /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".FontWidthSpacing 1.0 || true
-        /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".FontHeightSpacing 1.0 || true
-
-        /usr/bin/osascript -e 'tell application "Terminal"
-          set font name of settings set "Dracula Pro" to "HackGen Console NF"
-          set font size of settings set "Dracula Pro" to 14
-        end tell' >/dev/null 2>&1 || /usr/bin/osascript -e 'tell application "Terminal"
-          set font name of settings set "Dracula Pro" to "HackGenConsoleNF-Regular"
-          set font size of settings set "Dracula Pro" to 14
-        end tell' >/dev/null 2>&1 || true
       fi
     fi
   '';

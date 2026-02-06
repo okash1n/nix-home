@@ -36,6 +36,9 @@ make init
 - `Terminal.app` の `Dracula Pro` 既定プロファイル設定
 - Nix Store の自動メンテナンス（GC / optimise）
 
+注: GUI セッションが無い実行（ヘッドレス VM など）では、
+`Terminal.app` へのテーマ適用は自動でスキップされます。
+
 ## 仕様管理
 
 - `AGENTS.md`
