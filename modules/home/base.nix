@@ -32,6 +32,9 @@ in
   xdg.enable = true;
 
   home.file.".config/zsh/.zshrc".text = ''
+    mkdir -p "$HOME/.local/state/zsh"
+    mkdir -p "$HOME/.cache/zsh"
+
     export HISTFILE="$HOME/.local/state/zsh/history"
     export HISTSIZE=50000
     export SAVEHIST=50000
@@ -114,6 +117,7 @@ in
           echo "[nix-home] Dracula Pro theme file was not found: $THEME_FILE"
           echo "[nix-home] Run: ghq get git@github.com:okash1n/dracula-pro.git"
         else
+          THEME_IMPORTED=1
           THEME_HASH=$(/usr/bin/shasum -a 256 "$THEME_FILE" | /usr/bin/awk '{print $1}')
           APPLIED_HASH=""
           if [ -f "$MARKER_FILE" ]; then
@@ -128,28 +132,37 @@ in
               fi
               /bin/sleep 1
             done
-            printf "%s\n" "$THEME_HASH" > "$MARKER_FILE"
           fi
 
-          /usr/bin/defaults write com.apple.Terminal "Default Window Settings" "Dracula Pro" || true
-          /usr/bin/defaults write com.apple.Terminal "Startup Window Settings" "Dracula Pro" || true
-          /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".columnCount 120 || true
-          /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".rowCount 30 || true
-          /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".FontWidthSpacing 1.0 || true
-          /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".FontHeightSpacing 1.0 || true
+          if ! /usr/bin/defaults export com.apple.Terminal - 2>/dev/null | /usr/bin/grep -q "<key>Dracula Pro</key>"; then
+            THEME_IMPORTED=0
+            echo "[nix-home] Dracula Pro profile import could not be confirmed."
+            echo "[nix-home] Please open once: $THEME_FILE"
+          fi
 
-          if ! /usr/bin/osascript -e 'with timeout of 3 seconds
-            tell application "Terminal"
-              set font name of settings set "Dracula Pro" to "HackGen Console NF"
-              set font size of settings set "Dracula Pro" to 14
-            end tell
-          end timeout' >/dev/null 2>&1 && ! /usr/bin/osascript -e 'with timeout of 3 seconds
-            tell application "Terminal"
-              set font name of settings set "Dracula Pro" to "HackGenConsoleNF-Regular"
-              set font size of settings set "Dracula Pro" to 14
-            end tell
-          end timeout' >/dev/null 2>&1; then
-            echo "[nix-home] Terminal.app font sync failed or timed out."
+          if [ "$THEME_IMPORTED" = "1" ]; then
+            printf "%s\n" "$THEME_HASH" > "$MARKER_FILE"
+
+            /usr/bin/defaults write com.apple.Terminal "Default Window Settings" "Dracula Pro" || true
+            /usr/bin/defaults write com.apple.Terminal "Startup Window Settings" "Dracula Pro" || true
+            /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".columnCount 120 || true
+            /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".rowCount 30 || true
+            /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".FontWidthSpacing 1.0 || true
+            /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".FontHeightSpacing 1.0 || true
+
+            if ! /usr/bin/osascript -e 'with timeout of 3 seconds
+              tell application "Terminal"
+                set font name of settings set "Dracula Pro" to "HackGen Console NF"
+                set font size of settings set "Dracula Pro" to 14
+              end tell
+            end timeout' >/dev/null 2>&1 && ! /usr/bin/osascript -e 'with timeout of 3 seconds
+              tell application "Terminal"
+                set font name of settings set "Dracula Pro" to "HackGenConsoleNF-Regular"
+                set font size of settings set "Dracula Pro" to 14
+              end tell
+            end timeout' >/dev/null 2>&1; then
+              echo "[nix-home] Terminal.app font sync failed or timed out."
+            fi
           fi
         fi
       fi

@@ -62,6 +62,7 @@
 - 既存 dotfiles の `powerlevel10k` 設定（見た目）を維持する。
 - alias / functions を Nix 管理で復元する。
 - 履歴・補完キャッシュなどの XDG パスを一貫させる。
+- 履歴ファイル保存先ディレクトリ（例: `~/.local/state/zsh`）が存在しない場合は自動作成する。
 - `~/.config/zsh/.zshrc` を Nix 管理で生成する。
 - `~/.config/zsh/.p10k.zsh` を Nix 管理で生成する。
 
@@ -88,6 +89,7 @@
 - `~/.config/ghostty/config` を Nix 管理で生成し、HackGen と Dracula Pro 配色を適用する。
 - `Terminal.app` は `Dracula Pro` プロファイルを既定に設定する。
 - GUI セッションが有効な環境では、`Terminal.app` の起動有無に依存せずテーマ適用処理（import / defaults / フォント設定）を試行する。
+- `Dracula Pro` プロファイルの import 失敗時は `defaults` の既定設定更新を強行せず、失敗理由をログに出す。
 - `Dracula Pro` が未取得の場合は処理をスキップし、復旧手順をログに表示する。
 - GUI セッションが無い環境では `Terminal.app` への適用処理をスキップして停止しない。
 

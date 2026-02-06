@@ -41,6 +41,7 @@ make init
 明示的にスキップする場合は `NIX_HOME_SKIP_TERMINAL_THEME=1 make init` を使います。
 `Terminal.app` のテーマ適用処理（import / defaults / フォント同期）は、
 GUI セッションが有効なら `Terminal.app` 起動有無に依存せず試行します。
+`Dracula Pro` プロファイルの import が確認できない場合は、既定設定更新をスキップしてログに案内を出します。
 
 ## 仕様管理
 
