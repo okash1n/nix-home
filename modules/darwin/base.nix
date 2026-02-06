@@ -6,7 +6,7 @@ let
 
     src = pkgs.fetchzip {
       url = "https://github.com/line/seed/releases/download/v20251119/seed-v20251119.zip";
-      hash = "sha256-lwGSCNO2iG1fxYS/UoXgkzInEkd4bdn5uNlpZIEqYpA=";
+      hash = "sha256-2SphpQ85BETRMndlA6t+v6f4FXEC1vX74zaWBvT3QhI=";
       stripRoot = false;
     };
 
