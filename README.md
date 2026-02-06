@@ -23,6 +23,7 @@ make init
 - `dracula-pro` private repository の取得または更新（`~/ghq/github.com/okash1n/dracula-pro`）
 - `nix-darwin` + `home-manager` の適用
 - 既存 dotfile 衝突時の自動バックアップ（`*.hm-bak`）
+- Nix Store の自動 GC / 最適化設定の適用（容量増加を抑制）
 
 ## 反映される主な設定
 
@@ -32,6 +33,7 @@ make init
 - `Ghostty` 本体と `~/.config/ghostty/config`（HackGen + Dracula Pro 配色）
 - フォント: HackGen NF / LINE Seed JP / IBM Plex Sans JP / IBM Plex Mono
 - `Terminal.app` の `Dracula Pro` 既定プロファイル設定
+- Nix Store の自動メンテナンス（GC / optimise）
 
 ## 仕様管理
 

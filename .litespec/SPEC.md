@@ -78,6 +78,11 @@
 - IBM Plex JP を導入する。
 - IBM Plex Mono を導入する。
 
+### FR-008 ストアメンテナンス
+- Nix Store のガベージコレクションを自動実行する。
+- 古い世代を定期的に削除し、容量増加を抑制する。
+- Nix Store の最適化を自動実行する。
+
 ### FR-007 ターミナルテーマ管理
 - `Ghostty` 本体を Nix 管理で導入する。
 - `~/.config/ghostty/config` を Nix 管理で生成し、HackGen と Dracula Pro 配色を適用する。
@@ -107,6 +112,7 @@
 - `git config --global user.name` と `git config --global user.email` が期待値を返す。
 - HackGen NF / LINE Seed JP / IBM Plex JP / IBM Plex Mono が利用可能。
 - `Dracula Pro` private repository のテーマ資産を使って `Terminal.app` の既定プロファイルが `Dracula Pro` になる。
+- Nix Store の自動 GC / 最適化設定が有効になっている。
 - 2回連続で `make init` 実行しても破綻しない。
 - `.litespec/README.md` に初期化手順と検証手順が記載されている。
 
