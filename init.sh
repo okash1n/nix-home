@@ -254,8 +254,16 @@ ensure_nix_system_files
 NIX_CMD=(nix --extra-experimental-features "nix-command flakes")
 NIX_HOME_USERNAME=${NIX_HOME_USERNAME:-$(id -un)}
 NIX_HOME_SKIP_TERMINAL_THEME=${NIX_HOME_SKIP_TERMINAL_THEME:-0}
+TERMINAL_THEME_SKIP_MARKER="$LOG_DIR/skip-terminal-theme"
 export NIX_HOME_USERNAME
 export NIX_HOME_SKIP_TERMINAL_THEME
+
+if [ "$NIX_HOME_SKIP_TERMINAL_THEME" = "1" ]; then
+  touch "$TERMINAL_THEME_SKIP_MARKER"
+  echo "Terminal theme setup will be skipped for this run."
+else
+  rm -f "$TERMINAL_THEME_SKIP_MARKER"
+fi
 
 if [ ! -f "$REPO_ROOT_DIR/flake.lock" ]; then
   echo "Generating flake.lock..."

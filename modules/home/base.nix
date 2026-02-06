@@ -98,7 +98,7 @@ in
 
   home.activation.setupTerminalDraculaPro = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if [ "$(/usr/bin/uname)" = "Darwin" ]; then
-      if [ "''${NIX_HOME_SKIP_TERMINAL_THEME:-0}" = "1" ]; then
+      if [ "''${NIX_HOME_SKIP_TERMINAL_THEME:-0}" = "1" ] || [ -f "$HOME/.local/state/nix-home/skip-terminal-theme" ]; then
         echo "[nix-home] Skipping Terminal.app theme setup (NIX_HOME_SKIP_TERMINAL_THEME=1)."
       elif ! /usr/bin/pgrep -x WindowServer >/dev/null 2>&1; then
         echo "[nix-home] Skipping Terminal.app theme setup (no GUI session)."
@@ -123,7 +123,7 @@ in
           fi
 
           if [ "$THEME_HASH" != "$APPLIED_HASH" ]; then
-            /usr/bin/open "$THEME_FILE" >/dev/null 2>&1 || true
+            /usr/bin/open "$THEME_FILE" >/dev/null 2>&1 &
             printf "%s\n" "$THEME_HASH" > "$MARKER_FILE"
           fi
 
@@ -134,13 +134,17 @@ in
           /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".FontWidthSpacing 1.0 || true
           /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".FontHeightSpacing 1.0 || true
 
-          /usr/bin/osascript -e 'tell application "Terminal"
-            set font name of settings set "Dracula Pro" to "HackGen Console NF"
-            set font size of settings set "Dracula Pro" to 14
-          end tell' >/dev/null 2>&1 || /usr/bin/osascript -e 'tell application "Terminal"
-            set font name of settings set "Dracula Pro" to "HackGenConsoleNF-Regular"
-            set font size of settings set "Dracula Pro" to 14
-          end tell' >/dev/null 2>&1 || true
+          /usr/bin/osascript -e 'with timeout of 3 seconds
+            tell application "Terminal"
+              set font name of settings set "Dracula Pro" to "HackGen Console NF"
+              set font size of settings set "Dracula Pro" to 14
+            end tell
+          end timeout' >/dev/null 2>&1 || /usr/bin/osascript -e 'with timeout of 3 seconds
+            tell application "Terminal"
+              set font name of settings set "Dracula Pro" to "HackGenConsoleNF-Regular"
+              set font size of settings set "Dracula Pro" to 14
+            end tell
+          end timeout' >/dev/null 2>&1 || true
         fi
       fi
     fi
