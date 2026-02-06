@@ -20,3 +20,11 @@
 
 - ローカル macOS では `switch` 前に `build` を優先する
 - 別ユーザーまたは VM で `make init` の通し確認を行う
+
+## 追加の検証観点（MVP）
+
+- `xcode-select -p` が成功すること
+- `ssh -T git@github.com` が成功すること
+- `~/ghq/github.com/okash1n/dracula-pro` が clone 済みであること
+- `~/.config/ghostty/config` に HackGen と Dracula Pro の設定が入ること
+- `defaults read com.apple.Terminal "Default Window Settings"` が `Dracula Pro` になること

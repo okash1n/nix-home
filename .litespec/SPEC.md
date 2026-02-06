@@ -20,6 +20,7 @@
 - alias / functions / 基本 CLI の再現。
 - AI CLI（Codex / Claude Code / Gemini）の利用可能状態の再現。
 - 主要フォントの導入（HackGen NF、LINE Seed JP、IBM Plex JP、IBM Plex Mono）。
+- `Dracula Pro`（private repository）を使ったターミナルテーマ適用。
 
 ## 非スコープ（MVP）
 - GUI アプリの全面自動化（Karabiner、Raycast など）。
@@ -40,8 +41,11 @@
 ## 機能要件
 
 ### FR-001 ブートストラップ
+- `init.sh` は macOS で `xcode-select -p` を事前確認し、未導入時は導入を促して終了する。
+- `init.sh` は GitHub SSH 接続を事前確認し、失敗時は鍵登録を促して終了する。
 - `init.sh` は未導入時に Nix を導入する。
 - `init.sh` はリポジトリを取得または更新する。
+- `init.sh` は `Dracula Pro` private repository を `ghq` 配下に取得または更新する。
 - `init.sh` は `darwin-rebuild switch --flake` を実行する。
 - `init.sh` はログファイルを出力し、失敗時に参照先を表示する。
 - `init.sh` はユーザーレベルで `~/.zshenv` に `ZDOTDIR` を設定する。
@@ -73,6 +77,12 @@
 - IBM Plex JP を導入する。
 - IBM Plex Mono を導入する。
 
+### FR-007 ターミナルテーマ管理
+- `~/.config/ghostty/config` を Nix 管理で生成し、HackGen と Dracula Pro 配色を適用する。
+- `Terminal.app` は `Dracula Pro` プロファイルを既定に設定する。
+- `Terminal.app` は HackGen 系フォント設定を適用する。
+- `Dracula Pro` が未取得の場合は処理をスキップし、復旧手順をログに表示する。
+
 ### FR-005 冪等性
 - 同一マシンで `make init`（または `./init.sh`）を再実行しても、致命的エラーで停止しない。
 - 再実行後もシェル設定が破損しない。
@@ -87,9 +97,11 @@
 - クリーン macOS で `make init` 実行後、ログインシェルが `zsh` で起動する。
 - `powerlevel10k` が表示される。
 - `~/.config/zsh/.zshrc` と `~/.config/zsh/.p10k.zsh` が存在する。
+- `~/.config/ghostty/config` が存在し、HackGen と Dracula Pro 配色が反映される。
 - 主要 alias / functions が機能する。
 - `command -v git nix zsh codex claude gemini` が成功する。
 - HackGen NF / LINE Seed JP / IBM Plex JP / IBM Plex Mono が利用可能。
+- `Dracula Pro` private repository のテーマ資産を使って `Terminal.app` の既定プロファイルが `Dracula Pro` になる。
 - 2回連続で `make init` 実行しても破綻しない。
 - `.litespec/README.md` に初期化手順と検証手順が記載されている。
 
@@ -102,7 +114,9 @@
 ## 依存・前提
 - インターネット接続。
 - GitHub からリポジトリ取得可能（SSH または HTTPS）。
+- GitHub へ登録済みの SSH 鍵（private repository 取得のため）。
 - macOS で `nix-darwin` 実行可能な管理者権限。
+- Xcode Command Line Tools が利用可能。
 
 ## リスク・懸念
 - AI CLI の認証情報投入は初期フェーズでは手動になる可能性がある。

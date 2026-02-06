@@ -4,6 +4,9 @@ set -euo pipefail
 REPO_ROOT_DIR=$(cd "$(dirname "$0")" && pwd)
 REPO_URL=${REPO_URL:-"git@github.com:okash1n/nix-home.git"}
 TARGET_DIR=${NIX_HOME_DIR:-"$HOME/nix-home"}
+GHQ_ROOT=${GHQ_ROOT:-"$HOME/ghq"}
+DRACULA_PRO_REPO=${DRACULA_PRO_REPO:-"git@github.com:okash1n/dracula-pro.git"}
+DRACULA_PRO_DIR=${DRACULA_PRO_DIR:-"$GHQ_ROOT/github.com/okash1n/dracula-pro"}
 LOG_DIR="$HOME/.local/state/nix-home"
 mkdir -p "$LOG_DIR"
 LOG_FILE="$LOG_DIR/init-$(date +%Y%m%d-%H%M%S).log"
@@ -12,6 +15,73 @@ exec > >(tee -a "$LOG_FILE") 2>&1
 
 echo "=== nix-home init ==="
 echo "log: $LOG_FILE"
+
+ensure_xcode_clt() {
+  if [ "$(uname)" != "Darwin" ]; then
+    return 0
+  fi
+  if /usr/bin/xcode-select -p >/dev/null 2>&1; then
+    return 0
+  fi
+
+  echo "Xcode Command Line Tools are required before nix-home initialization."
+  echo "Launching: xcode-select --install"
+  /usr/bin/xcode-select --install >/dev/null 2>&1 || true
+  echo "Complete the installation and run make init again."
+  exit 1
+}
+
+ensure_github_ssh() {
+  if [ "${NIX_HOME_SKIP_SSH_CHECK:-0}" = "1" ]; then
+    echo "Skipping GitHub SSH check (NIX_HOME_SKIP_SSH_CHECK=1)."
+    return 0
+  fi
+  if ! command -v ssh >/dev/null 2>&1; then
+    echo "ssh command is required."
+    exit 1
+  fi
+
+  local ssh_output ssh_status
+  set +e
+  ssh_output=$(ssh -T -o BatchMode=yes -o ConnectTimeout=5 -o StrictHostKeyChecking=accept-new git@github.com 2>&1)
+  ssh_status=$?
+  set -e
+
+  if [ "$ssh_status" -eq 0 ] || echo "$ssh_output" | grep -qi "successfully authenticated"; then
+    echo "GitHub SSH authentication is ready."
+    return 0
+  fi
+
+  echo "GitHub SSH authentication is not ready."
+  echo "$ssh_output"
+  echo "Register your SSH public key to GitHub and retry."
+  echo "Check with: ssh -T git@github.com"
+  exit 1
+}
+
+sync_dracula_pro() {
+  if ! command -v git >/dev/null 2>&1; then
+    echo "git is required to sync Dracula Pro repository."
+    exit 1
+  fi
+
+  mkdir -p "$(dirname "$DRACULA_PRO_DIR")"
+  if [ -d "$DRACULA_PRO_DIR/.git" ]; then
+    echo "Updating Dracula Pro repository"
+    git -C "$DRACULA_PRO_DIR" pull --ff-only
+    return 0
+  fi
+
+  if [ -d "$DRACULA_PRO_DIR" ]; then
+    echo "Path exists but is not a git repository: $DRACULA_PRO_DIR"
+    exit 1
+  fi
+
+  echo "Cloning Dracula Pro repository to $DRACULA_PRO_DIR"
+  git clone "$DRACULA_PRO_REPO" "$DRACULA_PRO_DIR"
+}
+
+ensure_xcode_clt
 
 if command -v sudo >/dev/null 2>&1; then
   if sudo -n true >/dev/null 2>&1; then
@@ -41,15 +111,19 @@ if [ ! -d "$REPO_ROOT_DIR/.git" ]; then
     echo "git is required to clone the repository."
     exit 1
   fi
+  ensure_github_ssh
   echo "Cloning repository to $TARGET_DIR"
   git clone "$REPO_URL" "$TARGET_DIR"
   exec "$TARGET_DIR/init.sh"
 fi
 
 if command -v git >/dev/null 2>&1; then
+  ensure_github_ssh
   echo "Updating repository"
   git -C "$REPO_ROOT_DIR" pull --ff-only || true
 fi
+
+sync_dracula_pro
 
 ZSHENV="$HOME/.zshenv"
 ZDOTDIR_LINE='export ZDOTDIR="$HOME/.config/zsh"'

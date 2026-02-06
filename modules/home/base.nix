@@ -1,4 +1,4 @@
-{ pkgs, username, ... }:
+{ pkgs, username, lib, ... }:
 {
   home.username = username;
   home.homeDirectory = "/Users/${username}";
@@ -53,6 +53,82 @@
   '';
 
   home.file.".config/zsh/.p10k.zsh".source = ../../home/zsh/p10k.zsh;
+
+  home.file.".config/ghostty/config".text = ''
+    # Font
+    font-family = "HackGen Console NF"
+    font-codepoint-map = U+3000-U+9FFF=HackGen Console NF
+    font-size = 16
+
+    # Theme (Dracula Pro)
+    palette = 0=#22212C
+    palette = 1=#FF9580
+    palette = 2=#8AFF80
+    palette = 3=#FFFF80
+    palette = 4=#9580FF
+    palette = 5=#FF80BF
+    palette = 6=#80FFEA
+    palette = 7=#F8F8F2
+    palette = 8=#504C67
+    palette = 9=#FFAA99
+    palette = 10=#A2FF99
+    palette = 11=#FFFF99
+    palette = 12=#AA99FF
+    palette = 13=#FF99CC
+    palette = 14=#99FFEE
+    palette = 15=#FFFFFF
+    background = #22212C
+    foreground = #F8F8F2
+    cursor-color = #7970A9
+    cursor-text = #7970A9
+    selection-background = #454158
+    selection-foreground = #F8F8F2
+
+    # Icon
+    macos-icon = "retro"
+  '';
+
+  home.activation.setupTerminalDraculaPro = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    if [ "$(/usr/bin/uname)" = "Darwin" ]; then
+      DRACULA_PRO_ROOT="$HOME/ghq/github.com/okash1n/dracula-pro"
+      THEME_FILE="$DRACULA_PRO_ROOT/themes/terminal-app/Dracula Pro.terminal"
+      STATE_DIR="$HOME/.local/state/nix-home"
+      MARKER_FILE="$STATE_DIR/terminal-dracula-pro.sha256"
+
+      mkdir -p "$STATE_DIR"
+
+      if [ ! -f "$THEME_FILE" ]; then
+        echo "[nix-home] Dracula Pro theme file was not found: $THEME_FILE"
+        echo "[nix-home] Run: ghq get git@github.com:okash1n/dracula-pro.git"
+      else
+        THEME_HASH=$(/usr/bin/shasum -a 256 "$THEME_FILE" | /usr/bin/awk '{print $1}')
+        APPLIED_HASH=""
+        if [ -f "$MARKER_FILE" ]; then
+          APPLIED_HASH="$(cat "$MARKER_FILE" 2>/dev/null || true)"
+        fi
+
+        if [ "$THEME_HASH" != "$APPLIED_HASH" ]; then
+          /usr/bin/open "$THEME_FILE" >/dev/null 2>&1 || true
+          printf "%s\n" "$THEME_HASH" > "$MARKER_FILE"
+        fi
+
+        /usr/bin/defaults write com.apple.Terminal "Default Window Settings" "Dracula Pro" || true
+        /usr/bin/defaults write com.apple.Terminal "Startup Window Settings" "Dracula Pro" || true
+        /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".columnCount 120 || true
+        /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".rowCount 30 || true
+        /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".FontWidthSpacing 1.0 || true
+        /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".FontHeightSpacing 1.0 || true
+
+        /usr/bin/osascript -e 'tell application "Terminal"
+          set font name of settings set "Dracula Pro" to "HackGen Console NF"
+          set font size of settings set "Dracula Pro" to 14
+        end tell' >/dev/null 2>&1 || /usr/bin/osascript -e 'tell application "Terminal"
+          set font name of settings set "Dracula Pro" to "HackGenConsoleNF-Regular"
+          set font size of settings set "Dracula Pro" to 14
+        end tell' >/dev/null 2>&1 || true
+      fi
+    fi
+  '';
 
   programs.home-manager.enable = true;
 }
