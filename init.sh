@@ -85,6 +85,37 @@ if ! command -v nix >/dev/null 2>&1; then
   exit 1
 fi
 
+cleanup_installer_nix_snippet() {
+  local file tmp
+  for file in /etc/bashrc /etc/zshrc /etc/bash.bashrc; do
+    if ! sudo test -f "$file"; then
+      continue
+    fi
+    if ! sudo grep -Fq "# Nix" "$file"; then
+      continue
+    fi
+
+    tmp=$(mktemp)
+    sudo awk '
+      BEGIN { skip = 0 }
+      /^# Nix$/ { skip = 1; next }
+      /^# End Nix$/ { skip = 0; next }
+      { if (!skip) print }
+    ' "$file" > "$tmp"
+
+    if ! cmp -s "$tmp" "$file"; then
+      if ! sudo test -e "${file}.before-nix-home"; then
+        sudo cp "$file" "${file}.before-nix-home"
+      fi
+      sudo cp "$tmp" "$file"
+      echo "Removed installer Nix snippet from $file"
+    fi
+    rm -f "$tmp"
+  done
+}
+
+cleanup_installer_nix_snippet
+
 NIX_CMD=(nix --extra-experimental-features "nix-command flakes")
 
 if [ ! -f "$REPO_ROOT_DIR/flake.lock" ]; then
@@ -93,13 +124,18 @@ if [ ! -f "$REPO_ROOT_DIR/flake.lock" ]; then
 fi
 
 HOSTNAME_SHORT=$(hostname -s 2>/dev/null || hostname)
-TARGET="$REPO_ROOT_DIR#$HOSTNAME_SHORT"
+HOST_CONFIG="$REPO_ROOT_DIR/hosts/darwin/$HOSTNAME_SHORT.nix"
+if [ -f "$HOST_CONFIG" ]; then
+  TARGET="$REPO_ROOT_DIR#$HOSTNAME_SHORT"
+else
+  TARGET="$REPO_ROOT_DIR#default"
+fi
 
 if [ "$(uname)" = "Darwin" ]; then
   echo "Applying nix-darwin: $TARGET"
-  if ! sudo "${NIX_CMD[@]}" run nix-darwin -- switch --flake "$TARGET"; then
+  if ! sudo -H "${NIX_CMD[@]}" run nix-darwin -- switch --flake "$TARGET"; then
     echo "Falling back to default host"
-    sudo "${NIX_CMD[@]}" run nix-darwin -- switch --flake "$REPO_ROOT_DIR#default"
+    sudo -H "${NIX_CMD[@]}" run nix-darwin -- switch --flake "$REPO_ROOT_DIR#default"
   fi
 else
   echo "Non-macOS is not supported yet."
