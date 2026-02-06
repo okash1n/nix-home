@@ -14,8 +14,18 @@ echo "=== nix-home init ==="
 echo "log: $LOG_FILE"
 
 if command -v sudo >/dev/null 2>&1; then
-  echo "Requesting sudo..."
-  sudo -v
+  if sudo -n true >/dev/null 2>&1; then
+    echo "sudo is available without prompt."
+  else
+    echo "Requesting sudo..."
+    if [ -t 0 ]; then
+      sudo -v
+    else
+      echo "sudo requires a password, but no TTY is available."
+      echo "Run make init from an interactive terminal."
+      exit 1
+    fi
+  fi
   (
     while true; do
       sudo -n true
