@@ -87,10 +87,9 @@
 - `Ghostty` 本体を Nix 管理で導入する。
 - `~/.config/ghostty/config` を Nix 管理で生成し、HackGen と Dracula Pro 配色を適用する。
 - `Terminal.app` は `Dracula Pro` プロファイルを既定に設定する。
-- `Terminal.app` は HackGen 系フォント設定を適用する。
+- `Terminal.app` のテーマ適用処理（import / defaults / フォント同期）は、`Terminal.app` が起動中の場合のみ実行する。
 - `Dracula Pro` が未取得の場合は処理をスキップし、復旧手順をログに表示する。
 - GUI セッションが無い環境では `Terminal.app` への適用処理をスキップして停止しない。
-- `Terminal.app` のフォント同期は、`Terminal.app` が起動中の場合のみ実行する。
 
 ### FR-005 冪等性
 - 同一マシンで `make init`（または `./init.sh`）を再実行しても、致命的エラーで停止しない。
@@ -115,6 +114,7 @@
 - `git config --global user.name` と `git config --global user.email` が期待値を返す。
 - HackGen NF / LINE Seed JP / IBM Plex JP / IBM Plex Mono が利用可能。
 - `Dracula Pro` private repository のテーマ資産を使って `Terminal.app` の既定プロファイルが `Dracula Pro` になる。
+- ヘッドレス環境では `make init` が `setupTerminalDraculaPro` でハングせず完了する。
 - Nix Store の自動 GC / 最適化設定が有効になっている。
 - 2回連続で `make init` 実行しても破綻しない。
 - `.litespec/README.md` に初期化手順と検証手順が記載されている。

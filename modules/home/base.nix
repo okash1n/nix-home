@@ -102,6 +102,8 @@ in
         echo "[nix-home] Skipping Terminal.app theme setup (NIX_HOME_SKIP_TERMINAL_THEME=1)."
       elif ! /usr/bin/pgrep -x WindowServer >/dev/null 2>&1; then
         echo "[nix-home] Skipping Terminal.app theme setup (no GUI session)."
+      elif ! /usr/bin/pgrep -x Terminal >/dev/null 2>&1; then
+        echo "[nix-home] Terminal.app is not running; skipped theme setup."
       else
         DRACULA_PRO_ROOT="$HOME/ghq/github.com/okash1n/dracula-pro"
         THEME_FILE="$DRACULA_PRO_ROOT/themes/terminal-app/Dracula Pro.terminal"
@@ -132,17 +134,13 @@ in
           /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".FontWidthSpacing 1.0 || true
           /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".FontHeightSpacing 1.0 || true
 
-          if /usr/bin/pgrep -x Terminal >/dev/null 2>&1; then
-            /usr/bin/osascript -e 'tell application "Terminal"
-              set font name of settings set "Dracula Pro" to "HackGen Console NF"
-              set font size of settings set "Dracula Pro" to 14
-            end tell' >/dev/null 2>&1 || /usr/bin/osascript -e 'tell application "Terminal"
-              set font name of settings set "Dracula Pro" to "HackGenConsoleNF-Regular"
-              set font size of settings set "Dracula Pro" to 14
-            end tell' >/dev/null 2>&1 || true
-          else
-            echo "[nix-home] Terminal.app is not running; skipped profile font sync."
-          fi
+          /usr/bin/osascript -e 'tell application "Terminal"
+            set font name of settings set "Dracula Pro" to "HackGen Console NF"
+            set font size of settings set "Dracula Pro" to 14
+          end tell' >/dev/null 2>&1 || /usr/bin/osascript -e 'tell application "Terminal"
+            set font name of settings set "Dracula Pro" to "HackGenConsoleNF-Regular"
+            set font size of settings set "Dracula Pro" to 14
+          end tell' >/dev/null 2>&1 || true
         fi
       fi
     fi
