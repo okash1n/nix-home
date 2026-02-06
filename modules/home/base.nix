@@ -1,11 +1,17 @@
 { pkgs, username, lib, ... }:
+let
+  ghosttyPkg =
+    if pkgs ? ghostty then pkgs.ghostty
+    else if pkgs ? ghostty-bin then pkgs.ghostty-bin
+    else null;
+in
 {
   home.username = username;
   home.homeDirectory = "/Users/${username}";
 
   home.stateVersion = "24.05";
 
-  home.packages = with pkgs; [
+  home.packages = (with pkgs; [
     git
     curl
     jq
@@ -19,7 +25,7 @@
     codex
     claude-code
     gemini-cli
-  ];
+  ]) ++ lib.optional (ghosttyPkg != null) ghosttyPkg;
 
   xdg.enable = true;
 

@@ -79,6 +79,7 @@
 - IBM Plex Mono を導入する。
 
 ### FR-007 ターミナルテーマ管理
+- `Ghostty` 本体を Nix 管理で導入する。
 - `~/.config/ghostty/config` を Nix 管理で生成し、HackGen と Dracula Pro 配色を適用する。
 - `Terminal.app` は `Dracula Pro` プロファイルを既定に設定する。
 - `Terminal.app` は HackGen 系フォント設定を適用する。
@@ -98,6 +99,7 @@
 - クリーン macOS で `make init` 実行後、ログインシェルが `zsh` で起動する。
 - `powerlevel10k` が表示される。
 - `~/.config/zsh/.zshrc` と `~/.config/zsh/.p10k.zsh` が存在する。
+- `command -v ghostty` が成功する。
 - `~/.config/ghostty/config` が存在し、HackGen と Dracula Pro 配色が反映される。
 - 主要 alias / functions が機能する。
 - `command -v git nix zsh codex claude gemini` が成功する。
