@@ -150,6 +150,18 @@ in
             /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".FontWidthSpacing 1.0 || true
             /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".FontHeightSpacing 1.0 || true
 
+            /usr/bin/osascript -e 'with timeout of 5 seconds
+              tell application "Terminal"
+                if (count of windows) > 0 then
+                  repeat with w in windows
+                    repeat with t in tabs of w
+                      set current settings of t to settings set "Dracula Pro"
+                    end repeat
+                  end repeat
+                end if
+              end tell
+            end timeout' >/dev/null 2>&1 || true
+
             if ! /usr/bin/osascript -e 'with timeout of 3 seconds
               tell application "Terminal"
                 set font name of settings set "Dracula Pro" to "HackGen Console NF"
