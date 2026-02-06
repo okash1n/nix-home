@@ -150,6 +150,8 @@ ensure_nix_system_files() {
 ensure_nix_system_files
 
 NIX_CMD=(nix --extra-experimental-features "nix-command flakes")
+NIX_HOME_USERNAME=${NIX_HOME_USERNAME:-$(id -un)}
+export NIX_HOME_USERNAME
 
 if [ ! -f "$REPO_ROOT_DIR/flake.lock" ]; then
   echo "Generating flake.lock..."
@@ -166,10 +168,10 @@ fi
 
 if [ "$(uname)" = "Darwin" ]; then
   echo "Applying nix-darwin: $TARGET"
-  if ! sudo -H "${NIX_CMD[@]}" run nix-darwin -- switch --flake "$TARGET"; then
+  if ! sudo -H NIX_HOME_USERNAME="$NIX_HOME_USERNAME" "${NIX_CMD[@]}" --impure run nix-darwin -- switch --flake "$TARGET"; then
     if [ "$TARGET" != "$REPO_ROOT_DIR#default" ]; then
       echo "Falling back to default host"
-      sudo -H "${NIX_CMD[@]}" run nix-darwin -- switch --flake "$REPO_ROOT_DIR#default"
+      sudo -H NIX_HOME_USERNAME="$NIX_HOME_USERNAME" "${NIX_CMD[@]}" --impure run nix-darwin -- switch --flake "$REPO_ROOT_DIR#default"
     else
       exit 1
     fi

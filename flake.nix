@@ -13,7 +13,10 @@
     let
       lib = nixpkgs.lib;
       system = "aarch64-darwin";
-      username = "okash1n";
+      defaultUsername = "okash1n";
+      username =
+        let fromEnv = builtins.getEnv "NIX_HOME_USERNAME";
+        in if fromEnv != "" then fromEnv else defaultUsername;
 
       removeSuffix = suffix: str:
         if lib.hasSuffix suffix str
