@@ -140,18 +140,17 @@ in
 
   programs.git = {
     enable = true;
-    settings = {
-      user.name = "okash1n";
-      user.email = "48118431+okash1n@users.noreply.github.com";
-    };
     ignores = [
       "**/.claude/settings.local.json"
     ];
   };
 
   home.file.".gitconfig".text = ''
+    [user]
+      name = okash1n
+      email = 48118431+okash1n@users.noreply.github.com
     [include]
-      path = ~/.config/git/config
+      path = /Users/${username}/.config/git/config
   '';
 
   programs.home-manager.enable = true;
