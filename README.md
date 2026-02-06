@@ -40,7 +40,7 @@ make init
 `Terminal.app` へのテーマ適用は自動でスキップされます。
 明示的にスキップする場合は `NIX_HOME_SKIP_TERMINAL_THEME=1 make init` を使います。
 `Terminal.app` のテーマ適用処理（import / defaults / フォント同期）は、
-実行時に `Terminal.app` が起動中の場合のみ実施します。
+GUI セッションが有効なら `Terminal.app` 起動有無に依存せず試行します。
 
 ## 仕様管理
 
