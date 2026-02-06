@@ -253,7 +253,9 @@ ensure_nix_system_files
 
 NIX_CMD=(nix --extra-experimental-features "nix-command flakes")
 NIX_HOME_USERNAME=${NIX_HOME_USERNAME:-$(id -un)}
+NIX_HOME_SKIP_TERMINAL_THEME=${NIX_HOME_SKIP_TERMINAL_THEME:-0}
 export NIX_HOME_USERNAME
+export NIX_HOME_SKIP_TERMINAL_THEME
 
 if [ ! -f "$REPO_ROOT_DIR/flake.lock" ]; then
   echo "Generating flake.lock..."
@@ -270,10 +272,10 @@ fi
 
 if [ "$(uname)" = "Darwin" ]; then
   echo "Applying nix-darwin: $TARGET"
-  if ! sudo -H NIX_HOME_USERNAME="$NIX_HOME_USERNAME" "${NIX_CMD[@]}" run --impure nix-darwin -- switch --impure --flake "$TARGET"; then
+  if ! sudo -H NIX_HOME_USERNAME="$NIX_HOME_USERNAME" NIX_HOME_SKIP_TERMINAL_THEME="$NIX_HOME_SKIP_TERMINAL_THEME" "${NIX_CMD[@]}" run --impure nix-darwin -- switch --impure --flake "$TARGET"; then
     if [ "$TARGET" != "$REPO_ROOT_DIR#default" ]; then
       echo "Falling back to default host"
-      sudo -H NIX_HOME_USERNAME="$NIX_HOME_USERNAME" "${NIX_CMD[@]}" run --impure nix-darwin -- switch --impure --flake "$REPO_ROOT_DIR#default"
+      sudo -H NIX_HOME_USERNAME="$NIX_HOME_USERNAME" NIX_HOME_SKIP_TERMINAL_THEME="$NIX_HOME_SKIP_TERMINAL_THEME" "${NIX_CMD[@]}" run --impure nix-darwin -- switch --impure --flake "$REPO_ROOT_DIR#default"
     else
       exit 1
     fi

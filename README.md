@@ -38,6 +38,7 @@ make init
 
 注: GUI セッションが無い実行（ヘッドレス VM など）では、
 `Terminal.app` へのテーマ適用は自動でスキップされます。
+明示的にスキップする場合は `NIX_HOME_SKIP_TERMINAL_THEME=1 make init` を使います。
 
 ## 仕様管理
 

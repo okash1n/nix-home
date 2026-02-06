@@ -98,7 +98,9 @@ in
 
   home.activation.setupTerminalDraculaPro = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if [ "$(/usr/bin/uname)" = "Darwin" ]; then
-      if ! /usr/bin/pgrep -x WindowServer >/dev/null 2>&1; then
+      if [ "''${NIX_HOME_SKIP_TERMINAL_THEME:-0}" = "1" ]; then
+        echo "[nix-home] Skipping Terminal.app theme setup (NIX_HOME_SKIP_TERMINAL_THEME=1)."
+      elif ! /usr/bin/pgrep -x WindowServer >/dev/null 2>&1; then
         echo "[nix-home] Skipping Terminal.app theme setup (no GUI session)."
       else
         DRACULA_PRO_ROOT="$HOME/ghq/github.com/okash1n/dracula-pro"
