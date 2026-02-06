@@ -116,6 +116,26 @@ cleanup_installer_nix_snippet() {
 
 cleanup_installer_nix_snippet
 
+prepare_etc_for_nix_darwin() {
+  local file backup
+  for file in /etc/bashrc /etc/zshrc; do
+    if ! sudo test -f "$file"; then
+      continue
+    fi
+    if sudo test -L "$file"; then
+      continue
+    fi
+    backup="${file}.before-nix-darwin"
+    if sudo test -e "$backup"; then
+      continue
+    fi
+    sudo mv "$file" "$backup"
+    echo "Moved $file to $backup for first nix-darwin activation"
+  done
+}
+
+prepare_etc_for_nix_darwin
+
 NIX_CMD=(nix --extra-experimental-features "nix-command flakes")
 
 if [ ! -f "$REPO_ROOT_DIR/flake.lock" ]; then
@@ -134,8 +154,12 @@ fi
 if [ "$(uname)" = "Darwin" ]; then
   echo "Applying nix-darwin: $TARGET"
   if ! sudo -H "${NIX_CMD[@]}" run nix-darwin -- switch --flake "$TARGET"; then
-    echo "Falling back to default host"
-    sudo -H "${NIX_CMD[@]}" run nix-darwin -- switch --flake "$REPO_ROOT_DIR#default"
+    if [ "$TARGET" != "$REPO_ROOT_DIR#default" ]; then
+      echo "Falling back to default host"
+      sudo -H "${NIX_CMD[@]}" run nix-darwin -- switch --flake "$REPO_ROOT_DIR#default"
+    else
+      exit 1
+    fi
   fi
 else
   echo "Non-macOS is not supported yet."
