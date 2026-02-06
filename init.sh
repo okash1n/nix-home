@@ -58,17 +58,31 @@ if ! grep -Fq 'ZDOTDIR=' "$ZSHENV" 2>/dev/null; then
   printf "%s\n" "$ZDOTDIR_LINE" >> "$ZSHENV"
 fi
 
+source_nix_profile() {
+  if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
+    # shellcheck source=/dev/null
+    . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+    return 0
+  fi
+  if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix.sh ]; then
+    # shellcheck source=/dev/null
+    . /nix/var/nix/profiles/default/etc/profile.d/nix.sh
+    return 0
+  fi
+  return 1
+}
+
+source_nix_profile || true
+
 if ! command -v nix >/dev/null 2>&1; then
   echo "Installing Nix..."
-  curl -fsSL https://nixos.org/nix/install | sh -s -- --daemon
+  curl -fsSL https://nixos.org/nix/install | sh -s -- --daemon --yes --no-modify-profile
+  source_nix_profile || true
 fi
 
-if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
-  # shellcheck source=/dev/null
-  . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
-elif [ -e /nix/var/nix/profiles/default/etc/profile.d/nix.sh ]; then
-  # shellcheck source=/dev/null
-  . /nix/var/nix/profiles/default/etc/profile.d/nix.sh
+if ! command -v nix >/dev/null 2>&1; then
+  echo "nix command is still unavailable after installation."
+  exit 1
 fi
 
 NIX_CMD=(nix --extra-experimental-features "nix-command flakes")
