@@ -83,9 +83,9 @@ TARGET="$REPO_ROOT_DIR#$HOSTNAME_SHORT"
 
 if [ "$(uname)" = "Darwin" ]; then
   echo "Applying nix-darwin: $TARGET"
-  if ! nix run nix-darwin -- switch --flake "$TARGET"; then
+  if ! sudo nix run nix-darwin -- switch --flake "$TARGET"; then
     echo "Falling back to default host"
-    nix run nix-darwin -- switch --flake "$REPO_ROOT_DIR#default"
+    sudo nix run nix-darwin -- switch --flake "$REPO_ROOT_DIR#default"
   fi
 else
   echo "Non-macOS is not supported yet."
