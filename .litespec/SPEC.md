@@ -90,6 +90,7 @@
 - `Terminal.app` は HackGen 系フォント設定を適用する。
 - `Dracula Pro` が未取得の場合は処理をスキップし、復旧手順をログに表示する。
 - GUI セッションが無い環境では `Terminal.app` への適用処理をスキップして停止しない。
+- `Terminal.app` のフォント同期は、`Terminal.app` が起動中の場合のみ実行する。
 
 ### FR-005 冪等性
 - 同一マシンで `make init`（または `./init.sh`）を再実行しても、致命的エラーで停止しない。

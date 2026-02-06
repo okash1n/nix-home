@@ -132,13 +132,17 @@ in
           /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".FontWidthSpacing 1.0 || true
           /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".FontHeightSpacing 1.0 || true
 
-          /usr/bin/osascript -e 'tell application "Terminal"
-            set font name of settings set "Dracula Pro" to "HackGen Console NF"
-            set font size of settings set "Dracula Pro" to 14
-          end tell' >/dev/null 2>&1 || /usr/bin/osascript -e 'tell application "Terminal"
-            set font name of settings set "Dracula Pro" to "HackGenConsoleNF-Regular"
-            set font size of settings set "Dracula Pro" to 14
-          end tell' >/dev/null 2>&1 || true
+          if /usr/bin/pgrep -x Terminal >/dev/null 2>&1; then
+            /usr/bin/osascript -e 'tell application "Terminal"
+              set font name of settings set "Dracula Pro" to "HackGen Console NF"
+              set font size of settings set "Dracula Pro" to 14
+            end tell' >/dev/null 2>&1 || /usr/bin/osascript -e 'tell application "Terminal"
+              set font name of settings set "Dracula Pro" to "HackGenConsoleNF-Regular"
+              set font size of settings set "Dracula Pro" to 14
+            end tell' >/dev/null 2>&1 || true
+          else
+            echo "[nix-home] Terminal.app is not running; skipped profile font sync."
+          fi
         fi
       fi
     fi

@@ -39,6 +39,7 @@ make init
 注: GUI セッションが無い実行（ヘッドレス VM など）では、
 `Terminal.app` へのテーマ適用は自動でスキップされます。
 明示的にスキップする場合は `NIX_HOME_SKIP_TERMINAL_THEME=1 make init` を使います。
+`Terminal.app` のフォント同期は、実行時に `Terminal.app` が起動中の場合のみ実施します。
 
 ## 仕様管理
 
