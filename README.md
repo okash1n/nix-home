@@ -22,6 +22,7 @@ make init
 - Xcode CLT / GitHub SSH の preflight チェック
 - `dracula-pro` private repository の取得または更新（`~/ghq/github.com/okash1n/dracula-pro`）
 - `nix-darwin` + `home-manager` の適用
+- 既存 dotfile 衝突時の自動バックアップ（`*.hm-bak`）
 
 ## 反映される主な設定
 
