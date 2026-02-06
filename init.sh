@@ -157,6 +157,13 @@ prepare_nix_installer_rc_backups() {
       continue
     fi
 
+    # A broken symlink (for example /etc/bashrc -> /etc/static/bashrc) will
+    # make cp fail even when we need to restore the file from backup.
+    if sudo test -L "$file" && ! sudo test -e "$file"; then
+      sudo rm -f "$file"
+      echo "Removed broken symlink: $file"
+    fi
+
     if ! sudo test -e "$file"; then
       sudo cp "$backup" "$file"
       echo "Restored missing $file from $backup"
