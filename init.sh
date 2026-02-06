@@ -136,6 +136,19 @@ prepare_etc_for_nix_darwin() {
 
 prepare_etc_for_nix_darwin
 
+ensure_nix_system_files() {
+  local file
+  for file in /etc/synthetic.conf /etc/fstab; do
+    if sudo test -e "$file"; then
+      continue
+    fi
+    sudo touch "$file"
+    echo "Created missing $file"
+  done
+}
+
+ensure_nix_system_files
+
 NIX_CMD=(nix --extra-experimental-features "nix-command flakes")
 
 if [ ! -f "$REPO_ROOT_DIR/flake.lock" ]; then
