@@ -1,7 +1,9 @@
 { pkgs, username, lib, ... }:
 let
   ghosttyPkg =
-    if pkgs ? ghostty then pkgs.ghostty
+    if pkgs.stdenv.hostPlatform.isDarwin then
+      if pkgs ? ghostty-bin then pkgs.ghostty-bin else null
+    else if pkgs ? ghostty then pkgs.ghostty
     else if pkgs ? ghostty-bin then pkgs.ghostty-bin
     else null;
 in
@@ -138,8 +140,10 @@ in
 
   programs.git = {
     enable = true;
-    userName = "okash1n";
-    userEmail = "48118431+okash1n@users.noreply.github.com";
+    settings = {
+      user.name = "okash1n";
+      user.email = "48118431+okash1n@users.noreply.github.com";
+    };
     ignores = [
       "**/.claude/settings.local.json"
     ];
