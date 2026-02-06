@@ -57,6 +57,8 @@
 - `powerlevel10k` が有効なプロンプトが表示される。
 - alias / functions を Nix 管理で復元する。
 - 履歴・補完キャッシュなどの XDG パスを一貫させる。
+- `~/.config/zsh/.zshrc` を Nix 管理で生成する。
+- `~/.config/zsh/.p10k.zsh` を Nix 管理で生成する。
 
 ### FR-004 CLI 再現
 - `git`、`curl`、`jq`、`fzf`、`ghq`、`awk`、`grep`、`sed` を導入する。
@@ -83,6 +85,7 @@
 ## DoD（受け入れ条件）
 - クリーン macOS で `make init` 実行後、ログインシェルが `zsh` で起動する。
 - `powerlevel10k` が表示される。
+- `~/.config/zsh/.zshrc` と `~/.config/zsh/.p10k.zsh` が存在する。
 - 主要 alias / functions が機能する。
 - `command -v git nix zsh codex claude gemini` が成功する。
 - HackGen NF / LINE Seed JP / IBM Plex JP / IBM Plex Mono が利用可能。
