@@ -71,11 +71,11 @@ elif [ -e /nix/var/nix/profiles/default/etc/profile.d/nix.sh ]; then
   . /nix/var/nix/profiles/default/etc/profile.d/nix.sh
 fi
 
-export NIX_CONFIG="experimental-features = nix-command flakes"
+NIX_CMD=(nix --extra-experimental-features "nix-command flakes")
 
 if [ ! -f "$REPO_ROOT_DIR/flake.lock" ]; then
   echo "Generating flake.lock..."
-  nix flake lock "$REPO_ROOT_DIR"
+  "${NIX_CMD[@]}" flake lock "$REPO_ROOT_DIR"
 fi
 
 HOSTNAME_SHORT=$(hostname -s 2>/dev/null || hostname)
@@ -83,9 +83,9 @@ TARGET="$REPO_ROOT_DIR#$HOSTNAME_SHORT"
 
 if [ "$(uname)" = "Darwin" ]; then
   echo "Applying nix-darwin: $TARGET"
-  if ! sudo nix run nix-darwin -- switch --flake "$TARGET"; then
+  if ! sudo "${NIX_CMD[@]}" run nix-darwin -- switch --flake "$TARGET"; then
     echo "Falling back to default host"
-    sudo nix run nix-darwin -- switch --flake "$REPO_ROOT_DIR#default"
+    sudo "${NIX_CMD[@]}" run nix-darwin -- switch --flake "$REPO_ROOT_DIR#default"
   fi
 else
   echo "Non-macOS is not supported yet."
