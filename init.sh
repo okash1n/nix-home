@@ -11,6 +11,10 @@ LOG_DIR="$HOME/.local/state/nix-home"
 mkdir -p "$LOG_DIR"
 LOG_FILE="$LOG_DIR/init-$(date +%Y%m%d-%H%M%S).log"
 
+# Preserve the original stdout/stderr before redirecting to tee.
+# We'll use these FDs to reattach an interactive login shell to the terminal.
+exec 3>&1 4>&2
+
 exec > >(tee -a "$LOG_FILE") 2>&1
 
 echo "=== nix-home init ==="
@@ -359,7 +363,10 @@ maybe_reload_login_shell() {
   fi
 
   # Only do this when we have a real TTY; otherwise this will hang CI/headless runs.
-  if [ ! -t 0 ] || [ ! -t 1 ]; then
+  #
+  # Note: stdout/stderr are redirected to `tee` for logging, so `-t 1` would be
+  # false even in interactive runs. We check the original stdout (fd 3) instead.
+  if [ ! -t 0 ] || [ ! -t 3 ]; then
     return 0
   fi
 
@@ -383,7 +390,7 @@ maybe_reload_login_shell() {
   fi
 
   echo "[nix-home] Reloading login shell: $shell_bin -l"
-  exec "$shell_bin" -l
+  exec "$shell_bin" -l >&3 2>&4
 }
 
 NIX_CMD=(nix --extra-experimental-features "nix-command flakes")

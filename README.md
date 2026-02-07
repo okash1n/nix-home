@@ -22,10 +22,11 @@ else
   cd ~/nix-home
 fi
 
-make init
-# 必要に応じて
-exec zsh -l
-```
+	make init
+	```
+
+	対話的な TTY 上で `make init` を実行した場合、完了後に `zsh -l` を起動して設定を即時反映します。
+	抑止したい場合は `NIX_HOME_SKIP_SHELL_RELOAD=1 make init` を使います。
 
 `init.sh` は以下を実行します。
 
@@ -40,7 +41,7 @@ exec zsh -l
 
 ## 反映される主な設定
 
-- `zsh`（既定プロンプト: `Hanabi`、切替: `NIX_HOME_ZSH_PROMPT=p10k`）
+- `zsh`（既定プロンプト: `powerlevel10k` + `Hanabi` 配色、切替: `NIX_HOME_ZSH_PROMPT=hanabi`）
 - `dotfiles` 由来の `zsh` aliases / functions（`fgh` を含む）
 - CLI: `git` `curl` `wget` `jq` `fzf` `fd` `rg` `ghq` `awk` `grep` `sed` `tmux` `node` `pnpm` `bun` `python3` `uv` `vim` `codex` `claude` `gemini`
 - `git` グローバル設定（`user.name` / `user.email` / global ignore）
