@@ -70,7 +70,10 @@
       if [ "''${NIX_HOME_ZSH_PROMPT:-hanabi}" = "p10k" ]; then
         source "${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme"
         [[ -f "$HOME/.config/zsh/.p10k.zsh" ]] && source "$HOME/.config/zsh/.p10k.zsh"
-        [[ -f "$HOME/.config/zsh/hanabi.p10k.zsh" ]] && source "$HOME/.config/zsh/hanabi.p10k.zsh"
+        if [[ -f "$HOME/.config/zsh/hanabi.p10k.zsh" ]]; then
+          source "$HOME/.config/zsh/hanabi.p10k.zsh"
+          (( $+functions[p10k] )) && p10k reload
+        fi
       else
         if [ -f "$HOME/.config/zsh/hanabi.zsh-theme" ]; then
           source "$HOME/.config/zsh/hanabi.zsh-theme"
@@ -78,7 +81,10 @@
           # Fallback to p10k when Hanabi theme file is missing.
           source "${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme"
           [[ -f "$HOME/.config/zsh/.p10k.zsh" ]] && source "$HOME/.config/zsh/.p10k.zsh"
-          [[ -f "$HOME/.config/zsh/hanabi.p10k.zsh" ]] && source "$HOME/.config/zsh/hanabi.p10k.zsh"
+          if [[ -f "$HOME/.config/zsh/hanabi.p10k.zsh" ]]; then
+            source "$HOME/.config/zsh/hanabi.p10k.zsh"
+            (( $+functions[p10k] )) && p10k reload
+          fi
         fi
       fi
     fi
