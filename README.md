@@ -50,4 +50,5 @@ GUI セッションが有効なら `Terminal.app` 起動有無に依存せず試
 - `AGENTS.md`
 - `.litespec/README.md`
 - `.litespec/SPEC.md`
+- `.litespec/specs/`
 - `.litespec/adr/`
