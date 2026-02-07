@@ -8,13 +8,21 @@
   home.packages = (with pkgs; [
     git
     curl
+    wget
     jq
     fzf
     fd
+    ripgrep
     ghq
     gawk
     gnugrep
     gnused
+    tmux
+    nodejs
+    pnpm
+    bun
+    python3
+    uv
     zsh
     bash
     codex

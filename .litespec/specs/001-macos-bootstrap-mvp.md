@@ -62,9 +62,12 @@
 
 ### FR-004 CLI 再現
 
-- `git`、`curl`、`jq`、`fzf`、`ghq`、`awk`、`grep`、`sed` を導入する。
+- `git`、`curl`、`wget`、`jq`、`fzf`、`fd`、`rg`、`ghq`、`awk`、`grep`、`sed` を導入する。
 - `zsh` は macOS 標準ではなくパッケージ版を導入する。
 - `bash` もパッケージ版を導入する。
+- `node` / `pnpm` / `bun` を導入する。
+- `python3` / `uv` を導入する。
+- `tmux` を導入する。
 - AI CLI（Codex / Claude Code / Gemini）をコマンド実行可能にする。
 - `git` のグローバル設定（`user.name` / `user.email` / global ignore）を Nix 管理で復元する。
 
@@ -120,6 +123,7 @@
 - `~/.config/ghostty/config` が存在し、HackGen と Dracula Pro 配色が反映される。
 - 主要 alias / functions が機能する。
 - `command -v git nix zsh codex claude gemini` が成功する。
+- `command -v rg bun node pnpm uv python3 tmux wget` が成功する。
 - `git config --global user.name` と `git config --global user.email` が期待値を返す。
 - HackGen NF / LINE Seed JP / IBM Plex Sans JP / IBM Plex Mono が利用可能。
 - `Dracula Pro` private repository のテーマ資産を使って `Terminal.app` の既定プロファイルが `Dracula Pro` になる。
