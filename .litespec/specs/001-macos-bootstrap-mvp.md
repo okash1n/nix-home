@@ -44,6 +44,7 @@
 - `init.sh` はユーザーレベルで `~/.zshenv` に `ZDOTDIR` を設定する。
 - `make init` は `init.sh` を呼び出す。
 - `make init` 実行時の sudo パスワード入力は冒頭の1回に集約する。
+- 対話的な TTY 上で `make init` を実行した場合、完了後に `zsh -l` を再起動して設定を即時反映する（必要に応じて `NIX_HOME_SKIP_SHELL_RELOAD=1` で無効化できる）。
 
 ### FR-002 ホスト切り替え
 

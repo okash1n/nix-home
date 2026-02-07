@@ -350,6 +350,42 @@ maybe_open_ghostty() {
   echo "[nix-home] Ghostty is not available yet; skipping auto-launch."
 }
 
+maybe_reload_login_shell() {
+  if [ "${NIX_HOME_SKIP_SHELL_RELOAD:-0}" = "1" ]; then
+    return 0
+  fi
+  if [ "${NIX_HOME_SHELL_RELOAD:-1}" != "1" ]; then
+    return 0
+  fi
+
+  # Only do this when we have a real TTY; otherwise this will hang CI/headless runs.
+  if [ ! -t 0 ] || [ ! -t 1 ]; then
+    return 0
+  fi
+
+  local username shell_bin
+  username="$(/usr/bin/id -un 2>/dev/null || true)"
+  if [ -n "$username" ]; then
+    PATH="/run/current-system/sw/bin:/etc/profiles/per-user/$username/bin:$PATH"
+  fi
+
+  shell_bin="/etc/profiles/per-user/$username/bin/zsh"
+  if [ ! -x "$shell_bin" ]; then
+    shell_bin="$(command -v zsh 2>/dev/null || true)"
+  fi
+  if [ -z "$shell_bin" ]; then
+    return 0
+  fi
+
+  # Stop sudo keep-alive loop if it's running, otherwise it'll live past exec.
+  if [ -n "${SUDO_PID:-}" ]; then
+    kill "$SUDO_PID" >/dev/null 2>&1 || true
+  fi
+
+  echo "[nix-home] Reloading login shell: $shell_bin -l"
+  exec "$shell_bin" -l
+}
+
 NIX_CMD=(nix --extra-experimental-features "nix-command flakes")
 NIX_HOME_USERNAME=${NIX_HOME_USERNAME:-$(id -un)}
 NIX_HOME_SKIP_TERMINAL_THEME=${NIX_HOME_SKIP_TERMINAL_THEME:-0}
@@ -395,3 +431,5 @@ fi
 maybe_open_ghostty
 
 echo "Done"
+
+maybe_reload_login_shell
