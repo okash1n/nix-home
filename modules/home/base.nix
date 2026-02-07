@@ -67,14 +67,8 @@
       source "${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
       source "${pkgs.zsh-syntax-highlighting}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 
-      if [ "''${NIX_HOME_ZSH_PROMPT:-hanabi}" = "p10k" ]; then
-        source "${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme"
-        [[ -f "$HOME/.config/zsh/.p10k.zsh" ]] && source "$HOME/.config/zsh/.p10k.zsh"
-        if [[ -f "$HOME/.config/zsh/hanabi.p10k.zsh" ]]; then
-          source "$HOME/.config/zsh/hanabi.p10k.zsh"
-          (( $+functions[p10k] )) && p10k reload
-        fi
-      else
+      prompt_mode="''${NIX_HOME_ZSH_PROMPT:-p10k}"
+      if [ "$prompt_mode" = "hanabi" ]; then
         if [ -f "$HOME/.config/zsh/hanabi.zsh-theme" ]; then
           source "$HOME/.config/zsh/hanabi.zsh-theme"
         else
@@ -85,6 +79,13 @@
             source "$HOME/.config/zsh/hanabi.p10k.zsh"
             (( $+functions[p10k] )) && p10k reload
           fi
+        fi
+      else
+        source "${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme"
+        [[ -f "$HOME/.config/zsh/.p10k.zsh" ]] && source "$HOME/.config/zsh/.p10k.zsh"
+        if [[ -f "$HOME/.config/zsh/hanabi.p10k.zsh" ]]; then
+          source "$HOME/.config/zsh/hanabi.p10k.zsh"
+          (( $+functions[p10k] )) && p10k reload
         fi
       fi
     fi

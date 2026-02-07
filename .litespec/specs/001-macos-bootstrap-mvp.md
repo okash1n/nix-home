@@ -53,9 +53,9 @@
 ### FR-003 シェル再現
 
 - `zsh` をデフォルトシェルとして利用可能にする。
-- `Hanabi` の Zsh プロンプトテーマが有効なプロンプトが表示される。
-- `powerlevel10k` 設定は保持し、必要に応じて切り替え可能にする（MVP ではデフォルトは `Hanabi`）。
-- `powerlevel10k` を有効化した場合、`hanabi.p10k.zsh` により配色を Hanabi に寄せる（プロンプト構造は維持）。
+- 既定は `powerlevel10k` のプロンプト構造が表示される。
+- `hanabi.p10k.zsh` により、`powerlevel10k` の配色を Hanabi に寄せる（プロンプト構造は維持）。
+- `Hanabi` の Zsh プロンプトテーマ（`hanabi.zsh-theme`）は保持し、必要に応じて `NIX_HOME_ZSH_PROMPT=hanabi` で切り替え可能にする。
 - alias / functions を Nix 管理で復元する。
 - 既存 dotfiles 由来の主要関数（例: `fgh`）を利用可能にする。
 - 履歴・補完キャッシュなどの XDG パスを一貫させる。
@@ -123,7 +123,7 @@
 
 - クリーン macOS で `make init` 実行後、ログインシェルが `zsh` で起動する。
 - `nix-home` 本体が `~/nix-home` に配置されている。
-- `Hanabi` の Zsh プロンプトテーマが表示される（`powerlevel10k` は切り替え用に保持）。
+- `powerlevel10k` のプロンプト構造が表示され、Hanabi 配色（`hanabi.p10k.zsh`）が適用される。
 - `~/.config/zsh/.zshrc` と `~/.config/zsh/.p10k.zsh` が存在する。
 - `~/.config/zsh/hanabi.zsh-theme` が存在する。
 - `~/.config/zsh/hanabi.p10k.zsh` が存在する。
