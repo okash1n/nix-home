@@ -70,6 +70,7 @@
       if [ "''${NIX_HOME_ZSH_PROMPT:-hanabi}" = "p10k" ]; then
         source "${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme"
         [[ -f "$HOME/.config/zsh/.p10k.zsh" ]] && source "$HOME/.config/zsh/.p10k.zsh"
+        [[ -f "$HOME/.config/zsh/hanabi.p10k.zsh" ]] && source "$HOME/.config/zsh/hanabi.p10k.zsh"
       else
         if [ -f "$HOME/.config/zsh/hanabi.zsh-theme" ]; then
           source "$HOME/.config/zsh/hanabi.zsh-theme"
@@ -77,6 +78,7 @@
           # Fallback to p10k when Hanabi theme file is missing.
           source "${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme"
           [[ -f "$HOME/.config/zsh/.p10k.zsh" ]] && source "$HOME/.config/zsh/.p10k.zsh"
+          [[ -f "$HOME/.config/zsh/hanabi.p10k.zsh" ]] && source "$HOME/.config/zsh/hanabi.p10k.zsh"
         fi
       fi
     fi
@@ -119,6 +121,9 @@
       fi
       if [ -f "$HANABI_ROOT/themes/zsh/hanabi.zsh-theme" ]; then
         cp -f "$HANABI_ROOT/themes/zsh/hanabi.zsh-theme" "$HOME/.config/zsh/hanabi.zsh-theme"
+      fi
+      if [ -f "$HANABI_ROOT/themes/zsh/hanabi.p10k.zsh" ]; then
+        cp -f "$HANABI_ROOT/themes/zsh/hanabi.p10k.zsh" "$HOME/.config/zsh/hanabi.p10k.zsh"
       fi
       if [ -f "$HANABI_ROOT/themes/vim/colors/hanabi.vim" ]; then
         cp -f "$HANABI_ROOT/themes/vim/colors/hanabi.vim" "$HOME/.vim/colors/hanabi.vim"
