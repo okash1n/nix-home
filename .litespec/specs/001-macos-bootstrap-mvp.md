@@ -8,17 +8,18 @@
 ## ユーザーストーリー
 
 - 頻繁に新規環境を作る利用者として、手動セットアップを繰り返したくない。
-- macOS 初期化直後でも、`zsh` / `powerlevel10k` / 主要 CLI / AI CLI をすぐ使いたい。
+- macOS 初期化直後でも、`zsh` / 主要 CLI / AI CLI をすぐ使いたい。
 - 見た目（フォント、テーマ）を含めて、いつでも同じ作業環境に戻したい。
 
 ## スコープ
 
 - `nix-darwin` + `home-manager` による macOS 構成管理
 - `init.sh`（`make init` 呼び出し）での初期導入自動化
-- `zsh` / `powerlevel10k` / alias / functions の復元
+- `zsh` / prompt / alias / functions の復元
 - CLI と AI CLI の導入
 - フォント導入（HackGen NF、LINE Seed JP、IBM Plex Sans JP、IBM Plex Mono）
-- `Dracula Pro` private repository を使ったテーマ適用
+- `Hanabi Theme`（`hanabi-works/hanabi-theme`）を使ったテーマ適用
+- `vim` / `VS Code` の導入とテーマ適用
 - 再実行可能性（冪等）とバックアップ挙動
 
 ## 非スコープ
@@ -36,7 +37,7 @@
 - `init.sh` は GitHub SSH 接続を事前確認し、失敗時は鍵登録を促して終了する。
 - `init.sh` は未導入時に Nix を導入する。
 - `init.sh` はリポジトリを取得または更新する。
-- `init.sh` は `Dracula Pro` private repository の取得・更新に `ghq get -u` を利用し、`ghq` の動作確認も兼ねる。
+- `init.sh` は `hanabi-works/hanabi-theme` の取得・更新に `ghq get -u` を利用し、`ghq` の動作確認も兼ねる。
 - `init.sh` は `darwin-rebuild switch --flake` を実行する。
 - `init.sh` はログファイルを出力し、失敗時に参照先を表示する。
 - `init.sh` はユーザーレベルで `~/.zshenv` に `ZDOTDIR` を設定する。
@@ -51,14 +52,14 @@
 ### FR-003 シェル再現
 
 - `zsh` をデフォルトシェルとして利用可能にする。
-- `powerlevel10k` が有効なプロンプトが表示される。
-- 既存 dotfiles の `powerlevel10k` 設定（見た目）を維持する。
+- `Hanabi` の Zsh プロンプトテーマが有効なプロンプトが表示される。
+- `powerlevel10k` 設定は保持し、必要に応じて切り替え可能にする（MVP ではデフォルトは `Hanabi`）。
 - alias / functions を Nix 管理で復元する。
 - 既存 dotfiles 由来の主要関数（例: `fgh`）を利用可能にする。
 - 履歴・補完キャッシュなどの XDG パスを一貫させる。
 - 履歴ファイル保存先ディレクトリ（例: `~/.local/state/zsh`）が存在しない場合は自動作成する。
 - `~/.config/zsh/.zshrc` を Nix 管理で生成する。
-- `~/.config/zsh/.p10k.zsh` を Nix 管理で生成する。
+- `~/.config/zsh/.p10k.zsh` を Nix 管理で生成する（切り替え用）。
 
 ### FR-004 CLI 再現
 
@@ -68,6 +69,7 @@
 - `node` / `pnpm` / `bun` を導入する。
 - `python3` / `uv` を導入する。
 - `tmux` を導入する。
+- `vim` を導入する。
 - AI CLI（Codex / Claude Code / Gemini）をコマンド実行可能にする。
 - `git` のグローバル設定（`user.name` / `user.email` / global ignore）を Nix 管理で復元する。
 
@@ -85,19 +87,21 @@
 - IBM Plex Sans JP を導入する。
 - IBM Plex Mono を導入する。
 
-### FR-007 ターミナルテーマ管理
+### FR-007 テーマ適用
 
 - `Ghostty` 本体を Nix 管理で導入する。
 - `Ghostty` は `/Applications/Nix Apps` から GUI 起動できる状態にする。
-- `~/.config/ghostty/config` を Nix 管理で生成し、HackGen と Dracula Pro 配色を適用する。
-- `Terminal.app` は `Dracula Pro` プロファイルを既定に設定する。
-- `Terminal.app` の `Dracula Pro` プロファイルには HackGen 系フォント（優先: `HackGen Console NF`）を適用し、適用結果を検証する。
+- `~/.config/ghostty/config` を Nix 管理で生成し、HackGen と `Hanabi`（`theme = hanabi`）を適用する。
+- `Terminal.app` は `Hanabi` プロファイルを既定に設定する。
+- `Terminal.app` の `Hanabi` プロファイルには HackGen 系フォント（優先: `HackGen Console NF`）を適用し、適用結果を検証する。
 - GUI セッションが有効な環境では、`Terminal.app` の起動有無に依存せずテーマ適用処理（import / defaults / フォント設定）を試行する。
-- `Terminal.app` が起動中の場合、既存ウィンドウ/タブの current settings も `Dracula Pro` に合わせる。
-- `Dracula Pro` プロファイルの import 失敗時は `defaults` の既定設定更新を強行せず、失敗理由をログに出す。
-- `Dracula Pro` が未取得の場合は処理をスキップし、復旧手順をログに表示する。
+- `Terminal.app` が起動中の場合、既存ウィンドウ/タブの current settings も `Hanabi` に合わせる。
+- `Hanabi` プロファイルの import 失敗時は `defaults` の既定設定更新を強行せず、失敗理由をログに出す。
+- `hanabi-theme` が未取得の場合は処理をスキップし、復旧手順をログに表示する。
 - GUI セッションが無い環境では `Terminal.app` への適用処理をスキップして停止しない。
 - GUI セッションで初回セットアップ完了時は `Ghostty` を自動起動する（再実行時は既定で再起動しない）。
+- `vim` の colorscheme を `hanabi` に設定する（`~/.vim/colors/hanabi.vim` を配置し、`~/.vimrc` を生成）。
+- `VS Code` に `okash1n.hanabi-theme-vscode` を Marketplace からインストールし、`workbench.colorTheme` を `Hanabi` に設定する。
 
 ### FR-008 ストアメンテナンス
 
@@ -116,20 +120,24 @@
 
 - クリーン macOS で `make init` 実行後、ログインシェルが `zsh` で起動する。
 - `nix-home` 本体が `~/nix-home` に配置されている。
-- `powerlevel10k` が表示される。
+- `Hanabi` の Zsh プロンプトテーマが表示される（`powerlevel10k` は切り替え用に保持）。
 - `~/.config/zsh/.zshrc` と `~/.config/zsh/.p10k.zsh` が存在する。
+- `~/.config/zsh/hanabi.zsh-theme` が存在する。
 - `command -v ghostty` が成功する。
 - `/Applications/Nix Apps` 配下に `Ghostty.app` が作成される。
-- `~/.config/ghostty/config` が存在し、HackGen と Dracula Pro 配色が反映される。
+- `~/.config/ghostty/config` が存在し、HackGen と `theme = hanabi` が反映される。
 - 主要 alias / functions が機能する。
 - `command -v git nix zsh codex claude gemini` が成功する。
 - `command -v rg bun node pnpm uv python3 tmux wget` が成功する。
+- `command -v vim` が成功する。
 - `git config --global user.name` と `git config --global user.email` が期待値を返す。
 - HackGen NF / LINE Seed JP / IBM Plex Sans JP / IBM Plex Mono が利用可能。
-- `Dracula Pro` private repository のテーマ資産を使って `Terminal.app` の既定プロファイルが `Dracula Pro` になる。
-- `Terminal.app` の `Dracula Pro` プロファイルに HackGen 系フォントが設定される。
+- `hanabi-theme` のテーマ資産を使って `Terminal.app` の既定プロファイルが `Hanabi` になる。
+- `Terminal.app` の `Hanabi` プロファイルに HackGen 系フォントが設定される。
 - GUI セッションの初回 `make init` 完了時に `Ghostty` が自動起動する。
-- ヘッドレス環境では `make init` が `setupTerminalDraculaPro` でハングせず完了する。
+- `~/.vim/colors/hanabi.vim` が存在し、`~/.vimrc` に `colorscheme hanabi` が入る。
+- `code --list-extensions` に `okash1n.hanabi-theme-vscode` が含まれ、`settings.json` の `workbench.colorTheme` が `Hanabi` になる。
+- ヘッドレス環境では `make init` がテーマ適用処理でハングせず完了する。
 - Nix Store の自動 GC / 最適化設定が有効になっている。
 - 2回連続で `make init` 実行しても破綻しない。
 - `.litespec/README.md` に初期化手順と検証手順が記載されている。
@@ -138,7 +146,7 @@
 
 - インターネット接続。
 - GitHub からリポジトリ取得可能（SSH または HTTPS）。
-- GitHub へ登録済みの SSH 鍵（private repository 取得のため）。
+- GitHub へ登録済みの SSH 鍵（`REPO_URL` が SSH の場合）。
 - macOS で `nix-darwin` 実行可能な管理者権限。
 - Xcode Command Line Tools が利用可能。
 

@@ -31,10 +31,15 @@
 
 - `xcode-select -p` が成功すること
 - `ssh -T git@github.com` が成功すること
-- `~/ghq/github.com/okash1n/dracula-pro` が clone 済みであること
-- `~/.config/ghostty/config` に HackGen と Dracula Pro の設定が入ること
-- `defaults read com.apple.Terminal "Default Window Settings"` が `Dracula Pro` になること
-- `osascript -e 'tell application "Terminal" to font name of settings set "Dracula Pro"'` が HackGen 系名称を返すこと
+- `~/ghq/github.com/hanabi-works/hanabi-theme` が clone 済みであること
+- `~/.config/ghostty/themes/hanabi` が存在すること
+- `~/.config/ghostty/config` に HackGen と `theme = hanabi` の設定が入ること
+- `defaults read com.apple.Terminal "Default Window Settings"` が `Hanabi` になること
+- `osascript -e 'tell application \"Terminal\" to font name of settings set \"Hanabi\"'` が HackGen 系名称を返すこと
+- `~/.vim/colors/hanabi.vim` が存在すること
+- `grep -n \"colorscheme hanabi\" ~/.vimrc` が成功すること
+- `command -v code` が成功すること
+- `code --list-extensions | grep -n \"^okash1n\\.hanabi-theme-vscode$\"` が成功すること
 
 ## テンプレート利用時の注意
 

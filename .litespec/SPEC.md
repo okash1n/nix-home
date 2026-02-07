@@ -6,7 +6,8 @@
 ## 目的
 
 - OS 初期化後に、`make init` 1 回で macOS シェル環境を復旧できるようにする。
-- `zsh` / `powerlevel10k` / 主要 CLI / AI CLI を短時間で再利用可能にする。
+- `zsh` / 主要 CLI / AI CLI を短時間で再利用可能にする。
+- `Hanabi Theme` を軸に、ターミナル見た目（Ghostty / Terminal.app / Vim / VS Code）を揃える。
 
 ## 背景
 
@@ -17,7 +18,7 @@
 
 - `nix-darwin` + `home-manager` による macOS 構成管理
 - `init.sh` と `make init` による一発初期化
-- シェル/CLI/フォント/ターミナルテーマの再現
+- シェル/CLI/フォント/テーマの再現（Ghostty / Terminal.app / Vim / VS Code）
 
 ## 非スコープ
 
@@ -32,9 +33,9 @@
 
 ## 成功条件（DoD）
 
-- クリーン macOS で `make init` 後、`zsh` と `powerlevel10k` が利用可能である。
+- クリーン macOS で `make init` 後、`zsh` が利用可能である（既定プロンプトは `Hanabi`、`powerlevel10k` は切替用に保持）。
 - `git` / `nix` / `zsh` / `codex` / `claude` / `gemini` がコマンド実行可能である。
-- `Ghostty` とフォント設定、`Terminal.app` 既定テーマが仕様どおり反映される。
+- `Ghostty` / `Terminal.app` / `Vim` / `VS Code` に `Hanabi Theme` が適用される。
 - `make init` を再実行しても破綻しない。
 
 ## 詳細仕様一覧
