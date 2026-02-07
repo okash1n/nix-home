@@ -1,12 +1,4 @@
-{ pkgs, username, lib, ... }:
-let
-  ghosttyPkg =
-    if pkgs.stdenv.hostPlatform.isDarwin then
-      if pkgs ? ghostty-bin then pkgs.ghostty-bin else null
-    else if pkgs ? ghostty then pkgs.ghostty
-    else if pkgs ? ghostty-bin then pkgs.ghostty-bin
-    else null;
-in
+{ pkgs, username, ... }:
 {
   home.username = username;
   home.homeDirectory = "/Users/${username}";
@@ -27,7 +19,7 @@ in
     codex
     claude-code
     gemini-cli
-  ]) ++ lib.optional (ghosttyPkg != null) ghosttyPkg;
+  ]);
 
   xdg.enable = true;
 

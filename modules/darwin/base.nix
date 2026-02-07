@@ -17,6 +17,10 @@ let
       runHook postInstall
     '';
   };
+  ghosttyPkg =
+    if pkgs ? ghostty-bin then pkgs.ghostty-bin
+    else if pkgs ? ghostty then pkgs.ghostty
+    else null;
 in
 {
   nix.enable = true;
@@ -44,6 +48,7 @@ in
       ];
     })
   ];
+  environment.systemPackages = lib.optional (ghosttyPkg != null) ghosttyPkg;
 
   system.stateVersion = 4;
 }

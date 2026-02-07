@@ -32,7 +32,7 @@ make init
 - `zsh` / `powerlevel10k`
 - CLI: `git` `curl` `jq` `fzf` `ghq` `awk` `grep` `sed` `codex` `claude` `gemini`
 - `git` グローバル設定（`user.name` / `user.email` / global ignore）
-- `Ghostty` 本体と `~/.config/ghostty/config`（HackGen + Dracula Pro 配色）
+- `Ghostty` 本体（`/Applications/Nix Apps/Ghostty.app`）と `~/.config/ghostty/config`（HackGen + Dracula Pro 配色）
 - フォント: HackGen NF / LINE Seed JP / IBM Plex Sans JP / IBM Plex Mono
 - `Terminal.app` の `Dracula Pro` 既定プロファイル設定
 - Nix Store の自動メンテナンス（GC / optimise）

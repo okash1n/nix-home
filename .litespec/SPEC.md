@@ -86,6 +86,7 @@
 
 ### FR-007 ターミナルテーマ管理
 - `Ghostty` 本体を Nix 管理で導入する。
+- `Ghostty` は `/Applications/Nix Apps` から GUI 起動できる状態にする。
 - `~/.config/ghostty/config` を Nix 管理で生成し、HackGen と Dracula Pro 配色を適用する。
 - `Terminal.app` は `Dracula Pro` プロファイルを既定に設定する。
 - GUI セッションが有効な環境では、`Terminal.app` の起動有無に依存せずテーマ適用処理（import / defaults / フォント設定）を試行する。
@@ -111,6 +112,7 @@
 - `powerlevel10k` が表示される。
 - `~/.config/zsh/.zshrc` と `~/.config/zsh/.p10k.zsh` が存在する。
 - `command -v ghostty` が成功する。
+- `/Applications/Nix Apps` 配下に `Ghostty.app` が作成される。
 - `~/.config/ghostty/config` が存在し、HackGen と Dracula Pro 配色が反映される。
 - 主要 alias / functions が機能する。
 - `command -v git nix zsh codex claude gemini` が成功する。
