@@ -38,6 +38,7 @@ in
       "codex"
       "gemini-cli"
       "vscode"
+      "vscode-unwrapped"
     ];
   fonts.packages = [
     pkgs.hackgen-nf-font
