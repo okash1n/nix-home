@@ -31,11 +31,12 @@
 
 ### FR-001 ブートストラップ
 
+- `nix-home` 本体リポジトリは `~/nix-home` 配下で運用し、`ghq` 配下には配置しない。
 - `init.sh` は macOS で `xcode-select -p` を事前確認し、未導入時は導入を促して終了する。
 - `init.sh` は GitHub SSH 接続を事前確認し、失敗時は鍵登録を促して終了する。
 - `init.sh` は未導入時に Nix を導入する。
 - `init.sh` はリポジトリを取得または更新する。
-- `init.sh` は `Dracula Pro` private repository を `ghq` 配下に取得または更新する。
+- `init.sh` は `Dracula Pro` private repository の取得・更新に `ghq get -u` を利用し、`ghq` の動作確認も兼ねる。
 - `init.sh` は `darwin-rebuild switch --flake` を実行する。
 - `init.sh` はログファイルを出力し、失敗時に参照先を表示する。
 - `init.sh` はユーザーレベルで `~/.zshenv` に `ZDOTDIR` を設定する。
@@ -86,11 +87,13 @@
 - `Ghostty` は `/Applications/Nix Apps` から GUI 起動できる状態にする。
 - `~/.config/ghostty/config` を Nix 管理で生成し、HackGen と Dracula Pro 配色を適用する。
 - `Terminal.app` は `Dracula Pro` プロファイルを既定に設定する。
+- `Terminal.app` の `Dracula Pro` プロファイルには HackGen 系フォント（優先: `HackGen Console NF`）を適用し、適用結果を検証する。
 - GUI セッションが有効な環境では、`Terminal.app` の起動有無に依存せずテーマ適用処理（import / defaults / フォント設定）を試行する。
 - `Terminal.app` が起動中の場合、既存ウィンドウ/タブの current settings も `Dracula Pro` に合わせる。
 - `Dracula Pro` プロファイルの import 失敗時は `defaults` の既定設定更新を強行せず、失敗理由をログに出す。
 - `Dracula Pro` が未取得の場合は処理をスキップし、復旧手順をログに表示する。
 - GUI セッションが無い環境では `Terminal.app` への適用処理をスキップして停止しない。
+- GUI セッションで初回セットアップ完了時は `Ghostty` を自動起動する（再実行時は既定で再起動しない）。
 
 ### FR-008 ストアメンテナンス
 
@@ -108,6 +111,7 @@
 ## 受け入れ条件（DoD）
 
 - クリーン macOS で `make init` 実行後、ログインシェルが `zsh` で起動する。
+- `nix-home` 本体が `~/nix-home` に配置されている。
 - `powerlevel10k` が表示される。
 - `~/.config/zsh/.zshrc` と `~/.config/zsh/.p10k.zsh` が存在する。
 - `command -v ghostty` が成功する。
@@ -118,6 +122,8 @@
 - `git config --global user.name` と `git config --global user.email` が期待値を返す。
 - HackGen NF / LINE Seed JP / IBM Plex Sans JP / IBM Plex Mono が利用可能。
 - `Dracula Pro` private repository のテーマ資産を使って `Terminal.app` の既定プロファイルが `Dracula Pro` になる。
+- `Terminal.app` の `Dracula Pro` プロファイルに HackGen 系フォントが設定される。
+- GUI セッションの初回 `make init` 完了時に `Ghostty` が自動起動する。
 - ヘッドレス環境では `make init` が `setupTerminalDraculaPro` でハングせず完了する。
 - Nix Store の自動 GC / 最適化設定が有効になっている。
 - 2回連続で `make init` 実行しても破綻しない。

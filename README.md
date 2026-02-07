@@ -11,18 +11,30 @@ Nix 前提で macOS シェル環境を一発復旧するための個人用設定
 
 ## 初期化コマンド
 
+`nix-home` 本体は `~/nix-home` 配下で運用します（`ghq` 配下には置かない）。
+`dracula-pro` は `ghq` 配下（`~/ghq/github.com/okash1n/dracula-pro`）で管理します。
+
 ```bash
+if [ -d ~/nix-home/.git ]; then
+  cd ~/nix-home
+  git pull --ff-only
+else
+  git clone git@github.com:okash1n/nix-home.git ~/nix-home
+  cd ~/nix-home
+fi
+
 make init
-# または
-./init.sh
+# 必要に応じて
+exec zsh -l
 ```
 
 `init.sh` は以下を実行します。
 
 - Xcode CLT / GitHub SSH の preflight チェック
-- `dracula-pro` private repository の取得または更新（`~/ghq/github.com/okash1n/dracula-pro`）
+- `dracula-pro` private repository の取得または更新（`ghq get -u`、配置先は `~/ghq/github.com/okash1n/dracula-pro`）
 - `zsh` の履歴/キャッシュ用ディレクトリの事前作成（`~/.local/state/zsh` / `~/.cache/zsh`）
 - `nix-darwin` + `home-manager` の適用
+- GUI セッションの初回適用後に `Ghostty` を自動起動
 - 既存 dotfile 衝突時の自動バックアップ（`*.hm-bak`）
 - Nix Store の自動 GC / 最適化設定の適用（容量増加を抑制）
 - 過去 Nix installer の `*.backup-before-nix` 衝突を自動退避して継続
@@ -44,6 +56,7 @@ make init
 GUI セッションが有効なら `Terminal.app` 起動有無に依存せず試行します。
 `Terminal.app` が起動中なら、既存ウィンドウの設定も `Dracula Pro` に同期します。
 `Dracula Pro` プロファイルの import が確認できない場合は、既定設定更新をスキップしてログに案内を出します。
+Ghostty 自動起動を抑止する場合は `NIX_HOME_OPEN_GHOSTTY=0 make init` を使います。
 
 ## 仕様管理
 

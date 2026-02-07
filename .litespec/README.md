@@ -23,6 +23,9 @@
 - ローカル macOS では `switch` 前に `build` を優先する
 - 別ユーザーまたは VM で `make init` の通し確認を行う
 - テーマ/フォント適用は GUI セッション上で確認する
+- GUI 検証用 VM は、ホストの通常ターミナルから `tart run` で起動する
+- `tart ip` は起動コマンドではなく、起動後の接続確認用途として使う
+- GUI 検証では SSH 実行結果を代替にせず、VM 画面内で見た目を確認する
 
 ## 追加の検証観点（MVP）
 
@@ -31,6 +34,7 @@
 - `~/ghq/github.com/okash1n/dracula-pro` が clone 済みであること
 - `~/.config/ghostty/config` に HackGen と Dracula Pro の設定が入ること
 - `defaults read com.apple.Terminal "Default Window Settings"` が `Dracula Pro` になること
+- `osascript -e 'tell application "Terminal" to font name of settings set "Dracula Pro"'` が HackGen 系名称を返すこと
 
 ## テンプレート利用時の注意
 

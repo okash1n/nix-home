@@ -72,20 +72,37 @@ sync_dracula_pro() {
     exit 1
   fi
 
-  mkdir -p "$(dirname "$DRACULA_PRO_DIR")"
-  if [ -d "$DRACULA_PRO_DIR/.git" ]; then
-    echo "Updating Dracula Pro repository"
-    git -C "$DRACULA_PRO_DIR" pull --ff-only
-    return 0
-  fi
+  run_ghq() {
+    if command -v ghq >/dev/null 2>&1; then
+      ghq "$@"
+      return 0
+    fi
+    if command -v nix >/dev/null 2>&1; then
+      nix --extra-experimental-features "nix-command flakes" run --quiet nixpkgs#ghq -- "$@"
+      return 0
+    fi
+    return 1
+  }
 
-  if [ -d "$DRACULA_PRO_DIR" ]; then
+  export GHQ_ROOT
+  mkdir -p "$GHQ_ROOT"
+
+  if [ -d "$DRACULA_PRO_DIR" ] && [ ! -d "$DRACULA_PRO_DIR/.git" ]; then
     echo "Path exists but is not a git repository: $DRACULA_PRO_DIR"
     exit 1
   fi
 
-  echo "Cloning Dracula Pro repository to $DRACULA_PRO_DIR"
-  git clone "$DRACULA_PRO_REPO" "$DRACULA_PRO_DIR"
+  echo "Syncing Dracula Pro repository with ghq: $DRACULA_PRO_REPO"
+  if ! run_ghq get -u "$DRACULA_PRO_REPO"; then
+    echo "Failed to sync Dracula Pro repository with ghq."
+    echo "Run manually: GHQ_ROOT=\"$GHQ_ROOT\" ghq get -u \"$DRACULA_PRO_REPO\""
+    exit 1
+  fi
+
+  if [ ! -d "$DRACULA_PRO_DIR/.git" ]; then
+    echo "Dracula Pro repository was not found at expected path: $DRACULA_PRO_DIR"
+    exit 1
+  fi
 }
 
 ensure_xcode_clt
@@ -129,8 +146,6 @@ if command -v git >/dev/null 2>&1; then
   echo "Updating repository"
   git -C "$REPO_ROOT_DIR" pull --ff-only || true
 fi
-
-sync_dracula_pro
 
 ZSHENV="$HOME/.zshenv"
 ZDOTDIR_LINE='export ZDOTDIR="$HOME/.config/zsh"'
@@ -193,6 +208,8 @@ if ! command -v nix >/dev/null 2>&1; then
   echo "nix command is still unavailable after installation."
   exit 1
 fi
+
+sync_dracula_pro
 
 cleanup_installer_nix_snippet() {
   local file tmp
@@ -258,6 +275,60 @@ ensure_nix_system_files() {
 
 ensure_nix_system_files
 
+maybe_open_ghostty() {
+  if [ "$(uname)" != "Darwin" ]; then
+    return 0
+  fi
+  if [ "${NIX_HOME_OPEN_GHOSTTY:-1}" != "1" ]; then
+    return 0
+  fi
+  if [ "${NIX_HOME_SKIP_GHOSTTY_OPEN:-0}" = "1" ]; then
+    return 0
+  fi
+  if ! /usr/bin/pgrep -x WindowServer >/dev/null 2>&1; then
+    echo "[nix-home] Skipping Ghostty auto-launch (no GUI session)."
+    return 0
+  fi
+
+  local marker_file ghostty_bin
+  marker_file="$LOG_DIR/ghostty-auto-opened"
+  if [ -f "$marker_file" ] && [ "${NIX_HOME_FORCE_OPEN_GHOSTTY:-0}" != "1" ]; then
+    local marker_mtime boot_epoch
+    marker_mtime=$(/usr/bin/stat -f %m "$marker_file" 2>/dev/null || echo 0)
+    boot_epoch=$(/usr/sbin/sysctl -n kern.boottime 2>/dev/null | /usr/bin/awk -F'[=, ]+' '{for(i=1;i<=NF;i++) if($i=="sec"){print $(i+1); exit}}')
+    boot_epoch=${boot_epoch:-0}
+
+    if [ "$marker_mtime" -ge "$boot_epoch" ]; then
+      return 0
+    fi
+
+    echo "[nix-home] Ignoring stale Ghostty auto-open marker from previous boot."
+    rm -f "$marker_file"
+  fi
+
+  if /usr/bin/open -a Ghostty >/dev/null 2>&1; then
+    touch "$marker_file"
+    echo "[nix-home] Opened Ghostty.app."
+    return 0
+  fi
+
+  if /usr/bin/open "/Applications/Nix Apps/Ghostty.app" >/dev/null 2>&1; then
+    touch "$marker_file"
+    echo "[nix-home] Opened Ghostty.app from /Applications/Nix Apps."
+    return 0
+  fi
+
+  ghostty_bin="/etc/profiles/per-user/$NIX_HOME_USERNAME/bin/ghostty"
+  if [ -x "$ghostty_bin" ]; then
+    "$ghostty_bin" >/dev/null 2>&1 &
+    touch "$marker_file"
+    echo "[nix-home] Opened Ghostty via binary: $ghostty_bin"
+    return 0
+  fi
+
+  echo "[nix-home] Ghostty is not available yet; skipping auto-launch."
+}
+
 NIX_CMD=(nix --extra-experimental-features "nix-command flakes")
 NIX_HOME_USERNAME=${NIX_HOME_USERNAME:-$(id -un)}
 NIX_HOME_SKIP_TERMINAL_THEME=${NIX_HOME_SKIP_TERMINAL_THEME:-0}
@@ -299,5 +370,7 @@ else
   echo "Non-macOS is not supported yet."
   exit 1
 fi
+
+maybe_open_ghostty
 
 echo "Done"
