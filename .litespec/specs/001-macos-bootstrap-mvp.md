@@ -54,12 +54,14 @@
 - `zsh` をデフォルトシェルとして利用可能にする。
 - `Hanabi` の Zsh プロンプトテーマが有効なプロンプトが表示される。
 - `powerlevel10k` 設定は保持し、必要に応じて切り替え可能にする（MVP ではデフォルトは `Hanabi`）。
+- `powerlevel10k` を有効化した場合、`hanabi.p10k.zsh` により配色を Hanabi に寄せる（プロンプト構造は維持）。
 - alias / functions を Nix 管理で復元する。
 - 既存 dotfiles 由来の主要関数（例: `fgh`）を利用可能にする。
 - 履歴・補完キャッシュなどの XDG パスを一貫させる。
 - 履歴ファイル保存先ディレクトリ（例: `~/.local/state/zsh`）が存在しない場合は自動作成する。
 - `~/.config/zsh/.zshrc` を Nix 管理で生成する。
 - `~/.config/zsh/.p10k.zsh` を Nix 管理で生成する（切り替え用）。
+- `~/.config/zsh/hanabi.p10k.zsh` を配置する（p10k 向け配色上書き用）。
 
 ### FR-004 CLI 再現
 
@@ -123,6 +125,7 @@
 - `Hanabi` の Zsh プロンプトテーマが表示される（`powerlevel10k` は切り替え用に保持）。
 - `~/.config/zsh/.zshrc` と `~/.config/zsh/.p10k.zsh` が存在する。
 - `~/.config/zsh/hanabi.zsh-theme` が存在する。
+- `~/.config/zsh/hanabi.p10k.zsh` が存在する。
 - `command -v ghostty` が成功する。
 - `/Applications/Nix Apps` 配下に `Ghostty.app` が作成される。
 - `~/.config/ghostty/config` が存在し、HackGen と `theme = hanabi` が反映される。

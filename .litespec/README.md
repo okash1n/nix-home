@@ -40,6 +40,7 @@
 - `grep -n \"colorscheme hanabi\" ~/.vimrc` が成功すること
 - `command -v code` が成功すること
 - `code --list-extensions | grep -n \"^okash1n\\.hanabi-theme-vscode$\"` が成功すること
+- `~/.config/zsh/hanabi.p10k.zsh` が存在すること（p10k 利用時の配色上書き）
 
 ## テンプレート利用時の注意
 
