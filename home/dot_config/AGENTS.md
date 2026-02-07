@@ -11,6 +11,12 @@
 - 簡潔なコードを心がける
 - コメントは日本語で書く
 
+## Git操作
+
+- 必ず gitconfig global の設定（user.name, user.email）を使用すること
+- エージェント自身の名前でコミットしないこと
+- git config を勝手に変更しないこと
+
 ## 作業フロー
 
 1. まずこのファイル（~/.config/AGENTS.md）を確認する
