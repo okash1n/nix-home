@@ -37,6 +37,7 @@ in
       "claude-code"
       "codex"
       "gemini-cli"
+      "vscode"
     ];
   fonts.packages = [
     pkgs.hackgen-nf-font
@@ -48,7 +49,11 @@ in
       ];
     })
   ];
-  environment.systemPackages = lib.optional (ghosttyPkg != null) ghosttyPkg;
+  environment.systemPackages =
+    (lib.optional (ghosttyPkg != null) ghosttyPkg)
+    ++ [
+      pkgs.vscode
+    ];
 
   system.stateVersion = 4;
 }

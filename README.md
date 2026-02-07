@@ -7,12 +7,11 @@ Nix 前提で macOS シェル環境を一発復旧するための個人用設定
 - macOS (Apple Silicon)
 - Xcode Command Line Tools が導入済み
 - GitHub SSH 鍵が登録済み（`ssh -T git@github.com` が成功）
-- `git@github.com:okash1n/dracula-pro.git` にアクセス可能
 
 ## 初期化コマンド
 
 `nix-home` 本体は `~/nix-home` 配下で運用します（`ghq` 配下には置かない）。
-`dracula-pro` は `ghq` 配下（`~/ghq/github.com/okash1n/dracula-pro`）で管理します。
+`hanabi-theme` は `ghq` 配下（`~/ghq/github.com/hanabi-works/hanabi-theme`）で管理します（`init.sh` が `ghq get -u` で同期します）。
 
 ```bash
 if [ -d ~/nix-home/.git ]; then
@@ -31,7 +30,7 @@ exec zsh -l
 `init.sh` は以下を実行します。
 
 - Xcode CLT / GitHub SSH の preflight チェック
-- `dracula-pro` private repository の取得または更新（`ghq get -u`、配置先は `~/ghq/github.com/okash1n/dracula-pro`）
+- `hanabi-theme` repository の取得または更新（`ghq get -u`、配置先は `~/ghq/github.com/hanabi-works/hanabi-theme`）
 - `zsh` の履歴/キャッシュ用ディレクトリの事前作成（`~/.local/state/zsh` / `~/.cache/zsh`）
 - `nix-darwin` + `home-manager` の適用
 - GUI セッションの初回適用後に `Ghostty` を自動起動
@@ -41,13 +40,15 @@ exec zsh -l
 
 ## 反映される主な設定
 
-- `zsh` / `powerlevel10k`
+- `zsh`（既定プロンプト: `Hanabi`、切替: `NIX_HOME_ZSH_PROMPT=p10k`）
 - `dotfiles` 由来の `zsh` aliases / functions（`fgh` を含む）
-- CLI: `git` `curl` `wget` `jq` `fzf` `fd` `rg` `ghq` `awk` `grep` `sed` `tmux` `node` `pnpm` `bun` `python3` `uv` `codex` `claude` `gemini`
+- CLI: `git` `curl` `wget` `jq` `fzf` `fd` `rg` `ghq` `awk` `grep` `sed` `tmux` `node` `pnpm` `bun` `python3` `uv` `vim` `codex` `claude` `gemini`
 - `git` グローバル設定（`user.name` / `user.email` / global ignore）
-- `Ghostty` 本体（`/Applications/Nix Apps/Ghostty.app`）と `~/.config/ghostty/config`（HackGen + Dracula Pro 配色）
+- `Ghostty` 本体（`/Applications/Nix Apps/Ghostty.app`）と `~/.config/ghostty/config`（HackGen + `theme = hanabi`）
+- `VS Code` 本体（`/Applications/Nix Apps/Visual Studio Code.app`）と Marketplace 拡張 `okash1n.hanabi-theme-vscode`（`workbench.colorTheme = Hanabi`）
 - フォント: HackGen NF / LINE Seed JP / IBM Plex Sans JP / IBM Plex Mono
-- `Terminal.app` の `Dracula Pro` 既定プロファイル設定
+- `Terminal.app` の `Hanabi` 既定プロファイル設定
+- `Vim` の `colorscheme hanabi`（`~/.vim/colors/hanabi.vim` / `~/.vimrc`）
 - Nix Store の自動メンテナンス（GC / optimise）
 
 注: GUI セッションが無い実行（ヘッドレス VM など）では、
@@ -55,8 +56,8 @@ exec zsh -l
 明示的にスキップする場合は `NIX_HOME_SKIP_TERMINAL_THEME=1 make init` を使います。
 `Terminal.app` のテーマ適用処理（import / defaults / フォント同期）は、
 GUI セッションが有効なら `Terminal.app` 起動有無に依存せず試行します。
-`Terminal.app` が起動中なら、既存ウィンドウの設定も `Dracula Pro` に同期します。
-`Dracula Pro` プロファイルの import が確認できない場合は、既定設定更新をスキップしてログに案内を出します。
+`Terminal.app` が起動中なら、既存ウィンドウの設定も `Hanabi` に同期します。
+`Hanabi` プロファイルの import が確認できない場合は、既定設定更新をスキップしてログに案内を出します。
 Ghostty 自動起動を抑止する場合は `NIX_HOME_OPEN_GHOSTTY=0 make init` を使います。
 
 ## 仕様管理

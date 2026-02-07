@@ -25,6 +25,7 @@
     uv
     zsh
     bash
+    vim
     codex
     claude-code
     gemini-cli
@@ -65,9 +66,19 @@
 
       source "${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
       source "${pkgs.zsh-syntax-highlighting}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-      source "${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme"
 
-      [[ -f "$HOME/.config/zsh/.p10k.zsh" ]] && source "$HOME/.config/zsh/.p10k.zsh"
+      if [ "''${NIX_HOME_ZSH_PROMPT:-hanabi}" = "p10k" ]; then
+        source "${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme"
+        [[ -f "$HOME/.config/zsh/.p10k.zsh" ]] && source "$HOME/.config/zsh/.p10k.zsh"
+      else
+        if [ -f "$HOME/.config/zsh/hanabi.zsh-theme" ]; then
+          source "$HOME/.config/zsh/hanabi.zsh-theme"
+        else
+          # Fallback to p10k when Hanabi theme file is missing.
+          source "${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme"
+          [[ -f "$HOME/.config/zsh/.p10k.zsh" ]] && source "$HOME/.config/zsh/.p10k.zsh"
+        fi
+      fi
     fi
   '';
 
@@ -81,51 +92,57 @@
     font-codepoint-map = U+3000-U+9FFF=HackGen Console NF
     font-size = 16
 
-    # Theme (Dracula Pro)
-    palette = 0=#22212C
-    palette = 1=#FF9580
-    palette = 2=#8AFF80
-    palette = 3=#FFFF80
-    palette = 4=#9580FF
-    palette = 5=#FF80BF
-    palette = 6=#80FFEA
-    palette = 7=#F8F8F2
-    palette = 8=#504C67
-    palette = 9=#FFAA99
-    palette = 10=#A2FF99
-    palette = 11=#FFFF99
-    palette = 12=#AA99FF
-    palette = 13=#FF99CC
-    palette = 14=#99FFEE
-    palette = 15=#FFFFFF
-    background = #22212C
-    foreground = #F8F8F2
-    cursor-color = #7970A9
-    cursor-text = #7970A9
-    selection-background = #454158
-    selection-foreground = #F8F8F2
+    # Theme
+    theme = hanabi
 
     # Icon
     macos-icon = "retro"
   '';
 
-  home.activation.setupTerminalDraculaPro = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+  home.file.".vimrc".text = ''
+    set termguicolors
+    syntax on
+    colorscheme hanabi
+  '';
+
+  home.activation.setupHanabiThemeAssets = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    HANABI_ROOT="$HOME/ghq/github.com/hanabi-works/hanabi-theme"
+
+    if [ ! -d "$HANABI_ROOT/.git" ]; then
+      echo "[nix-home] hanabi-theme is not available: $HANABI_ROOT"
+      echo "[nix-home] Run: ghq get -u https://github.com/hanabi-works/hanabi-theme.git"
+    else
+      mkdir -p "$HOME/.config/ghostty/themes" "$HOME/.config/zsh" "$HOME/.vim/colors"
+
+      if [ -f "$HANABI_ROOT/themes/ghostty/hanabi" ]; then
+        cp -f "$HANABI_ROOT/themes/ghostty/hanabi" "$HOME/.config/ghostty/themes/hanabi"
+      fi
+      if [ -f "$HANABI_ROOT/themes/zsh/hanabi.zsh-theme" ]; then
+        cp -f "$HANABI_ROOT/themes/zsh/hanabi.zsh-theme" "$HOME/.config/zsh/hanabi.zsh-theme"
+      fi
+      if [ -f "$HANABI_ROOT/themes/vim/colors/hanabi.vim" ]; then
+        cp -f "$HANABI_ROOT/themes/vim/colors/hanabi.vim" "$HOME/.vim/colors/hanabi.vim"
+      fi
+    fi
+  '';
+
+  home.activation.setupTerminalHanabi = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if [ "$(/usr/bin/uname)" = "Darwin" ]; then
       if [ "''${NIX_HOME_SKIP_TERMINAL_THEME:-0}" = "1" ] || [ -f "$HOME/.local/state/nix-home/skip-terminal-theme" ]; then
         echo "[nix-home] Skipping Terminal.app theme setup (NIX_HOME_SKIP_TERMINAL_THEME=1)."
       elif ! /usr/bin/pgrep -x WindowServer >/dev/null 2>&1; then
         echo "[nix-home] Skipping Terminal.app theme setup (no GUI session)."
       else
-        DRACULA_PRO_ROOT="$HOME/ghq/github.com/okash1n/dracula-pro"
-        THEME_FILE="$DRACULA_PRO_ROOT/themes/terminal-app/Dracula Pro.terminal"
+        HANABI_ROOT="$HOME/ghq/github.com/hanabi-works/hanabi-theme"
+        THEME_FILE="$HANABI_ROOT/themes/terminal-app/Hanabi.terminal"
         STATE_DIR="$HOME/.local/state/nix-home"
-        MARKER_FILE="$STATE_DIR/terminal-dracula-pro.sha256"
+        MARKER_FILE="$STATE_DIR/terminal-hanabi.sha256"
 
         mkdir -p "$STATE_DIR"
 
         if [ ! -f "$THEME_FILE" ]; then
-          echo "[nix-home] Dracula Pro theme file was not found: $THEME_FILE"
-          echo "[nix-home] Run: ghq get git@github.com:okash1n/dracula-pro.git"
+          echo "[nix-home] Hanabi theme file was not found: $THEME_FILE"
+          echo "[nix-home] Run: ghq get -u https://github.com/hanabi-works/hanabi-theme.git"
         else
           THEME_IMPORTED=1
           THEME_HASH=$(/usr/bin/shasum -a 256 "$THEME_FILE" | /usr/bin/awk '{print $1}')
@@ -147,10 +164,10 @@
             return 1
           }
 
-          terminal_has_dracula_profile() {
+          terminal_has_hanabi_profile() {
             /usr/bin/osascript -e 'with timeout of 3 seconds
               tell application "Terminal"
-                return (exists settings set "Dracula Pro") as string
+                return (exists settings set "Hanabi") as string
               end tell
             end timeout' 2>/dev/null | /usr/bin/tr -d '\r' | /usr/bin/grep -qi "^true$"
           }
@@ -166,15 +183,15 @@
               /usr/bin/osascript >/dev/null 2>&1 <<OSA || true
 with timeout of 5 seconds
   tell application "Terminal"
-    set font name of settings set "Dracula Pro" to "$font_name"
-    set font size of settings set "Dracula Pro" to 14
+    set font name of settings set "Hanabi" to "$font_name"
+    set font size of settings set "Hanabi" to 14
   end tell
 end timeout
 OSA
 
               current_font=$(/usr/bin/osascript -e 'with timeout of 3 seconds
                 tell application "Terminal"
-                  return font name of settings set "Dracula Pro"
+                  return font name of settings set "Hanabi"
                 end tell
               end timeout' 2>/dev/null | /usr/bin/tr -d '\r')
 
@@ -192,18 +209,18 @@ OSA
             /usr/bin/osascript >/dev/null 2>&1 <<'OSA' || true
 with timeout of 5 seconds
   tell application "Terminal"
-    set default settings to settings set "Dracula Pro"
-    set startup settings to settings set "Dracula Pro"
+    set default settings to settings set "Hanabi"
+    set startup settings to settings set "Hanabi"
   end tell
 end timeout
 OSA
 
-            /usr/bin/defaults write com.apple.Terminal "Default Window Settings" "Dracula Pro" || true
-            /usr/bin/defaults write com.apple.Terminal "Startup Window Settings" "Dracula Pro" || true
+            /usr/bin/defaults write com.apple.Terminal "Default Window Settings" "Hanabi" || true
+            /usr/bin/defaults write com.apple.Terminal "Startup Window Settings" "Hanabi" || true
 
             current_default=$(/usr/bin/defaults read com.apple.Terminal "Default Window Settings" 2>/dev/null || true)
-            if [ "$current_default" != "Dracula Pro" ]; then
-              echo "[nix-home] Terminal default profile is '$current_default' (expected Dracula Pro)."
+            if [ "$current_default" != "Hanabi" ]; then
+              echo "[nix-home] Terminal default profile is '$current_default' (expected Hanabi)."
               return 1
             fi
             return 0
@@ -218,19 +235,19 @@ OSA
             echo "[nix-home] Terminal.app is not ready for automation."
           fi
 
-          if [ "$THEME_IMPORTED" = "1" ] && { [ "$THEME_HASH" != "$APPLIED_HASH" ] || ! terminal_has_dracula_profile; }; then
+          if [ "$THEME_IMPORTED" = "1" ] && { [ "$THEME_HASH" != "$APPLIED_HASH" ] || ! terminal_has_hanabi_profile; }; then
             /usr/bin/open "$THEME_FILE" >/dev/null 2>&1 &
             for _ in 1 2 3 4 5 6 7 8; do
-              if terminal_has_dracula_profile; then
+              if terminal_has_hanabi_profile; then
                 break
               fi
               /bin/sleep 1
             done
           fi
 
-          if [ "$THEME_IMPORTED" = "1" ] && ! terminal_has_dracula_profile; then
+          if [ "$THEME_IMPORTED" = "1" ] && ! terminal_has_hanabi_profile; then
             THEME_IMPORTED=0
-            echo "[nix-home] Dracula Pro profile import could not be confirmed."
+            echo "[nix-home] Hanabi profile import could not be confirmed."
             echo "[nix-home] Please open once: $THEME_FILE"
           fi
 
@@ -240,10 +257,10 @@ OSA
             if ! set_terminal_default_profile; then
               echo "[nix-home] Terminal default profile sync failed."
             fi
-            /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".columnCount 120 || true
-            /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".rowCount 30 || true
-            /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".FontWidthSpacing 1.0 || true
-            /usr/bin/defaults write com.apple.Terminal "Window Settings"."Dracula Pro".FontHeightSpacing 1.0 || true
+            /usr/bin/defaults write com.apple.Terminal "Window Settings"."Hanabi".columnCount 120 || true
+            /usr/bin/defaults write com.apple.Terminal "Window Settings"."Hanabi".rowCount 30 || true
+            /usr/bin/defaults write com.apple.Terminal "Window Settings"."Hanabi".FontWidthSpacing 1.0 || true
+            /usr/bin/defaults write com.apple.Terminal "Window Settings"."Hanabi".FontHeightSpacing 1.0 || true
 
             if apply_terminal_font; then
               FONT_APPLIED=1
@@ -254,7 +271,7 @@ OSA
                 if (count of windows) > 0 then
                   repeat with w in windows
                     repeat with t in tabs of w
-                      set current settings of t to settings set "Dracula Pro"
+                      set current settings of t to settings set "Hanabi"
                     end repeat
                   end repeat
                 end if
@@ -266,6 +283,58 @@ OSA
             fi
           fi
         fi
+      fi
+    fi
+  '';
+
+  home.activation.setupVSCodeHanabiTheme = lib.hm.dag.entryAfter [ "installPackages" ] ''
+    CODE_SETTINGS_DIR="$HOME/Library/Application Support/Code/User"
+    CODE_SETTINGS_FILE="$CODE_SETTINGS_DIR/settings.json"
+
+    USERNAME="$(/usr/bin/id -un 2>/dev/null || true)"
+    PATH="/run/current-system/sw/bin:/etc/profiles/per-user/$USERNAME/bin:$PATH"
+
+    if ! command -v code >/dev/null 2>&1; then
+      echo "[nix-home] code command was not found; skipping VS Code theme setup."
+    elif ! /usr/bin/pgrep -x WindowServer >/dev/null 2>&1; then
+      echo "[nix-home] Skipping VS Code theme setup (no GUI session)."
+    else
+      if ! code --list-extensions 2>/dev/null | /usr/bin/grep -q '^okash1n\\.hanabi-theme-vscode$'; then
+        if ! code --install-extension okash1n.hanabi-theme-vscode --force >/dev/null 2>&1; then
+          echo "[nix-home] Failed to install VS Code extension: okash1n.hanabi-theme-vscode"
+        fi
+      fi
+
+      mkdir -p "$CODE_SETTINGS_DIR"
+
+      if command -v python3 >/dev/null 2>&1; then
+        python3 - "$CODE_SETTINGS_FILE" <<'PY' || true
+import json
+import os
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+data = {}
+if path.exists():
+    try:
+        raw = path.read_text(encoding="utf-8")
+        data = json.loads(raw) if raw.strip() else {}
+        if not isinstance(data, dict):
+            data = {}
+    except Exception:
+        bak = path.with_suffix(path.suffix + ".nix-home-bak")
+        try:
+            path.rename(bak)
+        except Exception:
+            pass
+        data = {}
+
+data["workbench.colorTheme"] = "Hanabi"
+path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+PY
+      else
+        echo "[nix-home] python3 was not found; skipping VS Code settings.json update."
       fi
     fi
   '';

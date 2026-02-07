@@ -5,8 +5,8 @@ REPO_ROOT_DIR=$(cd "$(dirname "$0")" && pwd)
 REPO_URL=${REPO_URL:-"git@github.com:okash1n/nix-home.git"}
 TARGET_DIR=${NIX_HOME_DIR:-"$HOME/nix-home"}
 GHQ_ROOT=${GHQ_ROOT:-"$HOME/ghq"}
-DRACULA_PRO_REPO=${DRACULA_PRO_REPO:-"git@github.com:okash1n/dracula-pro.git"}
-DRACULA_PRO_DIR=${DRACULA_PRO_DIR:-"$GHQ_ROOT/github.com/okash1n/dracula-pro"}
+HANABI_THEME_REPO=${HANABI_THEME_REPO:-"https://github.com/hanabi-works/hanabi-theme.git"}
+HANABI_THEME_DIR=${HANABI_THEME_DIR:-"$GHQ_ROOT/github.com/hanabi-works/hanabi-theme"}
 LOG_DIR="$HOME/.local/state/nix-home"
 mkdir -p "$LOG_DIR"
 LOG_FILE="$LOG_DIR/init-$(date +%Y%m%d-%H%M%S).log"
@@ -66,9 +66,9 @@ ensure_github_ssh() {
   exit 1
 }
 
-sync_dracula_pro() {
+sync_hanabi_theme() {
   if ! command -v git >/dev/null 2>&1; then
-    echo "git is required to sync Dracula Pro repository."
+    echo "git is required to sync hanabi-theme repository."
     exit 1
   fi
 
@@ -87,20 +87,20 @@ sync_dracula_pro() {
   export GHQ_ROOT
   mkdir -p "$GHQ_ROOT"
 
-  if [ -d "$DRACULA_PRO_DIR" ] && [ ! -d "$DRACULA_PRO_DIR/.git" ]; then
-    echo "Path exists but is not a git repository: $DRACULA_PRO_DIR"
+  if [ -d "$HANABI_THEME_DIR" ] && [ ! -d "$HANABI_THEME_DIR/.git" ]; then
+    echo "Path exists but is not a git repository: $HANABI_THEME_DIR"
     exit 1
   fi
 
-  echo "Syncing Dracula Pro repository with ghq: $DRACULA_PRO_REPO"
-  if ! run_ghq get -u "$DRACULA_PRO_REPO"; then
-    echo "Failed to sync Dracula Pro repository with ghq."
-    echo "Run manually: GHQ_ROOT=\"$GHQ_ROOT\" ghq get -u \"$DRACULA_PRO_REPO\""
+  echo "Syncing hanabi-theme repository with ghq: $HANABI_THEME_REPO"
+  if ! run_ghq get -u "$HANABI_THEME_REPO"; then
+    echo "Failed to sync hanabi-theme repository with ghq."
+    echo "Run manually: GHQ_ROOT=\"$GHQ_ROOT\" ghq get -u \"$HANABI_THEME_REPO\""
     exit 1
   fi
 
-  if [ ! -d "$DRACULA_PRO_DIR/.git" ]; then
-    echo "Dracula Pro repository was not found at expected path: $DRACULA_PRO_DIR"
+  if [ ! -d "$HANABI_THEME_DIR/.git" ]; then
+    echo "hanabi-theme repository was not found at expected path: $HANABI_THEME_DIR"
     exit 1
   fi
 }
@@ -209,7 +209,7 @@ if ! command -v nix >/dev/null 2>&1; then
   exit 1
 fi
 
-sync_dracula_pro
+sync_hanabi_theme
 
 cleanup_installer_nix_snippet() {
   local file tmp
