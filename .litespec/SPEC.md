@@ -42,6 +42,7 @@
 ## 詳細仕様一覧
 
 - [MVP: macOS ブートストラップ仕様](./specs/001-macos-bootstrap-mvp.md)
+- [XDG準拠CLI設定とAGENTS.md統一](./specs/002-xdg-cli-config.md)
 
 ## 変更ルール
 

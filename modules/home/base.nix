@@ -35,6 +35,29 @@
 
   xdg.enable = true;
 
+  # XDG準拠: CLI設定ディレクトリを ~/.config/ 配下に統一
+  home.sessionVariables = {
+    CLAUDE_CONFIG_DIR = "$HOME/.config/claude";
+    CODEX_HOME = "$HOME/.config/codex";
+    GEMINI_CLI_HOME = "$HOME/.config/gemini";
+    VIMINIT = "source $HOME/.config/vim/vimrc";
+  };
+
+  # グローバル共通指示ファイル
+  home.file.".config/AGENTS.md".source = ../../home/dot_config/AGENTS.md;
+
+  # Claude Code
+  home.file.".config/claude/CLAUDE.md".source = ../../home/dot_config/claude/CLAUDE.md;
+
+  # Codex CLI
+  home.file.".config/codex/AGENTS.md".source = ../../home/dot_config/codex/AGENTS.md;
+
+  # Gemini CLI
+  home.file.".config/gemini/GEMINI.md".source = ../../home/dot_config/gemini/GEMINI.md;
+
+  # Vim
+  home.file.".config/vim/vimrc".source = ../../home/dot_config/vim/vimrc;
+
   home.file.".config/zsh/.zshrc".text = ''
     mkdir -p "$HOME/.local/state/zsh"
     mkdir -p "$HOME/.cache/zsh"
@@ -93,9 +116,9 @@
     fi
   '';
 
-  home.file.".config/zsh/.p10k.zsh".source = ../../home/zsh/p10k.zsh;
-  home.file.".config/zsh/aliases.zsh".source = ../../home/zsh/aliases.zsh;
-  home.file.".config/zsh/functions.zsh".source = ../../home/zsh/functions.zsh;
+  home.file.".config/zsh/.p10k.zsh".source = ../../home/dot_config/zsh/p10k.zsh;
+  home.file.".config/zsh/aliases.zsh".source = ../../home/dot_config/zsh/aliases.zsh;
+  home.file.".config/zsh/functions.zsh".source = ../../home/dot_config/zsh/functions.zsh;
 
   home.file.".config/ghostty/config".text = ''
     # Font
@@ -110,12 +133,6 @@
     macos-icon = "retro"
   '';
 
-  home.file.".vimrc".text = ''
-    set termguicolors
-    syntax on
-    colorscheme hanabi
-  '';
-
 	  home.activation.setupHanabiThemeAssets = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
 	    HANABI_ROOT="$HOME/ghq/github.com/hanabi-works/hanabi-theme"
 
@@ -123,7 +140,7 @@
 	      echo "[nix-home] hanabi-theme is not available: $HANABI_ROOT"
 	      echo "[nix-home] Run: ghq get -u git@github.com:hanabi-works/hanabi-theme.git"
 	    else
-	      mkdir -p "$HOME/.config/ghostty/themes" "$HOME/.config/zsh" "$HOME/.vim/colors"
+	      mkdir -p "$HOME/.config/ghostty/themes" "$HOME/.config/zsh" "$HOME/.config/vim/colors"
 
       if [ -f "$HANABI_ROOT/themes/ghostty/hanabi" ]; then
         cp -f "$HANABI_ROOT/themes/ghostty/hanabi" "$HOME/.config/ghostty/themes/hanabi"
@@ -135,7 +152,7 @@
         cp -f "$HANABI_ROOT/themes/zsh/hanabi.p10k.zsh" "$HOME/.config/zsh/hanabi.p10k.zsh"
       fi
       if [ -f "$HANABI_ROOT/themes/vim/colors/hanabi.vim" ]; then
-        cp -f "$HANABI_ROOT/themes/vim/colors/hanabi.vim" "$HOME/.vim/colors/hanabi.vim"
+        cp -f "$HANABI_ROOT/themes/vim/colors/hanabi.vim" "$HOME/.config/vim/colors/hanabi.vim"
       fi
     fi
   '';
