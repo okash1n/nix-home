@@ -10,6 +10,7 @@
     curl
     jq
     fzf
+    fd
     ghq
     gawk
     gnugrep
@@ -36,6 +37,13 @@
     setopt INC_APPEND_HISTORY
     setopt AUTO_CD
 
+    if [ -f "$HOME/.config/zsh/aliases.zsh" ]; then
+      source "$HOME/.config/zsh/aliases.zsh"
+    fi
+    if [ -f "$HOME/.config/zsh/functions.zsh" ]; then
+      source "$HOME/.config/zsh/functions.zsh"
+    fi
+
     if [[ -o interactive ]]; then
       autoload -Uz compinit
       compinit
@@ -56,6 +64,8 @@
   '';
 
   home.file.".config/zsh/.p10k.zsh".source = ../../home/zsh/p10k.zsh;
+  home.file.".config/zsh/aliases.zsh".source = ../../home/zsh/aliases.zsh;
+  home.file.".config/zsh/functions.zsh".source = ../../home/zsh/functions.zsh;
 
   home.file.".config/ghostty/config".text = ''
     # Font

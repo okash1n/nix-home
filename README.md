@@ -42,6 +42,7 @@ exec zsh -l
 ## 反映される主な設定
 
 - `zsh` / `powerlevel10k`
+- `dotfiles` 由来の `zsh` aliases / functions（`fgh` を含む）
 - CLI: `git` `curl` `jq` `fzf` `ghq` `awk` `grep` `sed` `codex` `claude` `gemini`
 - `git` グローバル設定（`user.name` / `user.email` / global ignore）
 - `Ghostty` 本体（`/Applications/Nix Apps/Ghostty.app`）と `~/.config/ghostty/config`（HackGen + Dracula Pro 配色）

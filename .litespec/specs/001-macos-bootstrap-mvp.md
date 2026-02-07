@@ -54,6 +54,7 @@
 - `powerlevel10k` が有効なプロンプトが表示される。
 - 既存 dotfiles の `powerlevel10k` 設定（見た目）を維持する。
 - alias / functions を Nix 管理で復元する。
+- 既存 dotfiles 由来の主要関数（例: `fgh`）を利用可能にする。
 - 履歴・補完キャッシュなどの XDG パスを一貫させる。
 - 履歴ファイル保存先ディレクトリ（例: `~/.local/state/zsh`）が存在しない場合は自動作成する。
 - `~/.config/zsh/.zshrc` を Nix 管理で生成する。
