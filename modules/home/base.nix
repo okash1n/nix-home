@@ -18,6 +18,8 @@
     gnugrep
     gnused
     tmux
+    dust
+    yazi
     nodejs
     pnpm
     bun
@@ -114,14 +116,14 @@
     colorscheme hanabi
   '';
 
-  home.activation.setupHanabiThemeAssets = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    HANABI_ROOT="$HOME/ghq/github.com/hanabi-works/hanabi-theme"
+	  home.activation.setupHanabiThemeAssets = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+	    HANABI_ROOT="$HOME/ghq/github.com/hanabi-works/hanabi-theme"
 
-    if [ ! -d "$HANABI_ROOT/.git" ]; then
-      echo "[nix-home] hanabi-theme is not available: $HANABI_ROOT"
-      echo "[nix-home] Run: ghq get -u https://github.com/hanabi-works/hanabi-theme.git"
-    else
-      mkdir -p "$HOME/.config/ghostty/themes" "$HOME/.config/zsh" "$HOME/.vim/colors"
+	    if [ ! -d "$HANABI_ROOT/.git" ]; then
+	      echo "[nix-home] hanabi-theme is not available: $HANABI_ROOT"
+	      echo "[nix-home] Run: ghq get -u git@github.com:hanabi-works/hanabi-theme.git"
+	    else
+	      mkdir -p "$HOME/.config/ghostty/themes" "$HOME/.config/zsh" "$HOME/.vim/colors"
 
       if [ -f "$HANABI_ROOT/themes/ghostty/hanabi" ]; then
         cp -f "$HANABI_ROOT/themes/ghostty/hanabi" "$HOME/.config/ghostty/themes/hanabi"
@@ -138,8 +140,8 @@
     fi
   '';
 
-  home.activation.setupTerminalHanabi = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    if [ "$(/usr/bin/uname)" = "Darwin" ]; then
+	  home.activation.setupTerminalHanabi = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+	    if [ "$(/usr/bin/uname)" = "Darwin" ]; then
       if [ "''${NIX_HOME_SKIP_TERMINAL_THEME:-0}" = "1" ] || [ -f "$HOME/.local/state/nix-home/skip-terminal-theme" ]; then
         echo "[nix-home] Skipping Terminal.app theme setup (NIX_HOME_SKIP_TERMINAL_THEME=1)."
       elif ! /usr/bin/pgrep -x WindowServer >/dev/null 2>&1; then
@@ -152,11 +154,11 @@
 
         mkdir -p "$STATE_DIR"
 
-        if [ ! -f "$THEME_FILE" ]; then
-          echo "[nix-home] Hanabi theme file was not found: $THEME_FILE"
-          echo "[nix-home] Run: ghq get -u https://github.com/hanabi-works/hanabi-theme.git"
-        else
-          THEME_IMPORTED=1
+	        if [ ! -f "$THEME_FILE" ]; then
+	          echo "[nix-home] Hanabi theme file was not found: $THEME_FILE"
+	          echo "[nix-home] Run: ghq get -u git@github.com:hanabi-works/hanabi-theme.git"
+	        else
+	          THEME_IMPORTED=1
           THEME_HASH=$(/usr/bin/shasum -a 256 "$THEME_FILE" | /usr/bin/awk '{print $1}')
           APPLIED_HASH=""
           FONT_APPLIED=0

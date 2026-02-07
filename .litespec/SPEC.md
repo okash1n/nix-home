@@ -34,6 +34,7 @@
 ## 成功条件（DoD）
 
 - クリーン macOS で `make init` 後、`zsh` が利用可能である（既定プロンプトは `powerlevel10k`、配色は `Hanabi`）。
+- クリーン macOS で `make init` 後、ログインシェルが `nix` 管理の `zsh` に設定される。
 - `git` / `nix` / `zsh` / `codex` / `claude` / `gemini` がコマンド実行可能である。
 - `Ghostty` / `Terminal.app` / `Vim` / `VS Code` に `Hanabi Theme` が適用される。
 - `make init` を再実行しても破綻しない。

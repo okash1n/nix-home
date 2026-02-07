@@ -54,7 +54,13 @@ in
     (lib.optional (ghosttyPkg != null) ghosttyPkg)
     ++ [
       pkgs.vscode
+      pkgs.zsh
+      pkgs.bash
     ];
+  environment.shells = [
+    pkgs.zsh
+    pkgs.bash
+  ];
 
   system.stateVersion = 4;
 }

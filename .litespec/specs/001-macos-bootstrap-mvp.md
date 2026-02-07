@@ -38,6 +38,7 @@
 - `init.sh` は未導入時に Nix を導入する。
 - `init.sh` はリポジトリを取得または更新する。
 - `init.sh` は `hanabi-works/hanabi-theme` の取得・更新に `ghq get -u` を利用し、`ghq` の動作確認も兼ねる。
+- `hanabi-theme` の取得・更新は既定で SSH（`git@github.com:hanabi-works/hanabi-theme.git`）を利用する（必要に応じて `HANABI_THEME_REPO` で上書き可能）。
 - `ghq get -u` が失敗した場合でも、既存チェックアウトを退避してクリーンに再取得し、最新状態で継続できる。
 - `init.sh` は `darwin-rebuild switch --flake` を実行する。
 - `init.sh` はログファイルを出力し、失敗時に参照先を表示する。
@@ -45,6 +46,7 @@
 - `make init` は `init.sh` を呼び出す。
 - `make init` 実行時の sudo パスワード入力は冒頭の1回に集約する。
 - 対話的な TTY 上で `make init` を実行した場合、完了後に `zsh -l` を再起動して設定を即時反映する（必要に応じて `NIX_HOME_SKIP_SHELL_RELOAD=1` で無効化できる）。
+- `make init` は `nix` 管理の `zsh` をログインシェルに設定する（必要に応じて `NIX_HOME_SKIP_LOGIN_SHELL=1` で無効化できる）。
 
 ### FR-002 ホスト切り替え
 
@@ -73,6 +75,7 @@
 - `node` / `pnpm` / `bun` を導入する。
 - `python3` / `uv` を導入する。
 - `tmux` を導入する。
+- `dust` / `yazi` を導入する。
 - `vim` を導入する。
 - AI CLI（Codex / Claude Code / Gemini）をコマンド実行可能にする。
 - `git` のグローバル設定（`user.name` / `user.email` / global ignore）を Nix 管理で復元する。
@@ -134,6 +137,7 @@
 - 主要 alias / functions が機能する。
 - `command -v git nix zsh codex claude gemini` が成功する。
 - `command -v rg bun node pnpm uv python3 tmux wget` が成功する。
+- `command -v dust yazi` が成功する。
 - `command -v vim` が成功する。
 - `git config --global user.name` と `git config --global user.email` が期待値を返す。
 - HackGen NF / LINE Seed JP / IBM Plex Sans JP / IBM Plex Mono が利用可能。
@@ -150,8 +154,8 @@
 ## 依存・前提
 
 - インターネット接続。
-- GitHub からリポジトリ取得可能（SSH または HTTPS）。
-- GitHub へ登録済みの SSH 鍵（`REPO_URL` が SSH の場合）。
+- GitHub からリポジトリ取得可能（既定は SSH、必要に応じて `REPO_URL` / `HANABI_THEME_REPO` で HTTPS に切り替え可能）。
+- GitHub へ登録済みの SSH 鍵（既定 URL を利用する場合）。
 - macOS で `nix-darwin` 実行可能な管理者権限。
 - Xcode Command Line Tools が利用可能。
 

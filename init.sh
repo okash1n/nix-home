@@ -5,7 +5,7 @@ REPO_ROOT_DIR=$(cd "$(dirname "$0")" && pwd)
 REPO_URL=${REPO_URL:-"git@github.com:okash1n/nix-home.git"}
 TARGET_DIR=${NIX_HOME_DIR:-"$HOME/nix-home"}
 GHQ_ROOT=${GHQ_ROOT:-"$HOME/ghq"}
-HANABI_THEME_REPO=${HANABI_THEME_REPO:-"https://github.com/hanabi-works/hanabi-theme.git"}
+HANABI_THEME_REPO=${HANABI_THEME_REPO:-"git@github.com:hanabi-works/hanabi-theme.git"}
 HANABI_THEME_DIR=${HANABI_THEME_DIR:-"$GHQ_ROOT/github.com/hanabi-works/hanabi-theme"}
 LOG_DIR="$HOME/.local/state/nix-home"
 mkdir -p "$LOG_DIR"
@@ -354,6 +354,56 @@ maybe_open_ghostty() {
   echo "[nix-home] Ghostty is not available yet; skipping auto-launch."
 }
 
+ensure_login_shell() {
+  if [ "$(uname)" != "Darwin" ]; then
+    return 0
+  fi
+  if [ "${NIX_HOME_SKIP_LOGIN_SHELL:-0}" = "1" ]; then
+    echo "[nix-home] Skipping login shell update (NIX_HOME_SKIP_LOGIN_SHELL=1)."
+    return 0
+  fi
+
+  local username desired_shell current_shell
+  username="${NIX_HOME_USERNAME:-}"
+  if [ -z "$username" ]; then
+    return 0
+  fi
+
+  if [ -x "/run/current-system/sw/bin/zsh" ]; then
+    desired_shell="/run/current-system/sw/bin/zsh"
+  elif [ -x "/etc/profiles/per-user/$username/bin/zsh" ]; then
+    desired_shell="/etc/profiles/per-user/$username/bin/zsh"
+  else
+    desired_shell="$(command -v zsh 2>/dev/null || true)"
+  fi
+
+  if [ -z "$desired_shell" ] || [ ! -x "$desired_shell" ]; then
+    echo "[nix-home] zsh was not found; skipping login shell update."
+    return 0
+  fi
+
+  if ! sudo test -f /etc/shells; then
+    sudo touch /etc/shells
+  fi
+  if ! sudo grep -Fxq "$desired_shell" /etc/shells; then
+    echo "[nix-home] Registering shell in /etc/shells: $desired_shell"
+    printf "%s\n" "$desired_shell" | sudo tee -a /etc/shells >/dev/null
+  fi
+
+  current_shell=$(/usr/bin/dscl . -read "/Users/$username" UserShell 2>/dev/null | /usr/bin/awk '{print $2}' || true)
+  if [ "$current_shell" = "$desired_shell" ]; then
+    echo "[nix-home] Login shell is already set: $desired_shell"
+    return 0
+  fi
+
+  echo "[nix-home] Setting login shell: $username -> $desired_shell"
+  if ! sudo /usr/bin/dscl . -create "/Users/$username" UserShell "$desired_shell"; then
+    echo "[nix-home] Failed to set login shell via dscl."
+    echo "[nix-home] Try manually: sudo dscl . -create \"/Users/$username\" UserShell \"$desired_shell\""
+    return 0
+  fi
+}
+
 maybe_reload_login_shell() {
   if [ "${NIX_HOME_SKIP_SHELL_RELOAD:-0}" = "1" ]; then
     return 0
@@ -434,6 +484,8 @@ else
   echo "Non-macOS is not supported yet."
   exit 1
 fi
+
+ensure_login_shell
 
 maybe_open_ghostty
 
