@@ -92,15 +92,36 @@ sync_hanabi_theme() {
     exit 1
   fi
 
+  local ts required_file
+  ts=$(date +%Y%m%d-%H%M%S)
+  required_file="$HANABI_THEME_DIR/themes/zsh/hanabi.p10k.zsh"
+
   echo "Syncing hanabi-theme repository with ghq: $HANABI_THEME_REPO"
   if ! run_ghq get -u "$HANABI_THEME_REPO"; then
-    echo "Failed to sync hanabi-theme repository with ghq."
-    echo "Run manually: GHQ_ROOT=\"$GHQ_ROOT\" ghq get -u \"$HANABI_THEME_REPO\""
-    exit 1
+    # `ghq get -u` can fail when the local checkout has diverged or contains
+    # local commits. For nix-home we treat this repository as an asset cache,
+    # so prefer a clean checkout over debugging git state.
+    echo "[nix-home] ghq update failed; preserving existing checkout and recloning."
+    if [ -d "$HANABI_THEME_DIR" ]; then
+      mv "$HANABI_THEME_DIR" "${HANABI_THEME_DIR}.nix-home-bak-${ts}" || true
+    fi
+    if ! run_ghq get "$HANABI_THEME_REPO"; then
+      echo "Failed to clone hanabi-theme repository with ghq."
+      echo "Run manually: GHQ_ROOT=\"$GHQ_ROOT\" ghq get \"$HANABI_THEME_REPO\""
+      exit 1
+    fi
   fi
 
   if [ ! -d "$HANABI_THEME_DIR/.git" ]; then
     echo "hanabi-theme repository was not found at expected path: $HANABI_THEME_DIR"
+    exit 1
+  fi
+
+  # Ensure the p10k overlay file exists. This is used by nix-home when the user
+  # selects Powerlevel10k prompt mode.
+  if [ ! -f "$required_file" ]; then
+    echo "[nix-home] Required file is missing: $required_file"
+    echo "[nix-home] Ensure hanabi-theme is up to date: ghq get -u \"$HANABI_THEME_REPO\""
     exit 1
   fi
 }

@@ -38,6 +38,7 @@
 - `init.sh` は未導入時に Nix を導入する。
 - `init.sh` はリポジトリを取得または更新する。
 - `init.sh` は `hanabi-works/hanabi-theme` の取得・更新に `ghq get -u` を利用し、`ghq` の動作確認も兼ねる。
+- `ghq get -u` が失敗した場合でも、既存チェックアウトを退避してクリーンに再取得し、最新状態で継続できる。
 - `init.sh` は `darwin-rebuild switch --flake` を実行する。
 - `init.sh` はログファイルを出力し、失敗時に参照先を表示する。
 - `init.sh` はユーザーレベルで `~/.zshenv` に `ZDOTDIR` を設定する。
