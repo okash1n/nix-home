@@ -42,11 +42,15 @@
     export ZDOTDIR="$HOME/.config/zsh"
   '';
 
-  # グローバル共通指示ファイル（1ソースで全AI CLIに配置）
+  # グローバル共通指示ファイル
   home.file.".config/AGENTS.md".source = ../../home/dot_config/AGENTS.md;
-  home.file.".config/claude/CLAUDE.md".source = ../../home/dot_config/AGENTS.md;
   home.file.".config/codex/AGENTS.md".source = ../../home/dot_config/AGENTS.md;
   home.file.".config/gemini/GEMINI.md".source = ../../home/dot_config/AGENTS.md;
+
+  # Claude Code 用: 共通指示 + Claude固有指示を結合
+  home.file.".config/claude/CLAUDE.md".text =
+    builtins.readFile ../../home/dot_config/AGENTS.md + "\n\n" +
+    builtins.readFile ../../home/dot_config/claude/CLAUDE.md;
 
   # Vim
   home.file.".config/vim/vimrc".source = ../../home/dot_config/vim/vimrc;

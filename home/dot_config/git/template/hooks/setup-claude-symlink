@@ -13,7 +13,7 @@ if [ -f "$ROOT/AGENTS.md" ] && [ ! -e "$ROOT/CLAUDE.md" ]; then
 
   # .git/info/exclude に追加（コミットされない gitignore）
   EXCLUDE_FILE="$ROOT/.git/info/exclude"
-  if [ -f "$EXCLUDE_FILE" ] && ! grep -q '^CLAUDE\.md$' "$EXCLUDE_FILE" 2>/dev/null; then
-    echo 'CLAUDE.md' >> "$EXCLUDE_FILE"
+  if [ -f "$EXCLUDE_FILE" ] && ! grep -q '^/CLAUDE\.md$' "$EXCLUDE_FILE" 2>/dev/null; then
+    echo '/CLAUDE.md' >> "$EXCLUDE_FILE"
   fi
 fi

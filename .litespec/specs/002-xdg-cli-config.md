@@ -34,15 +34,20 @@
 - `GEMINI_CLI_HOME` 環境変数で Gemini CLI の設定ディレクトリを `~/.config/gemini/` に設定する。
 - 環境変数は `home.sessionVariables` で管理する。
 
-### FR-002 AGENTS.mdの1ソース配置
+### FR-002 共通指示の配置
 
-- `home/dot_config/AGENTS.md` を唯一のソースとして管理する。
-- このファイルを以下の4箇所に Nix 管理で配置する：
+- `home/dot_config/AGENTS.md` を共通指示のソースとして管理する。
+- 共通指示を以下の3箇所に Nix 管理で配置する：
   - `~/.config/AGENTS.md`（グローバル共通）
-  - `~/.config/claude/CLAUDE.md`（Claude Code用）
   - `~/.config/codex/AGENTS.md`（Codex用）
   - `~/.config/gemini/GEMINI.md`（Gemini用）
-- 全て同じファイル（Nix store）へのシンボリックリンクとなる。
+- 上記3箇所は同じファイル（Nix store）へのシンボリックリンクとなる。
+
+### FR-002a Claude Code固有指示の結合配置
+
+- `home/dot_config/claude/CLAUDE.md` に Claude Code 固有の指示を管理する。
+- `~/.config/claude/CLAUDE.md` は、Nixビルド時に共通指示（AGENTS.md）と Claude 固有指示を `builtins.readFile` で結合して生成する。
+- 結合順序: AGENTS.md の内容 → 改行 → CLAUDE.md の内容。
 
 ### FR-003 Gemini CLIのcontext.fileName自動設定
 
@@ -84,7 +89,7 @@
 - `echo $GEMINI_CLI_HOME` が `~/.config/gemini` を返す。
 - `echo $VIMINIT` が `source ~/.config/vim/vimrc` を返す。
 - `~/.config/AGENTS.md` が存在し、Nix store へのシンボリックリンクである。
-- `~/.config/claude/CLAUDE.md` が存在し、`~/.config/AGENTS.md` と同じ Nix store パスを指す。
+- `~/.config/claude/CLAUDE.md` が存在し、共通指示（AGENTS.md）と Claude 固有指示の両方を含む。
 - `~/.config/codex/AGENTS.md` が存在し、`~/.config/AGENTS.md` と同じ Nix store パスを指す。
 - `~/.config/gemini/GEMINI.md` が存在し、`~/.config/AGENTS.md` と同じ Nix store パスを指す。
 - `~/.config/gemini/settings.json` に `context.fileName` が設定されている。
@@ -103,7 +108,8 @@
 ## テスト観点
 
 - 正常系: `make init` 後、各環境変数と設定ファイルが期待どおり配置される。
-- 正常系: 4箇所の AGENTS.md/CLAUDE.md/GEMINI.md が全て同じ Nix store パスを指す。
+- 正常系: codex/gemini の指示ファイルが AGENTS.md と同じ Nix store パスを指す。
+- 正常系: CLAUDE.md が共通指示と Claude 固有指示の両方を含む。
 - 正常系: `ghq get` で AGENTS.md を含むリポジトリを clone すると CLAUDE.md が自動作成される。
 - 正常系: `git pull` で AGENTS.md が追加された場合、CLAUDE.md が自動作成される。
 - 回帰: 既存のzsh / ghostty / git設定が引き続き動作する。
