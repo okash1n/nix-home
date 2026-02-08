@@ -1,0 +1,7 @@
+keys:
+  - &okash1n_default age16l87q66jcdzh35yy2gcefmw3hzk6uujzrmd9rvg5pxm2q34zvfeqwjuckk
+creation_rules:
+  - path_regex: secrets/secrets\.yaml$
+    key_groups:
+      - age:
+          - *okash1n_default

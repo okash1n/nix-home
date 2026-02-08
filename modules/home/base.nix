@@ -28,6 +28,9 @@
     zsh
     bash
     vim
+    sops
+    age
+    ssh-to-age
   ]) ++ (with pkgs.llm-agents; [
     # AI CLI tools (from numtide/llm-agents.nix, daily updates)
     codex
@@ -38,8 +41,12 @@
   xdg.enable = true;
 
   # ZDOTDIR を設定（zsh 設定を ~/.config/zsh に配置）
+  # sops-nix テンプレートで生成された環境変数を読み込む
   home.file.".zshenv".text = ''
     export ZDOTDIR="$HOME/.config/zsh"
+    if [ -f "$HOME/.config/sops-nix/secrets/rendered/sops-env.sh" ]; then
+      source "$HOME/.config/sops-nix/secrets/rendered/sops-env.sh"
+    fi
   '';
 
   # グローバル共通指示ファイル

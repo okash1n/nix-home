@@ -10,9 +10,12 @@
     # AI CLI tools (daily updates)
     llm-agents.url = "github:numtide/llm-agents.nix";
     llm-agents.inputs.nixpkgs.follows = "nixpkgs";
+    # Secret management
+    sops-nix.url = "github:Mic92/sops-nix";
+    sops-nix.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, darwin, home-manager, llm-agents, ... }:
+  outputs = { self, nixpkgs, darwin, home-manager, llm-agents, sops-nix, ... }:
     let
       lib = nixpkgs.lib;
       system = "aarch64-darwin";
@@ -44,6 +47,7 @@
             home-manager.useUserPackages = true;
             home-manager.backupFileExtension = "hm-bak";
             home-manager.extraSpecialArgs = { inherit username; };
+            home-manager.sharedModules = [ sops-nix.homeManagerModules.sops ];
             home-manager.users.${username} = import ./home/default.nix;
           }
         ];
