@@ -9,7 +9,6 @@
       user.name = "okash1n";
       user.email = "48118431+okash1n@users.noreply.github.com";
       init.templateDir = "~/.config/git/template";
-      include.path = "~/.config/git/config";
     };
   };
 
