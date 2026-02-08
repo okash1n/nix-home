@@ -28,6 +28,8 @@
     zsh
     bash
     vim
+  ]) ++ (with pkgs.llm-agents; [
+    # AI CLI tools (from numtide/llm-agents.nix, daily updates)
     codex
     claude-code
     gemini-cli

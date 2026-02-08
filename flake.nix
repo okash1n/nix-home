@@ -7,9 +7,12 @@
     darwin.inputs.nixpkgs.follows = "nixpkgs";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    # AI CLI tools (daily updates)
+    llm-agents.url = "github:numtide/llm-agents.nix";
+    llm-agents.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, darwin, home-manager, ... }:
+  outputs = { self, nixpkgs, darwin, home-manager, llm-agents, ... }:
     let
       lib = nixpkgs.lib;
       system = "aarch64-darwin";
@@ -33,6 +36,10 @@
           ./hosts/darwin/${hostname}.nix
           home-manager.darwinModules.home-manager
           {
+            # AI CLI tools overlay (daily updates from numtide/llm-agents.nix)
+            nixpkgs.overlays = [ llm-agents.overlays.default ];
+            nixpkgs.config.allowUnfree = true;
+
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.backupFileExtension = "hm-bak";
