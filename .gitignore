@@ -9,3 +9,8 @@
 # Nix
 result
 result-*
+
+# Secrets (防御的除外)
+secrets/*.env
+secrets/*.txt
+secrets/*.json.bak

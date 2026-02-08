@@ -218,6 +218,8 @@ prepare_nix_installer_rc_backups() {
 if ! command -v nix >/dev/null 2>&1; then
   prepare_nix_installer_rc_backups
   echo "Installing Nix..."
+  # 注意: ネットワーク経由のスクリプト実行（curl | sh）を使用。
+  # 公式インストーラーの標準的な導入方法だが、MITM 等のリスクを認識すること。
   curl -fsSL https://nixos.org/nix/install | sh -s -- --daemon --yes --no-modify-profile
   source_nix_profile || true
 fi

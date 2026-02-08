@@ -7,7 +7,7 @@ fcd() {
 
 # ghqのリポジトリリストからfzfしてcdする (find github)
 fgh() {
-  declare -r REPO_NAME="$(ghq list >/dev/null | fzf-tmux --reverse +m)"
+  declare -r REPO_NAME="$(ghq list | fzf-tmux --reverse +m)"
   [[ -n "${REPO_NAME}" ]] && cd "$(ghq root)/${REPO_NAME}"
 }
 
@@ -221,39 +221,5 @@ ghce() {
 	shift "$((OPTIND-1))"
 
 	GH_DEBUG="$GH_DEBUG" GH_HOST="$GH_HOST" gh copilot explain "$@"
-}
-
-# dotfilesの同期処理を実行
-sync-dotfiles() {
-  # dotfilesディレクトリのパスを取得
-  local DOTFILES_DIR="$HOME/dotfiles"
-  
-  # dotfilesディレクトリが存在するか確認
-  if [ ! -d "$DOTFILES_DIR" ]; then
-    echo "Error: dotfiles directory not found at $DOTFILES_DIR"
-    return 1
-  fi
-  
-  # sync.shスクリプトが存在するか確認
-  if [ ! -f "$DOTFILES_DIR/sync.sh" ]; then
-    echo "Error: sync.sh not found at $DOTFILES_DIR/sync.sh"
-    return 1
-  fi
-  
-  # sync.shを実行
-  echo "Running dotfiles sync script..."
-  if bash "$DOTFILES_DIR/sync.sh"; then
-    echo ""
-    echo "Reloading ZSH configuration..."
-    
-    # ZSHの設定ファイルを再読み込み
-    source ~/.zshrc
-    
-    echo "✓ ZSH configuration reloaded successfully!"
-    echo "✓ Dotfiles sync completed!"
-  else
-    echo "✗ Sync script failed. ZSH configuration not reloaded."
-    return 1
-  fi
 }
 

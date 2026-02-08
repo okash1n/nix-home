@@ -28,7 +28,7 @@ else
     echo "[warn] jina: JINA_API_KEY is not set, skipping"
   else
     codex mcp add jina -- npx -y mcp-remote "$JINA_URL" \
-      --header "Authorization: Bearer ${JINA_API_KEY}"
+      --header 'Authorization: Bearer ${JINA_API_KEY}'
     echo "[done] jina: added"
   fi
 fi

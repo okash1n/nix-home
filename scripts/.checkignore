@@ -60,6 +60,9 @@
 **/.config/gemini/google_accounts.json
 **/.config/gemini/installation_id
 
+# sops-nix (シークレット復号ファイル)
+**/.config/sops-nix/**
+
 # home.activation で管理しているファイル（Nix symlink ではないが管理下）
 **/.config/zsh/hanabi.*
 **/.config/vim/colors/hanabi.vim

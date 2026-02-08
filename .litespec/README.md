@@ -36,8 +36,8 @@
 - `~/.config/ghostty/config` に HackGen と `theme = hanabi` の設定が入ること
 - `defaults read com.apple.Terminal "Default Window Settings"` が `Hanabi` になること
 - `osascript -e 'tell application \"Terminal\" to font name of settings set \"Hanabi\"'` が HackGen 系名称を返すこと
-- `~/.vim/colors/hanabi.vim` が存在すること
-- `grep -n \"colorscheme hanabi\" ~/.vimrc` が成功すること
+- `~/.config/vim/colors/hanabi.vim` が存在すること
+- `grep -n "colorscheme hanabi" ~/.config/vim/vimrc` が成功すること
 - `command -v code` が成功すること
 - `code --list-extensions | grep -n \"^okash1n\\.hanabi-theme-vscode$\"` が成功すること
 - `~/.config/zsh/hanabi.p10k.zsh` が存在すること（p10k 利用時の配色上書き）

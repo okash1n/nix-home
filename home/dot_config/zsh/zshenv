@@ -1,0 +1,4 @@
+export ZDOTDIR="$HOME/.config/zsh"
+if [ -f "$HOME/.config/sops-nix/secrets/rendered/sops-env.sh" ]; then
+  source "$HOME/.config/sops-nix/secrets/rendered/sops-env.sh"
+fi
