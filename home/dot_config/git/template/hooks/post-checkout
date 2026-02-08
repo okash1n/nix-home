@@ -1,0 +1,12 @@
+#!/bin/bash
+# clone/switch 時に実行
+
+# 第3引数: 1 = branch checkout, 0 = file checkout
+if [ "$3" != "1" ]; then
+  exit 0
+fi
+
+HOOK_DIR=$(dirname "$0")
+if [ -x "$HOOK_DIR/setup-claude-symlink" ]; then
+  "$HOOK_DIR/setup-claude-symlink"
+fi

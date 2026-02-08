@@ -35,25 +35,16 @@
 
   xdg.enable = true;
 
-  # XDG準拠: CLI設定ディレクトリを ~/.config/ 配下に統一
-  home.sessionVariables = {
-    CLAUDE_CONFIG_DIR = "$HOME/.config/claude";
-    CODEX_HOME = "$HOME/.config/codex";
-    GEMINI_CLI_HOME = "$HOME/.config/gemini";
-    VIMINIT = "source $HOME/.config/vim/vimrc";
-  };
+  # ZDOTDIR を設定（zsh 設定を ~/.config/zsh に配置）
+  home.file.".zshenv".text = ''
+    export ZDOTDIR="$HOME/.config/zsh"
+  '';
 
-  # グローバル共通指示ファイル
+  # グローバル共通指示ファイル（1ソースで全AI CLIに配置）
   home.file.".config/AGENTS.md".source = ../../home/dot_config/AGENTS.md;
-
-  # Claude Code
-  home.file.".config/claude/CLAUDE.md".source = ../../home/dot_config/claude/CLAUDE.md;
-
-  # Codex CLI
-  home.file.".config/codex/AGENTS.md".source = ../../home/dot_config/codex/AGENTS.md;
-
-  # Gemini CLI
-  home.file.".config/gemini/GEMINI.md".source = ../../home/dot_config/gemini/GEMINI.md;
+  home.file.".config/claude/CLAUDE.md".source = ../../home/dot_config/AGENTS.md;
+  home.file.".config/codex/AGENTS.md".source = ../../home/dot_config/AGENTS.md;
+  home.file.".config/gemini/GEMINI.md".source = ../../home/dot_config/AGENTS.md;
 
   # Vim
   home.file.".config/vim/vimrc".source = ../../home/dot_config/vim/vimrc;
@@ -359,6 +350,22 @@ PY
     fi
   '';
 
+  # Gemini CLI の settings.json に context.fileName を設定
+  home.activation.setupGeminiContext = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    GEMINI_DIR="''${GEMINI_CLI_HOME:-$HOME/.config/gemini}"
+    SETTINGS_FILE="$GEMINI_DIR/settings.json"
+
+    if [ ! -f "$SETTINGS_FILE" ]; then
+      echo "[nix-home] Gemini settings.json が見つかりません。スキップします。"
+    elif command -v jq >/dev/null 2>&1; then
+      if ! jq -e '.context.fileName' "$SETTINGS_FILE" >/dev/null 2>&1; then
+        TMP=$(mktemp)
+        jq '. + {context: {fileName: ["AGENTS.md", "GEMINI.md"]}}' "$SETTINGS_FILE" > "$TMP" && mv "$TMP" "$SETTINGS_FILE"
+        echo "[nix-home] Gemini CLI: context.fileName を設定しました"
+      fi
+    fi
+  '';
+
   programs.git = {
     enable = true;
     ignores = [
@@ -366,10 +373,26 @@ PY
     ];
   };
 
+  # Git template hooks（AGENTS.md -> CLAUDE.md 自動リンク）
+  home.file.".config/git/template/hooks/setup-claude-symlink" = {
+    source = ../../home/dot_config/git/template/hooks/setup-claude-symlink;
+    executable = true;
+  };
+  home.file.".config/git/template/hooks/post-checkout" = {
+    source = ../../home/dot_config/git/template/hooks/post-checkout;
+    executable = true;
+  };
+  home.file.".config/git/template/hooks/post-merge" = {
+    source = ../../home/dot_config/git/template/hooks/post-merge;
+    executable = true;
+  };
+
   home.file.".gitconfig".text = ''
     [user]
       name = okash1n
       email = 48118431+okash1n@users.noreply.github.com
+    [init]
+      templateDir = ~/.config/git/template
     [include]
       path = /Users/${username}/.config/git/config
   '';

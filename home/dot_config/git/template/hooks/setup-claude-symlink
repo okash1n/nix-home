@@ -1,0 +1,19 @@
+#!/bin/bash
+# AGENTS.md -> CLAUDE.md シンボリックリンク自動作成
+# post-checkout, post-merge から呼び出される
+
+ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
+if [ -z "$ROOT" ]; then
+  exit 0
+fi
+
+# AGENTS.md があり、CLAUDE.md がなければリンク作成
+if [ -f "$ROOT/AGENTS.md" ] && [ ! -e "$ROOT/CLAUDE.md" ]; then
+  ln -s AGENTS.md "$ROOT/CLAUDE.md"
+
+  # .git/info/exclude に追加（コミットされない gitignore）
+  EXCLUDE_FILE="$ROOT/.git/info/exclude"
+  if [ -f "$EXCLUDE_FILE" ] && ! grep -q '^CLAUDE\.md$' "$EXCLUDE_FILE" 2>/dev/null; then
+    echo 'CLAUDE.md' >> "$EXCLUDE_FILE"
+  fi
+fi

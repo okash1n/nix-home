@@ -1,0 +1,7 @@
+#!/bin/bash
+# git pull/merge 時に実行
+
+HOOK_DIR=$(dirname "$0")
+if [ -x "$HOOK_DIR/setup-claude-symlink" ]; then
+  "$HOOK_DIR/setup-claude-symlink"
+fi
