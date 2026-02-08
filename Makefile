@@ -2,8 +2,8 @@ SHELL := /bin/bash
 
 .PHONY: init
 init:
-	./init.sh
+	./scripts/init.sh
 
-.PHONY: check-unmanaged
-check-unmanaged:
-	./scripts/check-unmanaged.sh
+.PHONY: check
+check:
+	./scripts/check.sh

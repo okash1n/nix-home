@@ -16,7 +16,7 @@
 - `$HOME` 直下の dotfiles（`.` 始まり）の未管理ファイル検出
 - `$HOME/.config` 配下の未管理ファイル検出
 - ignore パターンによる除外機能
-- `make check-unmanaged` での実行
+- `make check` での実行
 
 ## 非スコープ
 
@@ -28,17 +28,17 @@
 
 ### FR-001 未管理ファイル検出
 
-- `scripts/check-unmanaged.sh` で未管理ファイルを検出する。
+- `scripts/check.sh` で未管理ファイルを検出する。
 - home-manager 管理下のファイル（`/nix/store/` へのシンボリックリンク）は除外する。
 - 検査対象は以下の2箇所とする:
   - `$HOME` 直下の dotfiles（`.` で始まるファイル・シンボリックリンク、depth=1）
   - `$HOME/.config` 配下すべて
 - `Pictures`, `Documents` などの非 dotfiles ディレクトリは検査対象外とする。
-- `make check-unmanaged` で実行可能にする。
+- `make check` で実行可能にする。
 
 ### FR-002 ignore 機能
 
-- `scripts/.unmanaged-ignore` で ignore パターンを定義する。
+- `scripts/.checkignore` で ignore パターンを定義する。
 - glob パターン形式で指定可能にする。
 - `#` で始まる行はコメントとして扱う。
 - 空行は無視する。
@@ -70,7 +70,7 @@
 
 ## 受け入れ条件（DoD）
 
-- `make check-unmanaged` が正常終了する。
+- `make check` が正常終了する。
 - Nix 管理下のファイル（例: `~/.config/AGENTS.md`）が検出されない。
 - ignore パターンにマッチするファイルが検出されない。
 - 本当に未管理のファイル（例: `~/.config/karabiner/karabiner.json`）が検出される。

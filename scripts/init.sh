@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_ROOT_DIR=$(cd "$(dirname "$0")" && pwd)
+REPO_ROOT_DIR=$(cd "$(dirname "$0")/.." && pwd)
 REPO_URL=${REPO_URL:-"git@github.com:okash1n/nix-home.git"}
 TARGET_DIR=${NIX_HOME_DIR:-"$HOME/nix-home"}
 GHQ_ROOT=${GHQ_ROOT:-"$HOME/ghq"}
@@ -163,7 +163,7 @@ if [ ! -d "$REPO_ROOT_DIR/.git" ]; then
   ensure_github_ssh
   echo "Cloning repository to $TARGET_DIR"
   git clone "$REPO_URL" "$TARGET_DIR"
-  exec "$TARGET_DIR/init.sh"
+  exec "$TARGET_DIR/scripts/init.sh"
 fi
 
 if command -v git >/dev/null 2>&1; then
