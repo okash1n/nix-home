@@ -11,7 +11,7 @@ fgh() {
   [[ -n "${REPO_NAME}" ]] && cd "$(ghq root)/${REPO_NAME}"
 }
 
-# GitHubのリモートの内容を現在のローカルで書き換え、initial commit 一つだけにする (git reset force)
+# GitHubのリモートの内容を現在のローカルで書き換え、initial commit 一つだけにする黒魔術 (git reset FORCE)
 grf() {
   # .gitディレクトリが存在するか確認
   if [ ! -d ".git" ]; then
@@ -40,7 +40,7 @@ grf() {
   fi
 }
 
-# ローカルのmainブランチをリモートの最新状態に強制的に同期する (git pull force)
+# ローカルのmainブランチをリモートの最新状態に強制的に同期する黒魔術 (git pull FORCE)
 gpf() {
   # 確認プロンプト
   echo "Warning: This command will delete all local changes and reset the 'main' branch to match 'origin/main'."
