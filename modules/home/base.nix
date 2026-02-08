@@ -14,17 +14,29 @@
     fd
     ripgrep
     ghq
+    gh
     gawk
     gnugrep
     gnused
+    findutils
     tmux
+    zellij
     dust
     yazi
     nodejs
     pnpm
     bun
+    rustup
+    wrangler
+    cloudflared
     python3
     uv
+    bind
+    inetutils
+    mtr
+    whois
+    nmap
+    openssl
     zsh
     bash
     vim
