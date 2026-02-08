@@ -120,18 +120,7 @@
   home.file.".config/zsh/aliases.zsh".source = ../../home/dot_config/zsh/aliases.zsh;
   home.file.".config/zsh/functions.zsh".source = ../../home/dot_config/zsh/functions.zsh;
 
-  home.file.".config/ghostty/config".text = ''
-    # Font
-    font-family = "HackGen Console NF"
-    font-codepoint-map = U+3000-U+9FFF=HackGen Console NF
-    font-size = 16
-
-    # Theme
-    theme = hanabi
-
-    # Icon
-    macos-icon = "retro"
-  '';
+  home.file.".config/ghostty/config".source = ../../home/dot_config/ghostty/config;
 
 	  home.activation.setupHanabiThemeAssets = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
 	    HANABI_ROOT="$HOME/ghq/github.com/hanabi-works/hanabi-theme"
