@@ -172,13 +172,6 @@ if command -v git >/dev/null 2>&1; then
   git -C "$REPO_ROOT_DIR" pull --ff-only || true
 fi
 
-ZSHENV="$HOME/.zshenv"
-ZDOTDIR_LINE='export ZDOTDIR="$HOME/.config/zsh"'
-if ! grep -Fq 'ZDOTDIR=' "$ZSHENV" 2>/dev/null; then
-  echo "Configuring ZDOTDIR in ~/.zshenv"
-  printf "%s\n" "$ZDOTDIR_LINE" >> "$ZSHENV"
-fi
-
 source_nix_profile() {
   if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
     # shellcheck source=/dev/null

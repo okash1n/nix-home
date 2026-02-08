@@ -15,9 +15,9 @@
 ## スコープ
 
 - AI CLI（Claude Code / Codex / Gemini）の設定ディレクトリを環境変数で `~/.config/` 配下に変更する。
-- 共通指示ファイル（`~/.config/AGENTS.md`）を Nix 管理で配置する。
-- 各CLI用の指示ファイル（`CLAUDE.md` / `AGENTS.md` / `GEMINI.md`）を Nix 管理で配置する。
-- Nix管理のソースディレクトリ構造を `home/dot_config/` に再編成する。
+- 共通指示ファイル（`AGENTS.md`）を1ソースで全AI CLIに配置する。
+- Gemini CLIの `context.fileName` を activation script で自動設定する。
+- Git template hooks でプロジェクトの `AGENTS.md` から `CLAUDE.md` へのシンボリックリンクを自動作成する。
 - Vim の設定ディレクトリを `~/.config/vim/` に移行する。
 
 ## 非スコープ
@@ -34,27 +34,34 @@
 - `GEMINI_CLI_HOME` 環境変数で Gemini CLI の設定ディレクトリを `~/.config/gemini/` に設定する。
 - 環境変数は `home.sessionVariables` で管理する。
 
-### FR-002 共通指示ファイル（AGENTS.md）の配置
+### FR-002 AGENTS.mdの1ソース配置
 
-- `~/.config/AGENTS.md` を Nix 管理で配置する。
-- このファイルには全プロジェクト共通の指示（言語設定、コーディング規約など）を記載する。
-- ソースファイルは `home/dot_config/AGENTS.md` に配置する。
+- `home/dot_config/AGENTS.md` を唯一のソースとして管理する。
+- このファイルを以下の4箇所に Nix 管理で配置する：
+  - `~/.config/AGENTS.md`（グローバル共通）
+  - `~/.config/claude/CLAUDE.md`（Claude Code用）
+  - `~/.config/codex/AGENTS.md`（Codex用）
+  - `~/.config/gemini/GEMINI.md`（Gemini用）
+- 全て同じファイル（Nix store）へのシンボリックリンクとなる。
 
-### FR-003 各CLI用指示ファイルの配置
+### FR-003 Gemini CLIのcontext.fileName自動設定
 
-- `~/.config/claude/CLAUDE.md` を Nix 管理で配置する。
-- `~/.config/codex/AGENTS.md` を Nix 管理で配置する。
-- `~/.config/gemini/GEMINI.md` を Nix 管理で配置する。
-- 各ファイルには以下の参照順序を指示として記載する：
-  1. `~/.config/AGENTS.md`（グローバル共通指示）
-  2. プロジェクト直下の `AGENTS.md`（プロジェクト固有指示、存在する場合）
-- ソースファイルは `home/dot_config/{claude,codex,gemini}/` に配置する。
+- `home.activation.setupGeminiContext` で Gemini CLI の `settings.json` に `context.fileName` を設定する。
+- `settings.json` が存在しない場合はスキップする（初回起動時に自動生成されるため）。
+- 既に設定済みの場合は何もしない（冪等性）。
+- 設定内容: `["AGENTS.md", "GEMINI.md"]`
 
-### FR-004 ソースディレクトリ構造の再編成
+### FR-004 Git template hooks によるCLAUDE.md自動リンク
 
-- Nix管理の設定ファイルソースを `home/dot_config/` ディレクトリに集約する。
-- 既存の `home/zsh/` を `home/dot_config/zsh/` に移動する。
-- ディレクトリ構造を展開先（`~/.config/`）と対応させる。
+- `~/.config/git/template/hooks/` に以下のフックを配置する：
+  - `setup-claude-symlink`: 共通ロジック（AGENTS.md → CLAUDE.md リンク作成）
+  - `post-checkout`: clone/switch 時に実行
+  - `post-merge`: pull/merge 時に実行
+- `.gitconfig` に `init.templateDir = ~/.config/git/template` を設定する。
+- フックの動作：
+  1. リポジトリルートに `AGENTS.md` があり、`CLAUDE.md` がなければシンボリックリンクを作成
+  2. `.git/info/exclude` に `CLAUDE.md` を追加（コミットされない gitignore）
+- 制限事項：既存リポジトリには適用されない（手動でリンク作成が必要）
 
 ### FR-005 Vim設定のXDG準拠
 
@@ -65,8 +72,9 @@
 
 ## 非機能要件
 
-- 保守性: ソースディレクトリと展開先の対応が明確で、新規ファイル追加時に迷わない。
+- 保守性: 1ソースで全AI CLIの指示ファイルを管理でき、変更が即座に全ツールに反映される。
 - 一貫性: 3つのAI CLIが同じルールで動作する。
+- 冪等性: `make init` を何度実行しても同じ結果になる。
 - 可逆性: 既存の `~/.claude/` 等から `~/.config/` への移行が可能。
 
 ## 受け入れ条件（DoD）
@@ -76,13 +84,15 @@
 - `echo $GEMINI_CLI_HOME` が `~/.config/gemini` を返す。
 - `echo $VIMINIT` が `source ~/.config/vim/vimrc` を返す。
 - `~/.config/AGENTS.md` が存在し、Nix store へのシンボリックリンクである。
-- `~/.config/claude/CLAUDE.md` が存在し、共通指示への参照を含む。
-- `~/.config/codex/AGENTS.md` が存在し、共通指示への参照を含む。
-- `~/.config/gemini/GEMINI.md` が存在し、共通指示への参照を含む。
+- `~/.config/claude/CLAUDE.md` が存在し、`~/.config/AGENTS.md` と同じ Nix store パスを指す。
+- `~/.config/codex/AGENTS.md` が存在し、`~/.config/AGENTS.md` と同じ Nix store パスを指す。
+- `~/.config/gemini/GEMINI.md` が存在し、`~/.config/AGENTS.md` と同じ Nix store パスを指す。
+- `~/.config/gemini/settings.json` に `context.fileName` が設定されている。
+- `~/.config/git/template/hooks/` に `post-checkout`、`post-merge`、`setup-claude-symlink` が存在する。
+- `.gitconfig` に `init.templateDir` が設定されている。
 - `~/.config/vim/vimrc` が存在し、`colorscheme hanabi` を含む。
 - `~/.config/vim/colors/hanabi.vim` が存在する。
-- `~/nix-home/home/dot_config/` ディレクトリが存在し、zsh / claude / codex / gemini / vim の設定ソースを含む。
-- Claude Code が `~/.config/AGENTS.md` とプロジェクトの `AGENTS.md` を参照する。
+- `ghq get` で AGENTS.md を含むリポジトリを clone すると、CLAUDE.md シンボリックリンクが自動作成される。
 - `make init` 2回連続実行で破綻しない。
 
 ## 依存・前提
@@ -93,12 +103,17 @@
 ## テスト観点
 
 - 正常系: `make init` 後、各環境変数と設定ファイルが期待どおり配置される。
-- 正常系: AI CLIが `~/.config/AGENTS.md` を参照し、プロジェクトルールに従う。
+- 正常系: 4箇所の AGENTS.md/CLAUDE.md/GEMINI.md が全て同じ Nix store パスを指す。
+- 正常系: `ghq get` で AGENTS.md を含むリポジトリを clone すると CLAUDE.md が自動作成される。
+- 正常系: `git pull` で AGENTS.md が追加された場合、CLAUDE.md が自動作成される。
 - 回帰: 既存のzsh / ghostty / git設定が引き続き動作する。
 - 移行: 既存の `~/.claude/` 等がある状態から移行しても問題ない。
+- 冪等性: Gemini の `context.fileName` は既に設定済みなら再設定されない。
 
 ## 実装メモ
 
 - 既存の `~/.claude/` 等は手動で `~/.config/` に移動する必要がある（移行手順をREADMEに記載）。
 - 各CLIが動的に生成するファイル（`settings.json`、認証情報など）はNix管理外とする。
 - `home.file` で管理されるファイルは読み取り専用シンボリックリンクになるため、直接編集は不可。
+- Git template は新規 clone にのみ適用される。既存リポジトリへの適用は手動。
+- Gemini の `settings.json` が存在しない場合（初回起動前）は activation をスキップする。

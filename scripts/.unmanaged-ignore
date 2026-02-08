@@ -1,0 +1,66 @@
+# Nix 未管理ファイルの ignore パターン
+# glob パターンで指定（行頭 # はコメント）
+
+# ランタイム・キャッシュ系
+**/history*
+**/*_history
+**/*.log
+**/cache/*
+**/*cache*
+**/tmp/*
+
+# 認証・シークレット系
+**/auth.json
+**/oauth*.json
+**/*credentials*
+**/*token*
+**/*.key
+**/*.pem
+
+# macOS 系
+**/.DS_Store
+**/.localized
+**/.CFUserTextEncoding
+
+# Nix 管理
+**/.nix-profile
+**/.nix-defexpr
+
+# $HOME 直下の dotfiles（ランタイム系）
+**/.zsh_sessions/*
+**/.zcompdump*
+**/.viminfo
+**/.claude.json*
+**/.vscode/*
+**/.npm/*
+**/.local/*
+**/.gitconfig
+
+# Claude Code
+**/.config/claude/projects/*
+**/.config/claude/todos/*
+**/.config/claude/plugins/*
+**/.config/claude/settings.local.json
+**/.config/claude/statsig/*
+**/.config/claude/debug/*
+**/.config/claude/file-history/*
+**/.config/claude/shell-snapshots/*
+
+# Codex
+**/.config/codex/config.toml
+**/.config/codex/models_cache.json
+**/.config/codex/version.json
+**/.config/codex/instructions.md
+**/.config/codex/sessions/*
+**/.config/codex/skills/*
+
+# Gemini
+**/.config/gemini/settings.json
+**/.config/gemini/state.json
+**/.config/gemini/google_accounts.json
+**/.config/gemini/installation_id
+
+# home.activation で管理しているファイル（Nix symlink ではないが管理下）
+**/.config/zsh/hanabi.*
+**/.config/vim/colors/hanabi.vim
+**/.config/ghostty/themes/hanabi

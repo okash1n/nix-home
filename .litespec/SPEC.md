@@ -43,6 +43,7 @@
 
 - [MVP: macOS ブートストラップ仕様](./specs/001-macos-bootstrap-mvp.md)
 - [XDG準拠CLI設定とAGENTS.md統一](./specs/002-xdg-cli-config.md)
+- [未管理ファイル検出](./specs/003-unmanaged-files-check.md)
 
 ## 変更ルール
 

@@ -42,7 +42,6 @@
 - `ghq get -u` が失敗した場合でも、既存チェックアウトを退避してクリーンに再取得し、最新状態で継続できる。
 - `init.sh` は `darwin-rebuild switch --flake` を実行する。
 - `init.sh` はログファイルを出力し、失敗時に参照先を表示する。
-- `init.sh` はユーザーレベルで `~/.zshenv` に `ZDOTDIR` を設定する。
 - `make init` は `init.sh` を呼び出す。
 - `make init` 実行時の sudo パスワード入力は冒頭の1回に集約する。
 - 対話的な TTY 上で `make init` を実行した場合、完了後に `zsh -l` を再起動して設定を即時反映する（必要に応じて `NIX_HOME_SKIP_SHELL_RELOAD=1` で無効化できる）。
@@ -63,6 +62,7 @@
 - 既存 dotfiles 由来の主要関数（例: `fgh`）を利用可能にする。
 - 履歴・補完キャッシュなどの XDG パスを一貫させる。
 - 履歴ファイル保存先ディレクトリ（例: `~/.local/state/zsh`）が存在しない場合は自動作成する。
+- `~/.zshenv` を Nix 管理で生成し、`ZDOTDIR` を `~/.config/zsh` に設定する。
 - `~/.config/zsh/.zshrc` を Nix 管理で生成する。
 - `~/.config/zsh/.p10k.zsh` を Nix 管理で生成する（切り替え用）。
 - `~/.config/zsh/hanabi.p10k.zsh` を配置する（p10k 向け配色上書き用）。

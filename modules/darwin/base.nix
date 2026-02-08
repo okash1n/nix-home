@@ -62,5 +62,13 @@ in
     pkgs.bash
   ];
 
+  # システム全体の環境変数（GUI アプリからも参照可能）
+  environment.variables = {
+    CLAUDE_CONFIG_DIR = "$HOME/.config/claude";
+    CODEX_HOME = "$HOME/.config/codex";
+    GEMINI_CLI_HOME = "$HOME/.config/gemini";
+    VIMINIT = "source $HOME/.config/vim/vimrc";
+  };
+
   system.stateVersion = 4;
 }
