@@ -4,7 +4,7 @@
     ../../modules/darwin/base.nix
   ];
 
-  networking.hostName = "default";
+  networking.hostName = "okash1n-C7FP9HQP1F";
   users.users.${username} = {
     home = "/Users/${username}";
     shell = pkgs.zsh;

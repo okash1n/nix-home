@@ -32,7 +32,8 @@
 - `CLAUDE_CONFIG_DIR` 環境変数で Claude Code の設定ディレクトリを `~/.config/claude/` に設定する。
 - `CODEX_HOME` 環境変数で Codex CLI の設定ディレクトリを `~/.config/codex/` に設定する。
 - `GEMINI_CLI_HOME` 環境変数で Gemini CLI の設定ディレクトリを `~/.config/gemini/` に設定する。
-- 環境変数は `home.sessionVariables` で管理する。
+- 環境変数は `environment.variables`（nix-darwin システムレベル）で管理する。
+  - GUI アプリ（VS Code 等）からも参照可能にするためシステムレベルで設定する。
 
 ### FR-002 共通指示の配置
 

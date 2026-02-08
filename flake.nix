@@ -20,14 +20,11 @@
       lib = nixpkgs.lib;
       system = "aarch64-darwin";
       defaultUsername = "okash1n";
+      # builtins.getEnv は --impure フラグが必須（pure evaluation では常に空文字列）
+      # 使用例: NIX_HOME_USERNAME=other make switch
       username =
         let fromEnv = builtins.getEnv "NIX_HOME_USERNAME";
         in if fromEnv != "" then fromEnv else defaultUsername;
-
-      removeSuffix = suffix: str:
-        if lib.hasSuffix suffix str
-        then builtins.substring 0 (builtins.stringLength str - builtins.stringLength suffix) str
-        else str;
 
       hostFiles = lib.filter (name: lib.hasSuffix ".nix" name)
         (builtins.attrNames (builtins.readDir ./hosts/darwin));
@@ -41,7 +38,6 @@
           {
             # AI CLI tools overlay (daily updates from numtide/llm-agents.nix)
             nixpkgs.overlays = [ llm-agents.overlays.default ];
-            nixpkgs.config.allowUnfree = true;
 
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
@@ -54,7 +50,7 @@
       };
 
       mkHost = file:
-        let host = removeSuffix ".nix" file;
+        let host = lib.removeSuffix ".nix" file;
         in { name = host; value = mkDarwin host; };
     in
     {

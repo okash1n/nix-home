@@ -10,9 +10,10 @@
     secrets.jina-api-key = {};
 
     templates."sops-env.sh" = {
+      mode = "0400";
       content = ''
-        export JINA_API_KEY="${config.sops.placeholder.jina-api-key}"
-      '';
+export JINA_API_KEY="${config.sops.placeholder.jina-api-key}"
+'';
     };
   };
 }

@@ -21,6 +21,9 @@ else
   if [ -z "${JINA_API_KEY:-}" ]; then
     echo "[warn] jina: JINA_API_KEY is not set, skipping"
   else
+    # 注意: Claude の HTTP MCP は ${VAR} の遅延展開をサポートしないため、
+    # 実際の API キー値が settings.json に平文保存される。
+    # API キーは sops-nix で管理され、sops-env.sh 経由で環境変数に設定される。
     claude mcp add -s user --transport http jina "$JINA_URL" \
       --header "Authorization: Bearer ${JINA_API_KEY}"
     echo "[done] jina: added"

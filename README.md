@@ -49,7 +49,7 @@ fi
 - `VS Code` 本体（`/Applications/Nix Apps/Visual Studio Code.app`）と Marketplace 拡張 `okash1n.hanabi-theme-vscode`（`workbench.colorTheme = Hanabi`）
 - フォント: HackGen NF / LINE Seed JP / IBM Plex Sans JP / IBM Plex Mono
 - `Terminal.app` の `Hanabi` 既定プロファイル設定
-- `Vim` の `colorscheme hanabi`（`~/.vim/colors/hanabi.vim` / `~/.vimrc`）
+- `Vim` の `colorscheme hanabi`（`~/.config/vim/colors/hanabi.vim` / `~/.config/vim/vimrc`）
 - Nix Store の自動メンテナンス（GC / optimise）
 
 注: GUI セッションが無い実行（ヘッドレス VM など）では、

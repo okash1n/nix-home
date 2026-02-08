@@ -4,8 +4,8 @@
 # Gemini CLI has no `gemini mcp add` command, so we edit settings.json directly.
 set -euo pipefail
 
-GEMINI_HOME="${GEMINI_CLI_HOME:-$HOME}"
-SETTINGS_FILE="$GEMINI_HOME/.gemini/settings.json"
+GEMINI_HOME="${GEMINI_CLI_HOME:-$HOME/.config/gemini}"
+SETTINGS_FILE="$GEMINI_HOME/settings.json"
 CLAUDE_MEM_MCP_SERVER="${CLAUDE_CONFIG_DIR:-$HOME/.config/claude}/plugins/marketplaces/thedotmack/plugin/scripts/mcp-server.cjs"
 JINA_URL="https://mcp.jina.ai/v1?include_tags=search,read&exclude_tools=search_images,search_jina_blog,capture_screenshot_url"
 

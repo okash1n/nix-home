@@ -5,7 +5,7 @@
 #   1. $HOME 直下の dotfiles（.で始まるファイル・ディレクトリ）
 #   2. $HOME/.config 配下すべて
 #
-# Usage: ./scripts/check-unmanaged.sh
+# Usage: ./scripts/check.sh
 
 set -euo pipefail
 
