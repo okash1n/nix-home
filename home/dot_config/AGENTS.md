@@ -14,6 +14,9 @@
 
 ### 検索
 
+- 一般Web検索は Web search tool を使用する（Jina の検索は使わない）
+- 学術論文は Jina `search_arxiv` / `search_ssrn` を使用する
+- 引用・BibTeX は Jina `search_bibtex` を使用する
 - 日本のトピック → 日本語で検索
 - 技術トピック → 英語で検索（日本固有の場合は日本語）
 - アジア圏 → 中国語・韓国語も検討

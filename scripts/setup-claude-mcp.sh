@@ -14,7 +14,7 @@ else
 fi
 
 # jina (http, filtered)
-JINA_URL="https://mcp.jina.ai/v1?include_tags=search,read&exclude_tools=search_images,search_jina_blog,capture_screenshot_url"
+JINA_URL="https://mcp.jina.ai/v1?include_tags=search,read&exclude_tools=search_images,search_jina_blog,capture_screenshot_url,search_web"
 if claude mcp get jina >/dev/null 2>&1; then
   echo "[skip] jina: already configured"
 else
