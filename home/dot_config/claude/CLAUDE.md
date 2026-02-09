@@ -28,3 +28,4 @@ MCP経由で OpenAI Codex が利用可能。以下のケースでは Codex に�
 
 - **git config を変更しない。** `git config --global` / `--local` / `--system` による user.name, user.email の設定・変更を一切行わない。既存のグローバル設定をそのまま使用する。
 - **コミット時に `--author` フラグを使わない。** コミットの author は常に gitconfig の設定に従う。
+- **コミットメッセージに `Co-Authored-By` を付与しない。** コミットの著者情報は gitconfig のみで管理する。
