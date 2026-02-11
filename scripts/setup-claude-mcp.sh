@@ -3,6 +3,11 @@
 # MCP: codex, jina
 set -euo pipefail
 
+if ! command -v claude >/dev/null 2>&1; then
+  echo "[skip] claude: command not found"
+  exit 0
+fi
+
 echo "=== Claude Code MCP setup ==="
 
 # codex (stdio)

@@ -33,7 +33,11 @@
 - `CODEX_HOME` 環境変数で Codex CLI の設定ディレクトリを `~/.config/codex/` に設定する。
 - `GEMINI_CLI_HOME` 環境変数で Gemini CLI の設定ディレクトリを `~/.config/gemini/` に設定する。
 - 環境変数は `environment.variables`（nix-darwin システムレベル）で管理する。
-  - GUI アプリ（VS Code 等）からも参照可能にするためシステムレベルで設定する。
+- GUI アプリ（VS Code 等）からの起動経路を安定させるため、`launchd.user.envVariables` にも同等の値を設定する。
+- `launchd` の値は `$HOME` 展開に依存しないよう、`/Users/<username>/...` の絶対パスで設定する。
+- `__NIX_DARWIN_SET_ENVIRONMENT_DONE=1` のみ継承されるシェル（VS Code 統合ターミナル等）でも値が欠落しないよう、`~/.zshenv` と `~/.bashrc` にフォールバック export を入れる。
+- `launchd.user.envVariables` を有効化するため、`system.primaryUser` を設定する。
+- 旧ホーム直下パス（`~/.claude` / `~/.codex` / `~/.gemini`）には `home.file` の番兵ファイルを配置し、誤って legacy パスへ設定が生成される問題を早期検知できるようにする。
 
 ### FR-002 共通指示の配置
 
@@ -89,10 +93,13 @@
 - `echo $CODEX_HOME` が `~/.config/codex` を返す。
 - `echo $GEMINI_CLI_HOME` が `~/.config/gemini` を返す。
 - `echo $VIMINIT` が `source ~/.config/vim/vimrc` を返す。
+- `env -i HOME=$HOME USER=$USER __NIX_DARWIN_SET_ENVIRONMENT_DONE=1 zsh -c 'source ~/.zshenv; echo $CODEX_HOME'` が `~/.config/codex` を返す。
+- `env -i HOME=$HOME USER=$USER __NIX_DARWIN_SET_ENVIRONMENT_DONE=1 bash -lc 'source ~/.bashrc; echo $CODEX_HOME'` が `~/.config/codex` を返す。
 - `~/.config/AGENTS.md` が存在し、Nix store へのシンボリックリンクである。
 - `~/.config/claude/CLAUDE.md` が存在し、共通指示（AGENTS.md）と Claude 固有指示の両方を含む。
 - `~/.config/codex/AGENTS.md` が存在し、`~/.config/AGENTS.md` と同じ Nix store パスを指す。
 - `~/.config/gemini/GEMINI.md` が存在し、`~/.config/AGENTS.md` と同じ Nix store パスを指す。
+- `~/.claude` / `~/.codex` / `~/.gemini` が Nix 管理の読み取り専用シンボリックリンク（番兵ファイル）として存在する。
 - `~/.config/gemini/settings.json` に `context.fileName` が設定されている。
 - `~/.config/git/template/hooks/` に `post-checkout`、`post-merge`、`setup-claude-symlink` が存在する。
 - `.gitconfig` に `init.templateDir` が設定されている。
