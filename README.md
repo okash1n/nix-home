@@ -68,3 +68,21 @@ Ghostty 自動起動を抑止する場合は `NIX_HOME_OPEN_GHOSTTY=0 make init`
 - `.litespec/SPEC.md`
 - `.litespec/specs/`
 - `.litespec/adr/`
+
+## シークレット環境変数の追加
+
+`sops` 管理の環境変数は、対話スクリプトで追加できます。
+
+```bash
+make secret
+```
+
+例: `VSCE_PAT` を追加すると、以下が自動更新されます。
+
+- `secrets/secrets.yaml`（暗号化された値）
+- `modules/home/sops.nix`（`secrets.<key>` と `sops-env.sh` の `export`）
+
+`secrets` 側のキー名は既定で環境変数名から自動生成されます（例: `VSCE_PAT` -> `vsce-pat`）。
+値入力は表示ありです（確認のため再入力あり）。
+
+最後に `make switch` まで同じ対話の中で実行できます。
