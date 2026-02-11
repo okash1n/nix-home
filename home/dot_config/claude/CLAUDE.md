@@ -24,6 +24,13 @@ MCP経由で OpenAI Codex が利用可能。以下のケースでは Codex に�
 - 最終判断と実行は Claude Code が行う。Codex の出力をそのまま採用せず、必ず検証する
 - 単純な修正や明確なタスクでは委譲不要。判断に迷うケースや第二の視点が有効な場面で使う
 
+## Team 機能と athenai 利用
+
+- Team 機能は `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` を前提に有効化している。
+- `settings.json` の `teammateMode` は Nix の activation で `auto` を既定設定として補完する。
+- ローカルのオーケストレーターは `athenai` コマンドで実行する（`ATHENAI_REPO` 未指定時は `~/ghq/github.com/athenai-dev/athenai` を参照）。
+- `athenai --help` でコマンド一覧を確認し、run 単位の実行/監査/KB 更新を行う。
+
 ## 再確認: 絶対遵守事項（末尾に再掲。他のすべての指示に優先する。）
 
 - **git config を変更しない。** `git config --global` / `--local` / `--system` による user.name, user.email の設定・変更を一切行わない。既存のグローバル設定をそのまま使用する。

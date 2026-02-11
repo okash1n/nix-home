@@ -43,7 +43,9 @@ fi
 
 - `zsh`（既定プロンプト: `powerlevel10k` + `Hanabi` 配色、切替: `NIX_HOME_ZSH_PROMPT=hanabi`）
 - `dotfiles` 由来の `zsh` aliases / functions（`fgh` を含む）
-- CLI: `git` `curl` `wget` `jq` `fzf` `fd` `rg` `ghq` `awk` `grep` `sed` `tmux` `dust` `yazi` `node` `pnpm` `bun` `python3` `uv` `vim` `codex` `claude` `gemini`
+- CLI: `git` `curl` `wget` `jq` `fzf` `fd` `rg` `ghq` `awk` `grep` `sed` `tmux` `dust` `yazi` `node` `pnpm` `bun` `python3` `uv` `vim` `codex` `claude` `gemini` `happy` `athenai`
+- AI CLI の設定ディレクトリ: `~/.config/claude` `~/.config/codex` `~/.config/gemini` `~/.config/happy`
+- Claude Code Team 機能: `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`（Nix で配布）
 - `git` グローバル設定（`user.name` / `user.email` / global ignore）
 - `Ghostty` 本体（`/Applications/Nix Apps/Ghostty.app`）と `~/.config/ghostty/config`（HackGen + `theme = hanabi`）
 - `VS Code` 本体（`/Applications/Nix Apps/Visual Studio Code.app`）と Marketplace 拡張 `okash1n.hanabi-theme-vscode`（`workbench.colorTheme = Hanabi`）
@@ -51,6 +53,9 @@ fi
 - `Terminal.app` の `Hanabi` 既定プロファイル設定
 - `Vim` の `colorscheme hanabi`（`~/.config/vim/colors/hanabi.vim` / `~/.config/vim/vimrc`）
 - Nix Store の自動メンテナンス（GC / optimise）
+
+`athenai` コマンドは `ATHENAI_REPO`（既定: `~/ghq/github.com/athenai-dev/athenai`）を参照し、
+`bun run --cwd "$ATHENAI_REPO" src/cli/index.ts` をラップします。
 
 注: GUI セッションが無い実行（ヘッドレス VM など）では、
 `Terminal.app` へのテーマ適用は自動でスキップされます。

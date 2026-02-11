@@ -88,7 +88,8 @@
 - `tmux` を導入する。
 - `dust` / `yazi` を導入する。
 - `vim` を導入する。
-- AI CLI（Codex / Claude Code / Gemini）をコマンド実行可能にする。
+- AI CLI（Codex / Claude Code / Gemini / Happy）をコマンド実行可能にする。
+- `athenai` ラッパーコマンドを配置し、`~/ghq/github.com/athenai-dev/athenai` の CLI を起動できるようにする（`ATHENAI_REPO` で上書き可能）。
 - `git` のグローバル設定（`user.name` / `user.email` / global ignore）を Nix 管理で復元する。
 
 ### FR-005 冪等性
@@ -155,7 +156,7 @@
 - `/Applications/Nix Apps` 配下に `Ghostty.app` が作成される。
 - `~/.config/ghostty/config` が存在し、HackGen と `theme = hanabi` が反映される。
 - 主要 alias / functions が機能する。
-- `command -v git nix zsh codex claude gemini` が成功する。
+- `command -v git nix zsh codex claude gemini happy athenai` が成功する。
 - `command -v rg bun node pnpm uv python3 tmux wget` が成功する。
 - `command -v dust yazi` が成功する。
 - `command -v vim` が成功する。

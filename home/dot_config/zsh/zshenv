@@ -2,10 +2,12 @@ export ZDOTDIR="$HOME/.config/zsh"
 
 # VS Code 等から __NIX_DARWIN_SET_ENVIRONMENT_DONE=1 だけ継承される場合のフォールバック
 : "${CLAUDE_CONFIG_DIR:=$HOME/.config/claude}"
+: "${CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS:=1}"
 : "${CODEX_HOME:=$HOME/.config/codex}"
 : "${GEMINI_CLI_HOME:=$HOME/.config/gemini}"
+: "${HAPPY_HOME_DIR:=$HOME/.config/happy}"
 : "${VIMINIT:=source $HOME/.config/vim/vimrc}"
-export CLAUDE_CONFIG_DIR CODEX_HOME GEMINI_CLI_HOME VIMINIT
+export CLAUDE_CONFIG_DIR CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS CODEX_HOME GEMINI_CLI_HOME HAPPY_HOME_DIR VIMINIT
 
 if [ -f "$HOME/.config/sops-nix/secrets/rendered/sops-env.sh" ]; then
   source "$HOME/.config/sops-nix/secrets/rendered/sops-env.sh"

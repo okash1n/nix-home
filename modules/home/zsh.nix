@@ -11,6 +11,9 @@ in
 {
   # ZDOTDIR + sops 環境変数読み込み
   home.file.".zshenv".source = ../../home/dot_config/zsh/zshenv;
+  # ZDOTDIR が既に設定済みのシェルでは ~/.zshenv は読まれないため、
+  # ~/.config/zsh/.zshenv にも同じ内容を配置して環境変数フォールバックを安定化する。
+  home.file.".config/zsh/.zshenv".source = ../../home/dot_config/zsh/zshenv;
 
   # Nix store パスを環境変数としてエクスポート (Nix 評価時に生成)
   home.file.".config/zsh/nix-paths.zsh".text = nixPathsZsh;

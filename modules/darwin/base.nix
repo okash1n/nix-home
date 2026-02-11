@@ -23,14 +23,18 @@ let
     else null;
   xdgCliEnv = {
     CLAUDE_CONFIG_DIR = "$HOME/.config/claude";
+    CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
     CODEX_HOME = "$HOME/.config/codex";
     GEMINI_CLI_HOME = "$HOME/.config/gemini";
+    HAPPY_HOME_DIR = "$HOME/.config/happy";
     VIMINIT = "source $HOME/.config/vim/vimrc";
   };
   xdgCliEnvLaunchd = {
     CLAUDE_CONFIG_DIR = "/Users/${username}/.config/claude";
+    CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS = "1";
     CODEX_HOME = "/Users/${username}/.config/codex";
     GEMINI_CLI_HOME = "/Users/${username}/.config/gemini";
+    HAPPY_HOME_DIR = "/Users/${username}/.config/happy";
     VIMINIT = "source /Users/${username}/.config/vim/vimrc";
   };
 in

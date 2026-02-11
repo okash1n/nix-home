@@ -2,23 +2,26 @@
 
 ## 目的
 
-- AI CLI（Claude Code / Codex / Gemini）の設定ディレクトリを XDG 準拠（`~/.config/`）に統一する。
-- 3つのAI CLIが同じ指示ファイル（`AGENTS.md`）を参照する仕組みを構築する。
+- AI CLI（Claude Code / Codex / Gemini / Happy）の設定ディレクトリを XDG 準拠（`~/.config/`）に統一する。
+- 4つのAI CLIが同じ指示ファイル（`AGENTS.md`）を参照する仕組みを構築する。
 - Nix管理の設定ファイル構造を展開先と対応させ、管理しやすくする。
+- Claude Code Team 機能を Nix 管理の設定で安定して有効化する。
 
 ## ユーザーストーリー
 
-- AI CLIの利用者として、どのCLI（Claude / Codex / Gemini）を使っても同じ共通ルールに従ってほしい。
+- AI CLIの利用者として、どのCLI（Claude / Codex / Gemini / Happy）を使っても同じ共通ルールに従ってほしい。
 - dotfiles管理者として、`~/.config/` 配下に設定を統一し、ホームディレクトリの散らかりを防ぎたい。
 - Nix管理者として、ソースファイルと展開先の対応を明確にし、どこに何が展開されるか一目で分かるようにしたい。
 
 ## スコープ
 
-- AI CLI（Claude Code / Codex / Gemini）の設定ディレクトリを環境変数で `~/.config/` 配下に変更する。
+- AI CLI（Claude Code / Codex / Gemini / Happy）の設定ディレクトリを環境変数で `~/.config/` 配下に変更する。
 - 共通指示ファイル（`AGENTS.md`）を1ソースで全AI CLIに配置する。
+- Claude Code の Team 関連設定（環境変数、`teammateMode`）を Nix 管理で補完する。
 - Gemini CLIの `context.fileName` を activation script で自動設定する。
 - Git template hooks でプロジェクトの `AGENTS.md` から `CLAUDE.md` へのシンボリックリンクを自動作成する。
 - Vim の設定ディレクトリを `~/.config/vim/` に移行する。
+- `athenai` ラッパーコマンドを Nix 管理で提供する。
 
 ## 非スコープ
 
@@ -30,23 +33,26 @@
 ### FR-001 AI CLI設定ディレクトリのXDG準拠
 
 - `CLAUDE_CONFIG_DIR` 環境変数で Claude Code の設定ディレクトリを `~/.config/claude/` に設定する。
+- `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` 環境変数を `1` に設定し、Claude Code Team 機能を有効化する。
 - `CODEX_HOME` 環境変数で Codex CLI の設定ディレクトリを `~/.config/codex/` に設定する。
 - `GEMINI_CLI_HOME` 環境変数で Gemini CLI の設定ディレクトリを `~/.config/gemini/` に設定する。
+- `HAPPY_HOME_DIR` 環境変数で Happy CLI の設定ディレクトリを `~/.config/happy/` に設定する。
 - 環境変数は `environment.variables`（nix-darwin システムレベル）で管理する。
 - GUI アプリ（VS Code 等）からの起動経路を安定させるため、`launchd.user.envVariables` にも同等の値を設定する。
 - `launchd` の値は `$HOME` 展開に依存しないよう、`/Users/<username>/...` の絶対パスで設定する。
-- `__NIX_DARWIN_SET_ENVIRONMENT_DONE=1` のみ継承されるシェル（VS Code 統合ターミナル等）でも値が欠落しないよう、`~/.zshenv` と `~/.bashrc` にフォールバック export を入れる。
+- `__NIX_DARWIN_SET_ENVIRONMENT_DONE=1` のみ継承されるシェル（VS Code 統合ターミナル等）でも値が欠落しないよう、`~/.zshenv`・`~/.config/zsh/.zshenv` と `~/.bashrc` にフォールバック export を入れる。
 - `launchd.user.envVariables` を有効化するため、`system.primaryUser` を設定する。
-- 旧ホーム直下パス（`~/.claude` / `~/.codex` / `~/.gemini`）には `home.file` の番兵ファイルを配置し、誤って legacy パスへ設定が生成される問題を早期検知できるようにする。
+- 旧ホーム直下パス（`~/.claude` / `~/.codex` / `~/.gemini` / `~/.happy`）には `home.file` の番兵ファイルを配置し、誤って legacy パスへ設定が生成される問題を早期検知できるようにする。
 
 ### FR-002 共通指示の配置
 
 - `home/dot_config/AGENTS.md` を共通指示のソースとして管理する。
-- 共通指示を以下の3箇所に Nix 管理で配置する：
+- 共通指示を以下の4箇所に Nix 管理で配置する：
   - `~/.config/AGENTS.md`（グローバル共通）
   - `~/.config/codex/AGENTS.md`（Codex用）
   - `~/.config/gemini/GEMINI.md`（Gemini用）
-- 上記3箇所は同じファイル（Nix store）へのシンボリックリンクとなる。
+  - `~/.config/happy/AGENTS.md`（Happy用）
+- 上記4箇所は同じファイル（Nix store）へのシンボリックリンクとなる。
 
 ### FR-002a Claude Code固有指示の結合配置
 
@@ -60,6 +66,13 @@
 - `settings.json` が存在しない場合はスキップする（初回起動時に自動生成されるため）。
 - 既に設定済みの場合は何もしない（冪等性）。
 - 設定内容: `["AGENTS.md", "GEMINI.md"]`
+
+### FR-003a Claude Code の teammateMode 自動設定
+
+- `home.activation` で Claude Code の `settings.json` を検査し、`teammateMode` が未設定の場合のみ `auto` を追記する。
+- `settings.json` が存在しない場合は `{"teammateMode":"auto"}` で新規作成する。
+- 既に `teammateMode` が存在する場合は上書きしない（ユーザー設定優先）。
+- `settings.json` が不正な JSON の場合は更新せず、警告ログを出してスキップする。
 
 ### FR-004 Git template hooks によるCLAUDE.md自動リンク
 
@@ -80,46 +93,69 @@
 - `~/.config/vim/colors/hanabi.vim` を配置する（activation script経由）。
 - 既存の `~/.vimrc` と `~/.vim/` への配置を廃止する。
 
+### FR-006 athenai ラッパーコマンド
+
+- `athenai` コマンドを Nix 管理で提供する。
+- 既定で `ATHENAI_REPO=~/ghq/github.com/athenai-dev/athenai` を参照し、`bun run --cwd "$ATHENAI_REPO" src/cli/index.ts` を実行する。
+- `ATHENAI_REPO` を指定した場合は指定先を優先する。
+- 参照先に `src/cli/index.ts` が見つからない場合は、明示的なエラーメッセージを表示して終了する。
+
 ## 非機能要件
 
 - 保守性: 1ソースで全AI CLIの指示ファイルを管理でき、変更が即座に全ツールに反映される。
-- 一貫性: 3つのAI CLIが同じルールで動作する。
+- 一貫性: 4つのAI CLIが同じルールで動作する。
 - 冪等性: `make init` を何度実行しても同じ結果になる。
 - 可逆性: 既存の `~/.claude/` 等から `~/.config/` への移行が可能。
 
 ## 受け入れ条件（DoD）
 
 - `echo $CLAUDE_CONFIG_DIR` が `~/.config/claude` を返す。
+- `echo $CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS` が `1` を返す。
 - `echo $CODEX_HOME` が `~/.config/codex` を返す。
 - `echo $GEMINI_CLI_HOME` が `~/.config/gemini` を返す。
+- `echo $HAPPY_HOME_DIR` が `~/.config/happy` を返す。
 - `echo $VIMINIT` が `source ~/.config/vim/vimrc` を返す。
 - `env -i HOME=$HOME USER=$USER __NIX_DARWIN_SET_ENVIRONMENT_DONE=1 zsh -c 'source ~/.zshenv; echo $CODEX_HOME'` が `~/.config/codex` を返す。
+- `env -i HOME=$HOME USER=$USER __NIX_DARWIN_SET_ENVIRONMENT_DONE=1 zsh -c 'source ~/.zshenv; echo $CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS'` が `1` を返す。
+- `env -i HOME=$HOME USER=$USER ZDOTDIR=$HOME/.config/zsh __NIX_DARWIN_SET_ENVIRONMENT_DONE=1 zsh -c 'echo $CODEX_HOME'` が `~/.config/codex` を返す。
+- `env -i HOME=$HOME USER=$USER ZDOTDIR=$HOME/.config/zsh __NIX_DARWIN_SET_ENVIRONMENT_DONE=1 zsh -c 'echo $CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS'` が `1` を返す。
 - `env -i HOME=$HOME USER=$USER __NIX_DARWIN_SET_ENVIRONMENT_DONE=1 bash -lc 'source ~/.bashrc; echo $CODEX_HOME'` が `~/.config/codex` を返す。
+- `env -i HOME=$HOME USER=$USER __NIX_DARWIN_SET_ENVIRONMENT_DONE=1 bash -lc 'source ~/.bashrc; echo $CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS'` が `1` を返す。
+- `env -i HOME=$HOME USER=$USER __NIX_DARWIN_SET_ENVIRONMENT_DONE=1 zsh -c 'source ~/.zshenv; echo $HAPPY_HOME_DIR'` が `~/.config/happy` を返す。
+- `env -i HOME=$HOME USER=$USER ZDOTDIR=$HOME/.config/zsh __NIX_DARWIN_SET_ENVIRONMENT_DONE=1 zsh -c 'echo $HAPPY_HOME_DIR'` が `~/.config/happy` を返す。
+- `env -i HOME=$HOME USER=$USER __NIX_DARWIN_SET_ENVIRONMENT_DONE=1 bash -lc 'source ~/.bashrc; echo $HAPPY_HOME_DIR'` が `~/.config/happy` を返す。
 - `~/.config/AGENTS.md` が存在し、Nix store へのシンボリックリンクである。
 - `~/.config/claude/CLAUDE.md` が存在し、共通指示（AGENTS.md）と Claude 固有指示の両方を含む。
 - `~/.config/codex/AGENTS.md` が存在し、`~/.config/AGENTS.md` と同じ Nix store パスを指す。
 - `~/.config/gemini/GEMINI.md` が存在し、`~/.config/AGENTS.md` と同じ Nix store パスを指す。
-- `~/.claude` / `~/.codex` / `~/.gemini` が Nix 管理の読み取り専用シンボリックリンク（番兵ファイル）として存在する。
+- `~/.config/happy/AGENTS.md` が存在し、`~/.config/AGENTS.md` と同じ Nix store パスを指す。
+- `~/.claude` / `~/.codex` / `~/.gemini` / `~/.happy` が Nix 管理の読み取り専用シンボリックリンク（番兵ファイル）として存在する。
+- `~/.config/claude/settings.json` の `teammateMode` が未設定の場合、activation 後に `auto` が設定される。
 - `~/.config/gemini/settings.json` に `context.fileName` が設定されている。
 - `~/.config/git/template/hooks/` に `post-checkout`、`post-merge`、`setup-claude-symlink` が存在する。
 - `.gitconfig` に `init.templateDir` が設定されている。
 - `~/.config/vim/vimrc` が存在し、`colorscheme hanabi` を含む。
 - `~/.config/vim/colors/hanabi.vim` が存在する。
+- `command -v athenai` が成功する。
+- `ATHENAI_REPO=~/ghq/github.com/athenai-dev/athenai athenai --help` が成功する。
 - `ghq get` で AGENTS.md を含むリポジトリを clone すると、CLAUDE.md シンボリックリンクが自動作成される。
 - `make init` 2回連続実行で破綻しない。
 
 ## 依存・前提
 
 - 001-macos-bootstrap-mvp が適用済みであること。
-- Claude Code / Codex / Gemini がインストール済みであること。
+- Claude Code / Codex / Gemini / Happy がインストール済みであること。
+- `athenai` リポジトリが `~/ghq/github.com/athenai-dev/athenai` に存在するか、`ATHENAI_REPO` で参照先を指定できること。
 
 ## テスト観点
 
 - 正常系: `make init` 後、各環境変数と設定ファイルが期待どおり配置される。
-- 正常系: codex/gemini の指示ファイルが AGENTS.md と同じ Nix store パスを指す。
+- 正常系: codex/gemini/happy の指示ファイルが AGENTS.md と同じ Nix store パスを指す。
 - 正常系: CLAUDE.md が共通指示と Claude 固有指示の両方を含む。
+- 正常系: Claude Code の `teammateMode` が未設定時のみ `auto` で補完される。
 - 正常系: `ghq get` で AGENTS.md を含むリポジトリを clone すると CLAUDE.md が自動作成される。
 - 正常系: `git pull` で AGENTS.md が追加された場合、CLAUDE.md が自動作成される。
+- 正常系: `athenai --help` が実行できる。
 - 回帰: 既存のzsh / ghostty / git設定が引き続き動作する。
 - 移行: 既存の `~/.claude/` 等がある状態から移行しても問題ない。
 - 冪等性: Gemini の `context.fileName` は既に設定済みなら再設定されない。

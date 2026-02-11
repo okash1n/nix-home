@@ -39,7 +39,8 @@
 
 - クリーン macOS で `make init` 後、`zsh` が利用可能である（既定プロンプトは `powerlevel10k`、配色は `Hanabi`）。
 - クリーン macOS で `make init` 後、ログインシェルが `nix` 管理の `zsh` に設定される。
-- `git` / `nix` / `zsh` / `codex` / `claude` / `gemini` がコマンド実行可能である。
+- `git` / `nix` / `zsh` / `codex` / `claude` / `gemini` / `happy` / `athenai` がコマンド実行可能である。
+- Claude Code Team 機能の前提環境変数（`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`）が有効である。
 - `Ghostty` / `Terminal.app` / `Vim` / `VS Code` に `Hanabi Theme` が適用される。
 - VS Code の `settings.json` / `keybindings.json` / snippets が Nix 管理で再現される。
 - `make init` を再実行しても破綻しない。
