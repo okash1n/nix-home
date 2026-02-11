@@ -1,0 +1,4 @@
+bbenoist.nix
+hancel.markdown-image
+marp-team.marp-vscode
+okash1n.hanabi-theme-vscode

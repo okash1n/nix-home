@@ -119,7 +119,12 @@
 - GUI セッションが無い環境では `Terminal.app` への適用処理をスキップして停止しない。
 - GUI セッションで初回セットアップ完了時は `Ghostty` を自動起動する（再実行時は既定で再起動しない）。
 - `vim` の colorscheme を `hanabi` に設定する（`~/.vim/colors/hanabi.vim` を配置し、`~/.vimrc` を生成）。
-- `VS Code` に `okash1n.hanabi-theme-vscode` を Marketplace からインストールし、`workbench.colorTheme` を `Hanabi` に設定する。
+- `VS Code` の `settings.json` / `keybindings.json` / `snippets` を Home Manager (`home.file`) で宣言的に管理する。
+- `home.file` には `mkOutOfStoreSymlink` を使い、VS Code からの編集が `~/nix-home/home/dot_config/vscode/` 配下へ直接反映されるようにする。
+- `settings.json` は最小設定（テーマとフォント）を維持する。
+- `keybindings.json` は空配列（`[]`）を宣言し、OS差分のある独自キーバインドを持ち込まない。
+- `VS Code` 拡張リストは `home/dot_config/vscode/extensions.txt` を正本として管理する。
+- activation script は `extensions.txt` の未導入分をインストールし、VS Code 側で追加された拡張を `extensions.txt` へ取り込む（additive sync）。
 
 ### FR-008 ストアメンテナンス
 
@@ -156,7 +161,11 @@
 - `Terminal.app` の `Hanabi` プロファイルに HackGen 系フォントが設定される。
 - GUI セッションの初回 `make init` 完了時に `Ghostty` が自動起動する。
 - `~/.vim/colors/hanabi.vim` が存在し、`~/.vimrc` に `colorscheme hanabi` が入る。
-- `code --list-extensions` に `okash1n.hanabi-theme-vscode` が含まれ、`settings.json` の `workbench.colorTheme` が `Hanabi` になる。
+- `code --list-extensions` に `okash1n.hanabi-theme-vscode` が含まれる。
+- `home/dot_config/vscode/extensions.txt` が存在し、拡張IDを1行1件で保持する。
+- `~/Library/Application Support/Code/User/settings.json` が Nix 管理リンクとして存在し、`workbench.colorTheme` が `Hanabi` になっている。
+- `~/Library/Application Support/Code/User/settings.json` が Nix 管理リンクとして存在し、`editor.fontFamily` が `HackGen Console NF` になっている。
+- `~/Library/Application Support/Code/User/keybindings.json` が Nix 管理リンクとして存在し、内容が `[]` である。
 - ヘッドレス環境では `make init` がテーマ適用処理でハングせず完了する。
 - Nix Store の自動 GC / 最適化設定が有効になっている。
 - 2回連続で `make init` 実行しても破綻しない。

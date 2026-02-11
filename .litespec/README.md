@@ -40,6 +40,10 @@
 - `grep -n "colorscheme hanabi" ~/.config/vim/vimrc` が成功すること
 - `command -v code` が成功すること
 - `code --list-extensions | grep -n \"^okash1n\\.hanabi-theme-vscode$\"` が成功すること
+- `home/dot_config/vscode/extensions.txt` が存在し、拡張IDが1行1件で記録されること
+- `~/Library/Application Support/Code/User/settings.json` が存在し、`\"workbench.colorTheme\": \"Hanabi\"` を含むこと
+- `~/Library/Application Support/Code/User/settings.json` が存在し、`\"editor.fontFamily\": \"HackGen Console NF\"` を含むこと
+- `~/Library/Application Support/Code/User/keybindings.json` が存在し、内容が `[]` であること
 - `~/.config/zsh/hanabi.p10k.zsh` が存在すること（p10k 利用時の配色上書き）
 
 ## テンプレート利用時の注意

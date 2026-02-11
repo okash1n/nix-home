@@ -21,6 +21,7 @@
 - `make build` / `make switch` による日常のビルド・適用操作
 - `make update` による flake 入力の更新とビルド・適用
 - `make mcp` による AI CLI の MCP サーバー設定
+- VS Code の設定（settings/keybindings/snippets）と拡張リストの宣言管理
 - シェル/CLI/フォント/テーマの再現（Ghostty / Terminal.app / Vim / VS Code）
 
 ## 非スコープ
@@ -40,6 +41,7 @@
 - クリーン macOS で `make init` 後、ログインシェルが `nix` 管理の `zsh` に設定される。
 - `git` / `nix` / `zsh` / `codex` / `claude` / `gemini` がコマンド実行可能である。
 - `Ghostty` / `Terminal.app` / `Vim` / `VS Code` に `Hanabi Theme` が適用される。
+- VS Code の `settings.json` / `keybindings.json` / snippets が Nix 管理で再現される。
 - `make init` を再実行しても破綻しない。
 - `make build` でビルドが成功する。
 - `make switch` でシステム適用が成功する。
