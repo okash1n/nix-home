@@ -7,6 +7,7 @@
     ../modules/home/ai-agents.nix
     ../modules/home/vim.nix
     ../modules/home/ghostty.nix
+    ../modules/home/vscode.nix
     ../modules/home/hanabi-theme.nix
     ../modules/home/gemini-cli.nix
     ../modules/home/sops.nix
