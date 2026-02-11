@@ -12,8 +12,8 @@ JINA_URL="https://mcp.jina.ai/v1?include_tags=search,read&exclude_tools=search_i
 echo "=== Gemini CLI MCP setup ==="
 
 if ! command -v jq >/dev/null 2>&1; then
-  echo "[error] jq is required but not found"
-  exit 1
+  echo "[skip] jq: command not found"
+  exit 0
 fi
 
 if [ ! -f "$SETTINGS_FILE" ]; then

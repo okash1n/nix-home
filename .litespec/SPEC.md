@@ -18,6 +18,9 @@
 
 - `nix-darwin` + `home-manager` による macOS 構成管理
 - `init.sh` と `make init` による一発初期化
+- `make build` / `make switch` による日常のビルド・適用操作
+- `make update` による flake 入力の更新とビルド・適用
+- `make mcp` による AI CLI の MCP サーバー設定
 - シェル/CLI/フォント/テーマの再現（Ghostty / Terminal.app / Vim / VS Code）
 
 ## 非スコープ
@@ -38,6 +41,10 @@
 - `git` / `nix` / `zsh` / `codex` / `claude` / `gemini` がコマンド実行可能である。
 - `Ghostty` / `Terminal.app` / `Vim` / `VS Code` に `Hanabi Theme` が適用される。
 - `make init` を再実行しても破綻しない。
+- `make build` でビルドが成功する。
+- `make switch` でシステム適用が成功する。
+- `make update` で flake 入力を更新しビルド・適用できる。
+- `make mcp` で AI CLI の MCP 設定がセットアップされる（未導入コマンドはスキップ）。
 
 ## 詳細仕様一覧
 

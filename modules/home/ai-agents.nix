@@ -1,5 +1,10 @@
 { ... }:
 {
+  # 旧ホーム直下パスへの誤生成を早期検知するための番兵
+  home.file.".claude".text = "legacy path blocked: use ~/.config/claude\n";
+  home.file.".codex".text = "legacy path blocked: use ~/.config/codex\n";
+  home.file.".gemini".text = "legacy path blocked: use ~/.config/gemini\n";
+
   home.file.".config/AGENTS.md".source = ../../home/dot_config/AGENTS.md;
   home.file.".config/codex/AGENTS.md".source = ../../home/dot_config/AGENTS.md;
   home.file.".config/gemini/GEMINI.md".source = ../../home/dot_config/AGENTS.md;

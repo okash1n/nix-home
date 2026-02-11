@@ -50,7 +50,18 @@
 ### FR-002 ホスト切り替え
 
 - ホスト名に応じて flake 出力を切り替えられる。
+- `hosts/darwin/` 配下にホスト名と同名の `.nix` ファイルを配置することで、ホスト固有の設定を定義できる。
+- `hosts/darwin/default.nix` は汎用ベース設定として、ホスト固有ファイルから `imports` される。
+- Makefile は `hostname -s` でホスト名を取得し、対応する `.nix` ファイルが存在すればそのホスト名を flake ターゲットに使用する。存在しなければ `default` にフォールバックする。
 - デフォルトの macOS ホスト設定を1つ持つ。
+
+### FR-002a 日常操作ターゲット
+
+- `make build` は `darwin-rebuild build` を実行し、ビルドのみ行う（システム適用はしない）。
+- `make switch` は `darwin-rebuild switch` を実行し、システムに適用する。
+- `make update` は `nix flake update` 後に `build` → `switch` の順で実行する（検証方針「switch 前に build」に準拠）。
+- `make mcp` は sops-env.sh から環境変数を読み込み、各 AI CLI の MCP セットアップスクリプトを実行する。
+- 各 MCP セットアップスクリプトは、対象コマンドが未導入の場合は warn + skip で継続する。
 
 ### FR-003 シェル再現
 

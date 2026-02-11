@@ -1,4 +1,4 @@
-{ lib, pkgs, ... }:
+{ lib, pkgs, username, ... }:
 let
   lineSeedJp = pkgs.stdenvNoCC.mkDerivation {
     pname = "line-seed-jp-font";
@@ -21,6 +21,18 @@ let
     if pkgs ? ghostty-bin then pkgs.ghostty-bin
     else if pkgs ? ghostty then pkgs.ghostty
     else null;
+  xdgCliEnv = {
+    CLAUDE_CONFIG_DIR = "$HOME/.config/claude";
+    CODEX_HOME = "$HOME/.config/codex";
+    GEMINI_CLI_HOME = "$HOME/.config/gemini";
+    VIMINIT = "source $HOME/.config/vim/vimrc";
+  };
+  xdgCliEnvLaunchd = {
+    CLAUDE_CONFIG_DIR = "/Users/${username}/.config/claude";
+    CODEX_HOME = "/Users/${username}/.config/codex";
+    GEMINI_CLI_HOME = "/Users/${username}/.config/gemini";
+    VIMINIT = "source /Users/${username}/.config/vim/vimrc";
+  };
 in
 {
   nix.enable = true;
@@ -63,12 +75,8 @@ in
   ];
 
   # システム全体の環境変数（GUI アプリからも参照可能）
-  environment.variables = {
-    CLAUDE_CONFIG_DIR = "$HOME/.config/claude";
-    CODEX_HOME = "$HOME/.config/codex";
-    GEMINI_CLI_HOME = "$HOME/.config/gemini";
-    VIMINIT = "source $HOME/.config/vim/vimrc";
-  };
+  environment.variables = xdgCliEnv;
+  launchd.user.envVariables = xdgCliEnvLaunchd;
 
   system.stateVersion = 4;
 }

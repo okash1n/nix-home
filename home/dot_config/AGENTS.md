@@ -8,6 +8,7 @@
 - **git config を変更しない。** `git config --global` / `--local` / `--system` による user.name, user.email の設定・変更を一切行わない。既存のグローバル設定をそのまま使用する。
 - **コミット時に `--author` フラグを使わない。** コミットの author は常に gitconfig の設定に従う。
 - **コミットメッセージに `Co-Authored-By` を付与しない。** コミットの著者情報は gitconfig のみで管理する。
+- **グローバルツールの直接インストールを行わない。** `npm install -g`、`pip install`、`go install`、`cargo install`、`brew install`、`curl | sh` 等によるツールの直接インストールを一切行わない。新しいツールが必要な場合は `~/nix-home` リポジトリの Nix 設定（`home/packages.nix` 等）を更新し、Nix 経由でインストールする。一時的な利用であっても `nix-shell -p` や `nix run` を使い、グローバル環境を汚染しない。
 
 ## 基本方針
 
