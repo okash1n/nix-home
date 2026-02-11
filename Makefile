@@ -6,7 +6,7 @@ HOST_CONFIG := hosts/darwin/$(HOSTNAME_SHORT).nix
 TARGET := $(if $(wildcard $(HOST_CONFIG)),$(HOSTNAME_SHORT),default)
 NIX_HOME_USERNAME ?= $(shell id -un)
 
-.PHONY: init check build switch update mcp
+.PHONY: init check build switch update mcp secret
 
 init:
 	./scripts/init.sh
@@ -33,3 +33,6 @@ mcp:
 	./scripts/setup-claude-mcp.sh; \
 	./scripts/setup-codex-mcp.sh; \
 	./scripts/setup-gemini-mcp.sh
+
+secret:
+	./scripts/set-sops-env.sh
