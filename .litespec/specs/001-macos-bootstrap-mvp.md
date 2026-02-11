@@ -126,6 +126,10 @@
 - `VS Code` 拡張リストは `home/dot_config/vscode/extensions.txt` を正本として管理する。
 - activation script は `extensions.txt` の未導入分をインストールし、VS Code 側で追加された拡張を `extensions.txt` へ取り込む（additive sync）。
 
+### FR-007a macOSスクリーンショット設定
+
+- `system.defaults.screencapture."disable-shadow"` を有効化し、ウィンドウのスクリーンショット撮影時に影を付けない。
+
 ### FR-008 ストアメンテナンス
 
 - Nix Store のガベージコレクションを自動実行する。
@@ -166,6 +170,7 @@
 - `~/Library/Application Support/Code/User/settings.json` が Nix 管理リンクとして存在し、`workbench.colorTheme` が `Hanabi` になっている。
 - `~/Library/Application Support/Code/User/settings.json` が Nix 管理リンクとして存在し、`editor.fontFamily` が `HackGen Console NF` になっている。
 - `~/Library/Application Support/Code/User/keybindings.json` が Nix 管理リンクとして存在し、内容が `[]` である。
+- `defaults read com.apple.screencapture disable-shadow` が `1`（true）を返す。
 - ヘッドレス環境では `make init` がテーマ適用処理でハングせず完了する。
 - Nix Store の自動 GC / 最適化設定が有効になっている。
 - 2回連続で `make init` 実行しても破綻しない。

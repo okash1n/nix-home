@@ -78,5 +78,9 @@ in
   environment.variables = xdgCliEnv;
   launchd.user.envVariables = xdgCliEnvLaunchd;
 
+  system.defaults.screencapture = {
+    "disable-shadow" = true;
+  };
+
   system.stateVersion = 4;
 }
