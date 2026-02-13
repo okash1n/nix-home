@@ -49,6 +49,7 @@ in
     nodejs
     pnpm
     bun
+    playwright-test
     athenaiCli
     rustup
     wrangler
@@ -73,6 +74,7 @@ in
     claude-code
     gemini-cli
     happy-coder
+    agent-browser
   ]);
 
   xdg.enable = true;
