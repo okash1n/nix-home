@@ -19,6 +19,7 @@
 - 共通指示ファイル（`AGENTS.md`）を1ソースで全AI CLIに配置する。
 - Claude Code の Team 関連設定（環境変数、`teammateMode`）を Nix 管理で補完する。
 - Gemini CLIの `context.fileName` を activation script で自動設定する。
+- `~/nix-home/agent-skills` を個人用 skill ソースとして管理し、Claude / Codex / Gemini の skills ディレクトリへ自動同期する。
 - Git template hooks でプロジェクトの `AGENTS.md` から `CLAUDE.md` へのシンボリックリンクを自動作成する。
 - Vim の設定ディレクトリを `~/.config/vim/` に移行する。
 - `athenai` ラッパーコマンドを Nix 管理で提供する。
@@ -37,6 +38,7 @@
 - `CODEX_HOME` 環境変数で Codex CLI の設定ディレクトリを `~/.config/codex/` に設定する。
 - `GEMINI_CLI_HOME` 環境変数で Gemini CLI の設定ディレクトリを `~/.config/gemini/` に設定する。
 - `HAPPY_HOME_DIR` 環境変数で Happy CLI の設定ディレクトリを `~/.config/happy/` に設定する。
+- `NIX_HOME_AGENT_SKILLS_DIR` 環境変数で個人用 skill ソースを `~/nix-home/agent-skills` に設定する。
 - 環境変数は `environment.variables`（nix-darwin システムレベル）で管理する。
 - GUI アプリ（VS Code 等）からの起動経路を安定させるため、`launchd.user.envVariables` にも同等の値を設定する。
 - `launchd` の値は `$HOME` 展開に依存しないよう、`/Users/<username>/...` の絶対パスで設定する。
@@ -73,6 +75,18 @@
 - `settings.json` が存在しない場合は `{"teammateMode":"auto"}` で新規作成する。
 - 既に `teammateMode` が存在する場合は上書きしない（ユーザー設定優先）。
 - `settings.json` が不正な JSON の場合は更新せず、警告ログを出してスキップする。
+
+### FR-003b 個人用 skill のエージェント間同期
+
+- `home.activation.setupAgentSkills` で `NIX_HOME_AGENT_SKILLS_DIR`（既定: `~/nix-home/agent-skills`）配下を走査する。
+- `SKILL.md` を持つディレクトリのみを有効な skill とみなす。
+- 有効な skill を以下へ `ln -sfn` で同期する：
+  - `~/.config/claude/skills/<skill-name>`
+  - `~/.config/codex/skills/<skill-name>`
+  - `~/.config/gemini/.gemini/skills/<skill-name>`
+- 既存の同名パスが通常ディレクトリ/通常ファイル（非 symlink）の場合は上書きせずスキップする。
+- 既存の同名 symlink が `NIX_HOME_AGENT_SKILLS_DIR` 配下を指していない場合は上書きせずスキップする。
+- 過去に同期された symlink（`NIX_HOME_AGENT_SKILLS_DIR` 配下を指すもの）のうち、ソースに存在しない skill は削除する（クリーンアップ）。
 
 ### FR-004 Git template hooks によるCLAUDE.md自動リンク
 
@@ -114,6 +128,7 @@
 - `echo $CODEX_HOME` が `~/.config/codex` を返す。
 - `echo $GEMINI_CLI_HOME` が `~/.config/gemini` を返す。
 - `echo $HAPPY_HOME_DIR` が `~/.config/happy` を返す。
+- `echo $NIX_HOME_AGENT_SKILLS_DIR` が `~/nix-home/agent-skills` を返す。
 - `echo $VIMINIT` が `source ~/.config/vim/vimrc` を返す。
 - `env -i HOME=$HOME USER=$USER __NIX_DARWIN_SET_ENVIRONMENT_DONE=1 zsh -c 'source ~/.zshenv; echo $CODEX_HOME'` が `~/.config/codex` を返す。
 - `env -i HOME=$HOME USER=$USER __NIX_DARWIN_SET_ENVIRONMENT_DONE=1 zsh -c 'source ~/.zshenv; echo $CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS'` が `1` を返す。
@@ -130,6 +145,7 @@
 - `~/.config/gemini/GEMINI.md` が存在し、`~/.config/AGENTS.md` と同じ Nix store パスを指す。
 - `~/.config/happy/AGENTS.md` が存在し、`~/.config/AGENTS.md` と同じ Nix store パスを指す。
 - `~/.claude` / `~/.codex` / `~/.gemini` / `~/.happy` が Nix 管理の読み取り専用シンボリックリンク（番兵ファイル）として存在する。
+- `~/nix-home/agent-skills/<skill-name>/SKILL.md` が存在する場合、`~/.config/claude/skills/<skill-name>` / `~/.config/codex/skills/<skill-name>` / `~/.config/gemini/.gemini/skills/<skill-name>` が同ソースへの symlink として存在する。
 - `~/.config/claude/settings.json` の `teammateMode` が未設定の場合、activation 後に `auto` が設定される。
 - `~/.config/gemini/settings.json` に `context.fileName` が設定されている。
 - `~/.config/git/template/hooks/` に `post-checkout`、`post-merge`、`setup-claude-symlink` が存在する。
@@ -145,6 +161,7 @@
 
 - 001-macos-bootstrap-mvp が適用済みであること。
 - Claude Code / Codex / Gemini / Happy がインストール済みであること。
+- 個人用 skill ソースを `~/nix-home/agent-skills` で管理すること。
 - `athenai` リポジトリが `~/ghq/github.com/athenai-dev/athenai` に存在するか、`ATHENAI_REPO` で参照先を指定できること。
 
 ## テスト観点
@@ -153,6 +170,8 @@
 - 正常系: codex/gemini/happy の指示ファイルが AGENTS.md と同じ Nix store パスを指す。
 - 正常系: CLAUDE.md が共通指示と Claude 固有指示の両方を含む。
 - 正常系: Claude Code の `teammateMode` が未設定時のみ `auto` で補完される。
+- 正常系: `~/nix-home/agent-skills` の有効 skill が Claude / Codex / Gemini の `skills/` に同期される。
+- 正常系: エージェント側に同名の通常ディレクトリがある場合、上書きせずにスキップされる。
 - 正常系: `ghq get` で AGENTS.md を含むリポジトリを clone すると CLAUDE.md が自動作成される。
 - 正常系: `git pull` で AGENTS.md が追加された場合、CLAUDE.md が自動作成される。
 - 正常系: `athenai --help` が実行できる。
@@ -165,5 +184,6 @@
 - 既存の `~/.claude/` 等は手動で `~/.config/` に移動する必要がある（移行手順をREADMEに記載）。
 - 各CLIが動的に生成するファイル（`settings.json`、認証情報など）はNix管理外とする。
 - `home.file` で管理されるファイルは読み取り専用シンボリックリンクになるため、直接編集は不可。
+- `skills/` 配下は各エージェントが公式 skill を配置するため、ディレクトリ全体は Nix 管理しない（skill 単位 symlink のみ管理）。
 - Git template は新規 clone にのみ適用される。既存リポジトリへの適用は手動。
 - Gemini の `settings.json` が存在しない場合（初回起動前）は activation をスキップする。

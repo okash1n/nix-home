@@ -21,6 +21,7 @@
 - `make build` / `make switch` による日常のビルド・適用操作
 - `make update` による flake 入力の更新とビルド・適用
 - `make mcp` による AI CLI の MCP サーバー設定
+- `~/nix-home/agent-skills` から Claude / Codex / Gemini への skill symlink 同期
 - VS Code の設定（settings/keybindings/snippets）と拡張リストの宣言管理
 - シェル/CLI/フォント/テーマの再現（Ghostty / Terminal.app / Vim / VS Code）
 
@@ -39,8 +40,9 @@
 
 - クリーン macOS で `make init` 後、`zsh` が利用可能である（既定プロンプトは `powerlevel10k`、配色は `Hanabi`）。
 - クリーン macOS で `make init` 後、ログインシェルが `nix` 管理の `zsh` に設定される。
-- `git` / `nix` / `zsh` / `playwright` / `codex` / `claude` / `gemini` / `happy` / `agent-browser` / `athenai` がコマンド実行可能である。
+- `git` / `nix` / `zsh` / `playwright` / `codex` / `claude` / `gemini` / `happy` / `agent-browser` / `athenai` / `caddy` / `marp` がコマンド実行可能である。
 - Claude Code Team 機能の前提環境変数（`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`）が有効である。
+- `~/nix-home/agent-skills` 配下の有効な skill（`SKILL.md` を持つディレクトリ）が、`~/.config/claude/skills/`、`~/.config/codex/skills/`、`~/.config/gemini/.gemini/skills/` にシンボリックリンクとして同期される。
 - `Ghostty` / `Terminal.app` / `Vim` / `VS Code` に `Hanabi Theme` が適用される。
 - VS Code の `settings.json` / `keybindings.json` / snippets が Nix 管理で再現される。
 - `make init` を再実行しても破綻しない。

@@ -54,6 +54,8 @@ in
     rustup
     wrangler
     cloudflared
+    caddy
+    marp-cli
     python3
     uv
     bind
@@ -86,8 +88,9 @@ in
     : "''${CODEX_HOME:=$HOME/.config/codex}"
     : "''${GEMINI_CLI_HOME:=$HOME/.config/gemini}"
     : "''${HAPPY_HOME_DIR:=$HOME/.config/happy}"
+    : "''${NIX_HOME_AGENT_SKILLS_DIR:=$HOME/nix-home/agent-skills}"
     : "''${VIMINIT:=source $HOME/.config/vim/vimrc}"
-    export CLAUDE_CONFIG_DIR CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS CODEX_HOME GEMINI_CLI_HOME HAPPY_HOME_DIR VIMINIT
+    export CLAUDE_CONFIG_DIR CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS CODEX_HOME GEMINI_CLI_HOME HAPPY_HOME_DIR NIX_HOME_AGENT_SKILLS_DIR VIMINIT
   '';
 
   home.file.".bash_profile".text = ''

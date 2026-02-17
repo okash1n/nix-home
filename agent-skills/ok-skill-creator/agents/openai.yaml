@@ -1,0 +1,4 @@
+interface:
+  display_name: "OK Skill Creator"
+  short_description: "Create higher-quality, spec-aligned skills"
+  default_prompt: "Use $ok-skill-creator to design and validate a production-ready skill."

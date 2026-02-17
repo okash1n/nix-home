@@ -1,0 +1,4 @@
+interface:
+  display_name: "OK Install"
+  short_description: "Add global tools via nix-home safely"
+  default_prompt: "Use $ok-install to add a global tool in nix-home and apply switch."

@@ -157,7 +157,7 @@
 - `/Applications/Nix Apps` 配下に `Ghostty.app` が作成される。
 - `~/.config/ghostty/config` が存在し、HackGen と `theme = hanabi` が反映される。
 - 主要 alias / functions が機能する。
-- `command -v git nix zsh playwright codex claude gemini happy agent-browser athenai` が成功する。
+- `command -v git nix zsh playwright codex claude gemini happy agent-browser athenai caddy marp` が成功する。
 - `command -v rg bun node pnpm uv python3 tmux wget` が成功する。
 - `command -v dust yazi` が成功する。
 - `command -v vim` が成功する。

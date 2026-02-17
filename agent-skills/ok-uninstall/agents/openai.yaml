@@ -1,0 +1,4 @@
+interface:
+  display_name: "OK Uninstall"
+  short_description: "Remove global tools via nix-home safely"
+  default_prompt: "Use $ok-uninstall to remove a global tool from nix-home and apply switch."

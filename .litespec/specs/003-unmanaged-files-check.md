@@ -51,8 +51,9 @@
 - $HOME 直下のランタイム系（.zsh_sessions, .viminfo, .claude.json, .vscode, .npm, .local）を除外する。
 - Nix 管理の dotfiles（.gitconfig）を除外する。
 - Claude Code のランタイムデータ（projects, todos, plugins, debug, file-history, shell-snapshots）を除外する。
+- Claude Code の skills ディレクトリ（公式 skill + 個人 skill symlink）を除外する。
 - Codex のランタイムデータ（sessions, skills, config.toml, models_cache.json）を除外する。
-- Gemini のランタイムデータ（settings.json, state.json, installation_id）を除外する。
+- Gemini のランタイムデータ（settings.json, state.json, installation_id, skills）を除外する。
 - home.activation で管理しているファイル（hanabi テーマ関連）を除外する。
 - macOS システムファイル（.DS_Store, .localized, .CFUserTextEncoding）を除外する。
 

@@ -43,8 +43,9 @@ fi
 
 - `zsh`（既定プロンプト: `powerlevel10k` + `Hanabi` 配色、切替: `NIX_HOME_ZSH_PROMPT=hanabi`）
 - `dotfiles` 由来の `zsh` aliases / functions（`fgh` を含む）
-- CLI: `git` `curl` `wget` `jq` `fzf` `fd` `rg` `ghq` `awk` `grep` `sed` `tmux` `dust` `yazi` `node` `pnpm` `bun` `python3` `uv` `vim` `playwright` `codex` `claude` `gemini` `happy` `agent-browser` `athenai`
+- CLI: `git` `curl` `wget` `jq` `fzf` `fd` `rg` `ghq` `awk` `grep` `sed` `tmux` `dust` `yazi` `node` `pnpm` `bun` `python3` `uv` `caddy` `marp` `vim` `playwright` `codex` `claude` `gemini` `happy` `agent-browser` `athenai`
 - AI CLI の設定ディレクトリ: `~/.config/claude` `~/.config/codex` `~/.config/gemini` `~/.config/happy`
+- 個人用 skills: `~/nix-home/agent-skills` をソースとして、`make switch` / `make init` 時に `~/.config/claude/skills/`、`~/.config/codex/skills/`、`~/.config/gemini/.gemini/skills/` へシンボリックリンク同期
 - Claude Code Team 機能: `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`（Nix で配布）
 - `git` グローバル設定（`user.name` / `user.email` / global ignore）
 - `Ghostty` 本体（`/Applications/Nix Apps/Ghostty.app`）と `~/.config/ghostty/config`（HackGen + `theme = hanabi`）

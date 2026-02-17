@@ -27,6 +27,7 @@ let
     CODEX_HOME = "$HOME/.config/codex";
     GEMINI_CLI_HOME = "$HOME/.config/gemini";
     HAPPY_HOME_DIR = "$HOME/.config/happy";
+    NIX_HOME_AGENT_SKILLS_DIR = "$HOME/nix-home/agent-skills";
     VIMINIT = "source $HOME/.config/vim/vimrc";
   };
   xdgCliEnvLaunchd = {
@@ -35,6 +36,7 @@ let
     CODEX_HOME = "/Users/${username}/.config/codex";
     GEMINI_CLI_HOME = "/Users/${username}/.config/gemini";
     HAPPY_HOME_DIR = "/Users/${username}/.config/happy";
+    NIX_HOME_AGENT_SKILLS_DIR = "/Users/${username}/nix-home/agent-skills";
     VIMINIT = "source /Users/${username}/.config/vim/vimrc";
   };
 in

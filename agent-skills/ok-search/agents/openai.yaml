@@ -1,0 +1,4 @@
+interface:
+  display_name: "OK Search"
+  short_description: "Search nix-home global tool candidates"
+  default_prompt: "Use $ok-search to find candidate tool attrs before installation."

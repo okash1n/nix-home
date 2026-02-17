@@ -45,6 +45,7 @@
 **/.config/claude/debug/*
 **/.config/claude/file-history/*
 **/.config/claude/shell-snapshots/*
+**/.config/claude/skills/*
 
 # Codex
 **/.config/codex/config.toml
@@ -59,6 +60,12 @@
 **/.config/gemini/state.json
 **/.config/gemini/google_accounts.json
 **/.config/gemini/installation_id
+**/.config/gemini/skills/*
+**/.config/gemini/.gemini/settings.json
+**/.config/gemini/.gemini/state.json
+**/.config/gemini/.gemini/google_accounts.json
+**/.config/gemini/.gemini/installation_id
+**/.config/gemini/.gemini/skills/*
 
 # sops-nix (シークレット復号ファイル)
 **/.config/sops-nix/**

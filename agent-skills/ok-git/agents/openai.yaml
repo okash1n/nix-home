@@ -1,0 +1,4 @@
+interface:
+  display_name: "OK Git"
+  short_description: "Safe daily Git workflow with global identity"
+  default_prompt: "Use $ok-git to inspect, branch, commit, and sync while keeping git config unchanged."
