@@ -39,6 +39,8 @@
 - `GEMINI_CLI_HOME` 環境変数で Gemini CLI の設定ディレクトリを `~/.config/gemini/` に設定する。
 - `HAPPY_HOME_DIR` 環境変数で Happy CLI の設定ディレクトリを `~/.config/happy/` に設定する。
 - `NIX_HOME_AGENT_SKILLS_DIR` 環境変数で個人用 skill ソースを `~/nix-home/agent-skills` に設定する。
+- `NIX_HOME_MCP_DEFAULT_ENABLED` 環境変数で MCP 既定有効状態を制御する（既定: `0` = OFF）。
+- `NIX_HOME_MCP_FORCE_ENABLED` / `NIX_HOME_MCP_FORCE_DISABLED` 環境変数で MCP の例外を制御する（カンマ区切り、同一サーバーが両方に含まれる場合は `force_disabled` を優先）。
 - 環境変数は `environment.variables`（nix-darwin システムレベル）で管理する。
 - GUI アプリ（VS Code 等）からの起動経路を安定させるため、`launchd.user.envVariables` にも同等の値を設定する。
 - `launchd` の値は `$HOME` 展開に依存しないよう、`/Users/<username>/...` の絶対パスで設定する。
@@ -88,6 +90,20 @@
 - 既存の同名 symlink が `NIX_HOME_AGENT_SKILLS_DIR` 配下を指していない場合は上書きせずスキップする。
 - 過去に同期された symlink（`NIX_HOME_AGENT_SKILLS_DIR` 配下を指すもの）のうち、ソースに存在しない skill は削除する（クリーンアップ）。
 
+### FR-003c MCP 設定と JINA_API_KEY の自動同期
+
+- `home.activation.setupMcpServers` を `sops-nix` の後に実行し、`switch` / `init` 時に MCP 設定を自動同期する。
+- MCP 同期処理は `scripts/setup-mcp.sh` を共通エントリーポイントとして使用し、`make mcp` からも同じ処理を呼び出す。
+- `setup-mcp.sh` は `~/.config/sops-nix/secrets/rendered/sops-env.sh` を読み込み、`JINA_API_KEY` を `launchctl setenv` で GUI プロセス向けにも同期する。
+- `JINA_API_KEY` が未設定の場合は `launchctl unsetenv JINA_API_KEY` を実行し、警告を出して継続する。
+- MCP 既定有効状態は `NIX_HOME_MCP_DEFAULT_ENABLED` で制御する（既定: `0` = OFF、`1` = ON）。
+- MCP 例外は `NIX_HOME_MCP_FORCE_ENABLED` / `NIX_HOME_MCP_FORCE_DISABLED`（カンマ区切り）で制御する（既定: `NIX_HOME_MCP_FORCE_ENABLED=jina,claude-mem`）。
+- `scripts/setup-codex-mcp.sh` は Codex の `jina` MCP を streamable HTTP + `bearer_token_env_var=JINA_API_KEY` で再設定し、`config.toml` の `enabled` フラグを `NIX_HOME_MCP_DEFAULT_ENABLED` に追従させる。
+- `scripts/setup-claude-mcp.sh` は `NIX_HOME_MCP_DEFAULT_ENABLED=1` の場合に Claude の user scope `codex` / `jina` MCP を再設定し、`0` の場合は両サーバーを remove する（Claude CLI に disable 機能がないため）。
+- `scripts/setup-gemini-mcp.sh` は `~/.config/gemini/.gemini/settings.json` の `mcpServers` を upsert し、`jina.headers.Authorization` に `Bearer ${JINA_API_KEY}` を保持する。
+- `scripts/setup-gemini-mcp.sh` は `~/.config/gemini/.gemini/mcp-server-enablement.json` を更新し、`NIX_HOME_MCP_DEFAULT_ENABLED` に応じて server ごとの enabled 状態を反映する。
+- MCP 同期は「既存ならスキップ」ではなく差分再同期（reconcile）を基本とし、キー更新時にも追従する。
+
 ### FR-004 Git template hooks によるCLAUDE.md自動リンク
 
 - `~/.config/git/template/hooks/` に以下のフックを配置する：
@@ -129,6 +145,8 @@
 - `echo $GEMINI_CLI_HOME` が `~/.config/gemini` を返す。
 - `echo $HAPPY_HOME_DIR` が `~/.config/happy` を返す。
 - `echo $NIX_HOME_AGENT_SKILLS_DIR` が `~/nix-home/agent-skills` を返す。
+- `echo $NIX_HOME_MCP_DEFAULT_ENABLED` が `0` を返す。
+- `echo $NIX_HOME_MCP_FORCE_ENABLED` が `jina,claude-mem` を返す。
 - `echo $VIMINIT` が `source ~/.config/vim/vimrc` を返す。
 - `env -i HOME=$HOME USER=$USER __NIX_DARWIN_SET_ENVIRONMENT_DONE=1 zsh -c 'source ~/.zshenv; echo $CODEX_HOME'` が `~/.config/codex` を返す。
 - `env -i HOME=$HOME USER=$USER __NIX_DARWIN_SET_ENVIRONMENT_DONE=1 zsh -c 'source ~/.zshenv; echo $CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS'` が `1` を返す。
@@ -148,6 +166,14 @@
 - `~/nix-home/agent-skills/<skill-name>/SKILL.md` が存在する場合、`~/.config/claude/skills/<skill-name>` / `~/.config/codex/skills/<skill-name>` / `~/.config/gemini/.gemini/skills/<skill-name>` が同ソースへの symlink として存在する。
 - `~/.config/claude/settings.json` の `teammateMode` が未設定の場合、activation 後に `auto` が設定される。
 - `~/.config/gemini/settings.json` に `context.fileName` が設定されている。
+- `make switch` 後、`launchctl getenv JINA_API_KEY` が空でない。
+- `NIX_HOME_MCP_DEFAULT_ENABLED=0 make mcp` 実行後、`codex mcp get jina --json | jq -r '.enabled'` が `true` を返す（force enabled）。
+- `NIX_HOME_MCP_DEFAULT_ENABLED=0 make mcp` 実行後、`claude mcp get jina` が利用可能である（force enabled）。
+- `NIX_HOME_MCP_DEFAULT_ENABLED=0 make mcp` 実行後、`claude mcp get codex` は見つからない状態になる（force 対象外のため user scope から remove）。
+- `NIX_HOME_MCP_DEFAULT_ENABLED=0 make mcp` 実行後、`jq -r '.jina.enabled, .\"claude-mem\".enabled, .codex.enabled' ~/.config/gemini/.gemini/mcp-server-enablement.json` が `true, true, false` を返す。
+- `NIX_HOME_MCP_DEFAULT_ENABLED=0 make mcp` 実行後でも、`NIX_HOME_MCP_FORCE_ENABLED` に含まれる server（既定: `jina`, `claude-mem`）は enabled 状態で維持される。
+- `NIX_HOME_MCP_DEFAULT_ENABLED=1 make mcp` 実行後、`codex mcp get jina` で `bearer_token_env_var: JINA_API_KEY` が確認できる。
+- `NIX_HOME_MCP_DEFAULT_ENABLED=1 make mcp` 実行後、`jq '.mcpServers.jina.headers.Authorization' ~/.config/gemini/.gemini/settings.json` が `"Bearer ${JINA_API_KEY}"` を返す。
 - `~/.config/git/template/hooks/` に `post-checkout`、`post-merge`、`setup-claude-symlink` が存在する。
 - `.gitconfig` に `init.templateDir` が設定されている。
 - `~/.config/vim/vimrc` が存在し、`colorscheme hanabi` を含む。
@@ -172,6 +198,11 @@
 - 正常系: Claude Code の `teammateMode` が未設定時のみ `auto` で補完される。
 - 正常系: `~/nix-home/agent-skills` の有効 skill が Claude / Codex / Gemini の `skills/` に同期される。
 - 正常系: エージェント側に同名の通常ディレクトリがある場合、上書きせずにスキップされる。
+- 正常系: `make switch` 実行後に `launchctl getenv JINA_API_KEY` が設定される。
+- 正常系: `NIX_HOME_MCP_DEFAULT_ENABLED=0` では force 対象外の MCP が disabled/remove 状態で同期される。
+- 正常系: `NIX_HOME_MCP_DEFAULT_ENABLED=0` でも、`NIX_HOME_MCP_FORCE_ENABLED` に含まれる server は enabled 状態で同期される。
+- 正常系: `NIX_HOME_MCP_DEFAULT_ENABLED=1` では Codex/Claude/Gemini の MCP が enabled 状態で同期される。
+- 正常系: `JINA_API_KEY` を更新した後の `make switch` で、各 CLI の `jina` 設定が新値に追従する。
 - 正常系: `ghq get` で AGENTS.md を含むリポジトリを clone すると CLAUDE.md が自動作成される。
 - 正常系: `git pull` で AGENTS.md が追加された場合、CLAUDE.md が自動作成される。
 - 正常系: `athenai --help` が実行できる。

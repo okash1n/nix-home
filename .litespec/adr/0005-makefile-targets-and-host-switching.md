@@ -2,6 +2,7 @@
 
 - Status: Accepted
 - Date: 2026-02-11
+- Superseded-By: 0011-mcp-auto-reconcile-and-launchctl-jina-env（MCP 周りのみ）
 
 ## Context
 

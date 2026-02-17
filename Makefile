@@ -26,13 +26,7 @@ update:
 	$(MAKE) switch
 
 mcp:
-	@SOPS_ENV="$$HOME/.config/sops-nix/secrets/rendered/sops-env.sh"; \
-	if [ -f "$$SOPS_ENV" ]; then \
-		. "$$SOPS_ENV"; \
-	fi; \
-	./scripts/setup-claude-mcp.sh; \
-	./scripts/setup-codex-mcp.sh; \
-	./scripts/setup-gemini-mcp.sh
+	./scripts/setup-mcp.sh
 
 secret:
 	./scripts/set-sops-env.sh

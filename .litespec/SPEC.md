@@ -20,7 +20,7 @@
 - `init.sh` と `make init` による一発初期化
 - `make build` / `make switch` による日常のビルド・適用操作
 - `make update` による flake 入力の更新とビルド・適用
-- `make mcp` による AI CLI の MCP サーバー設定
+- `make switch` / `make init` 時の AI CLI MCP 自動同期と `make mcp` による手動再同期
 - `~/nix-home/agent-skills` から Claude / Codex / Gemini への skill symlink 同期
 - VS Code の設定（settings/keybindings/snippets）と拡張リストの宣言管理
 - シェル/CLI/フォント/テーマの再現（Ghostty / Terminal.app / Vim / VS Code）
@@ -49,7 +49,8 @@
 - `make build` でビルドが成功する。
 - `make switch` でシステム適用が成功する。
 - `make update` で flake 入力を更新しビルド・適用できる。
-- `make mcp` で AI CLI の MCP 設定がセットアップされる（未導入コマンドはスキップ）。
+- `make switch` / `make init` 後に AI CLI の MCP 設定が自動同期される（未導入コマンドはスキップ、既定は `NIX_HOME_MCP_DEFAULT_ENABLED=0` + `NIX_HOME_MCP_FORCE_ENABLED=jina,claude-mem`）。
+- `make mcp` で AI CLI の MCP 設定を手動で再同期できる。
 
 ## 詳細仕様一覧
 

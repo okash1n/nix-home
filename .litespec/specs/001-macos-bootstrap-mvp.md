@@ -60,7 +60,11 @@
 - `make build` は `darwin-rebuild build` を実行し、ビルドのみ行う（システム適用はしない）。
 - `make switch` は `darwin-rebuild switch` を実行し、システムに適用する。
 - `make update` は `nix flake update` 後に `build` → `switch` の順で実行する（検証方針「switch 前に build」に準拠）。
-- `make mcp` は sops-env.sh から環境変数を読み込み、各 AI CLI の MCP セットアップスクリプトを実行する。
+- `make switch` / `make init` は Home Manager activation を通じて、各 AI CLI の MCP セットアップを自動実行する。
+- MCP 自動セットアップ時は `sops-env.sh` から環境変数を読み込み、`launchctl` に `JINA_API_KEY` を同期する。
+- MCP の既定モードは `NIX_HOME_MCP_DEFAULT_ENABLED=0`（OFF）とし、`NIX_HOME_MCP_DEFAULT_ENABLED=1` を指定した場合のみ既定ONで同期する。
+- MCP の例外は `NIX_HOME_MCP_FORCE_ENABLED` / `NIX_HOME_MCP_FORCE_DISABLED`（カンマ区切り）で制御し、既定は `NIX_HOME_MCP_FORCE_ENABLED=jina,claude-mem` とする。
+- `make mcp` は上記と同じセットアップ処理を手動で再実行する。
 - 各 MCP セットアップスクリプトは、対象コマンドが未導入の場合は warn + skip で継続する。
 
 ### FR-003 シェル再現

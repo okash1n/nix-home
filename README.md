@@ -46,6 +46,7 @@ fi
 - CLI: `git` `curl` `wget` `jq` `fzf` `fd` `rg` `ghq` `awk` `grep` `sed` `tmux` `dust` `yazi` `node` `pnpm` `bun` `python3` `uv` `caddy` `marp` `vim` `playwright` `codex` `claude` `gemini` `happy` `agent-browser` `athenai`
 - AI CLI の設定ディレクトリ: `~/.config/claude` `~/.config/codex` `~/.config/gemini` `~/.config/happy`
 - 個人用 skills: `~/nix-home/agent-skills` をソースとして、`make switch` / `make init` 時に `~/.config/claude/skills/`、`~/.config/codex/skills/`、`~/.config/gemini/.gemini/skills/` へシンボリックリンク同期
+- MCP 同期: `make switch` / `make init` 時に Claude / Codex / Gemini の MCP 設定を自動再同期し、`JINA_API_KEY` を `launchctl` に反映（手動再同期は `make mcp`、既定は `NIX_HOME_MCP_DEFAULT_ENABLED=0` + `NIX_HOME_MCP_FORCE_ENABLED=jina,claude-mem`）
 - Claude Code Team 機能: `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`（Nix で配布）
 - `git` グローバル設定（`user.name` / `user.email` / global ignore）
 - `Ghostty` 本体（`/Applications/Nix Apps/Ghostty.app`）と `~/.config/ghostty/config`（HackGen + `theme = hanabi`）
@@ -54,6 +55,9 @@ fi
 - `Terminal.app` の `Hanabi` 既定プロファイル設定
 - `Vim` の `colorscheme hanabi`（`~/.config/vim/colors/hanabi.vim` / `~/.config/vim/vimrc`）
 - Nix Store の自動メンテナンス（GC / optimise）
+
+MCP を一時的に有効化したい場合は `NIX_HOME_MCP_DEFAULT_ENABLED=1 make mcp` を実行します。
+強制例外を変更する場合は `NIX_HOME_MCP_FORCE_ENABLED` / `NIX_HOME_MCP_FORCE_DISABLED` を使います（カンマ区切り、`force_disabled` 優先）。
 
 `athenai` コマンドは `ATHENAI_REPO`（既定: `~/ghq/github.com/athenai-dev/athenai`）を参照し、
 `bun run --cwd "$ATHENAI_REPO" src/cli/index.ts` をラップします。
