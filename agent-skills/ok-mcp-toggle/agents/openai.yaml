@@ -1,4 +1,4 @@
 interface:
   display_name: "OK MCP Toggle"
   short_description: "Enable asana/notion only when needed"
-  default_prompt: "Use $ok-mcp-toggle to enable asana/notion for this task, then restore the minimal MCP set."
+  default_prompt: "Use $ok-mcp-toggle to enable asana/notion for this project, then restore the minimal MCP set."

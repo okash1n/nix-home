@@ -9,7 +9,7 @@ compatibility: claude,codex,gemini
 ## 目的
 
 `asana` / `notion` を必要なセッションだけ有効化し、作業後は最小構成に戻す。  
-環境変数の組み合わせを毎回思い出さず、決め打ちスクリプトで切り替える。
+`make mcp` の既定（`jina` / `claude-mem` のみ有効）を維持したまま、プロジェクト単位で切り替える。
 
 ## Trigger Examples
 
@@ -19,19 +19,23 @@ compatibility: claude,codex,gemini
 
 ## Workflow
 
-1. 一時有効化を実行する  
+1. 対象プロジェクトで実行し、保存先を確認する  
+   `scripts/mcp_asana_notion.sh paths`
+2. プロジェクト用 MCP を有効化する  
    `scripts/mcp_asana_notion.sh on`
-2. 状態を確認する  
-   `scripts/mcp_asana_notion.sh status`
-3. 必要なら OAuth ログインを完了する（Codex）  
+3. プロジェクト用環境変数を読み込む  
+   `source .nix-home/mcp-project.env`
+4. 必要なら OAuth ログインを完了する（Codex）  
    `scripts/mcp_asana_notion.sh login`
-4. MCP を使う作業を実行する
-5. 作業完了後に既定構成へ戻す  
+5. MCP を使う作業を実行する
+6. 作業完了後に `asana` / `notion` を戻す  
    `scripts/mcp_asana_notion.sh off`
 
 ## Notes
 
-- MCP の有効/無効を切り替えた後は、対象 AI CLI の新しいセッションを開始して反映する。
+- `on/off/login/status` は現在ディレクトリ（Git 管理下なら repo root）単位で設定を分離する。
+- プロジェクト設定は既定で `.git/nix-home-mcp/`（非 Git ディレクトリでは `.nix-home/mcp/`）に保存する。
+- MCP の有効/無効を切り替えた後は、`source .nix-home/mcp-project.env` 済みのシェルで対象 AI CLI を起動する。
 - `force_disabled` が `force_enabled` より優先されるため、必要時は `status` で確認する。
 - Codex が使えない環境では `login` はスキップし、Claude/Gemini 側の OAuth UI で認可する。
 
