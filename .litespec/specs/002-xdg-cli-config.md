@@ -99,7 +99,9 @@
 - MCP 既定有効状態は `NIX_HOME_MCP_DEFAULT_ENABLED` で制御する（既定: `0` = OFF、`1` = ON）。
 - MCP 例外は `NIX_HOME_MCP_FORCE_ENABLED` / `NIX_HOME_MCP_FORCE_DISABLED`（カンマ区切り）で制御する（既定: `NIX_HOME_MCP_FORCE_ENABLED=jina,claude-mem`）。
 - `scripts/setup-codex-mcp.sh` は Codex の `jina` MCP を streamable HTTP + `bearer_token_env_var=JINA_API_KEY` で再設定し、`config.toml` の `enabled` フラグを `NIX_HOME_MCP_DEFAULT_ENABLED` に追従させる。
-- `scripts/setup-codex-mcp.sh` は Codex の `asana` / `notion` MCP を `npx -y mcp-remote https://mcp.asana.com/v2/mcp` / `npx -y mcp-remote https://mcp.notion.com/mcp`（stdio bridge）で再設定し、`enabled` フラグを `NIX_HOME_MCP_DEFAULT_ENABLED` と force 例外に追従させる。
+- `scripts/setup-codex-mcp.sh` は Codex の `asana` / `notion` MCP を `mcp-remote`（stdio bridge）で再設定し、`enabled` フラグを `NIX_HOME_MCP_DEFAULT_ENABLED` と force 例外に追従させる。加えて `startup_timeout_sec` を既定 `60` 秒で設定し、初回起動時の handshake timeout を緩和する。
+- `asana` は Asana MCP v2 の制約（dynamic client registration 非対応）により、`ASANA_MCP_CLIENT_ID` / `ASANA_MCP_CLIENT_SECRET` がない場合は Codex で強制 `enabled=false` とし、起動失敗を回避する。
+- `ASANA_MCP_CLIENT_ID` / `ASANA_MCP_CLIENT_SECRET` がある場合、`setup-codex-mcp.sh` は `--static-oauth-client-info @<path>` を使って Asana を登録する（`ASANA_MCP_CLIENT_INFO_FILE` / `ASANA_MCP_CALLBACK_HOST` / `ASANA_MCP_CALLBACK_PORT` で上書き可、既定 callback は `http://127.0.0.1:9554/oauth/callback`）。
 - `scripts/setup-claude-mcp.sh` は Claude の user scope `codex` / `jina` / `asana` / `notion` MCP を再設定または remove し、`NIX_HOME_MCP_DEFAULT_ENABLED` と force 例外に追従させる（Claude CLI に disable 機能がないため）。
 - `scripts/setup-gemini-mcp.sh` は `~/.config/gemini/.gemini/settings.json` の `mcpServers` を upsert し、`jina.headers.Authorization` に `Bearer ${JINA_API_KEY}` を保持する。
 - `scripts/setup-gemini-mcp.sh` は `asana` / `notion` を `https://mcp.asana.com/v2/mcp` / `https://mcp.notion.com/mcp` の HTTP MCP として upsert する。

@@ -2,4 +2,8 @@ alefragnani.project-manager
 bbenoist.nix
 hancel.markdown-image
 marp-team.marp-vscode
+ms-python.debugpy
+ms-python.python
+ms-python.vscode-pylance
+ms-python.vscode-python-envs
 okash1n.hanabi-theme-vscode
