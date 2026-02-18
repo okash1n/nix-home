@@ -99,8 +99,10 @@
 - MCP 既定有効状態は `NIX_HOME_MCP_DEFAULT_ENABLED` で制御する（既定: `0` = OFF、`1` = ON）。
 - MCP 例外は `NIX_HOME_MCP_FORCE_ENABLED` / `NIX_HOME_MCP_FORCE_DISABLED`（カンマ区切り）で制御する（既定: `NIX_HOME_MCP_FORCE_ENABLED=jina,claude-mem`）。
 - `scripts/setup-codex-mcp.sh` は Codex の `jina` MCP を streamable HTTP + `bearer_token_env_var=JINA_API_KEY` で再設定し、`config.toml` の `enabled` フラグを `NIX_HOME_MCP_DEFAULT_ENABLED` に追従させる。
-- `scripts/setup-claude-mcp.sh` は `NIX_HOME_MCP_DEFAULT_ENABLED=1` の場合に Claude の user scope `codex` / `jina` MCP を再設定し、`0` の場合は両サーバーを remove する（Claude CLI に disable 機能がないため）。
+- `scripts/setup-codex-mcp.sh` は Codex の `asana` / `notion` MCP を `npx -y mcp-remote https://mcp.asana.com/v2/mcp` / `npx -y mcp-remote https://mcp.notion.com/mcp`（stdio bridge）で再設定し、`enabled` フラグを `NIX_HOME_MCP_DEFAULT_ENABLED` と force 例外に追従させる。
+- `scripts/setup-claude-mcp.sh` は Claude の user scope `codex` / `jina` / `asana` / `notion` MCP を再設定または remove し、`NIX_HOME_MCP_DEFAULT_ENABLED` と force 例外に追従させる（Claude CLI に disable 機能がないため）。
 - `scripts/setup-gemini-mcp.sh` は `~/.config/gemini/.gemini/settings.json` の `mcpServers` を upsert し、`jina.headers.Authorization` に `Bearer ${JINA_API_KEY}` を保持する。
+- `scripts/setup-gemini-mcp.sh` は `asana` / `notion` を `https://mcp.asana.com/v2/mcp` / `https://mcp.notion.com/mcp` の HTTP MCP として upsert する。
 - `scripts/setup-gemini-mcp.sh` は `~/.config/gemini/.gemini/mcp-server-enablement.json` を更新し、`NIX_HOME_MCP_DEFAULT_ENABLED` に応じて server ごとの enabled 状態を反映する。
 - MCP 同期は「既存ならスキップ」ではなく差分再同期（reconcile）を基本とし、キー更新時にも追従する。
 
@@ -171,6 +173,7 @@
 - `NIX_HOME_MCP_DEFAULT_ENABLED=0 make mcp` 実行後、`claude mcp get jina` が利用可能である（force enabled）。
 - `NIX_HOME_MCP_DEFAULT_ENABLED=0 make mcp` 実行後、`claude mcp get codex` は見つからない状態になる（force 対象外のため user scope から remove）。
 - `NIX_HOME_MCP_DEFAULT_ENABLED=0 make mcp` 実行後、`jq -r '.jina.enabled, .\"claude-mem\".enabled, .codex.enabled' ~/.config/gemini/.gemini/mcp-server-enablement.json` が `true, true, false` を返す。
+- `NIX_HOME_MCP_DEFAULT_ENABLED=0 make mcp` 実行後、`codex mcp get asana --json | jq -r '.enabled'` と `codex mcp get notion --json | jq -r '.enabled'` が `false` を返す。
 - `NIX_HOME_MCP_DEFAULT_ENABLED=0 make mcp` 実行後でも、`NIX_HOME_MCP_FORCE_ENABLED` に含まれる server（既定: `jina`, `claude-mem`）は enabled 状態で維持される。
 - `NIX_HOME_MCP_DEFAULT_ENABLED=1 make mcp` 実行後、`codex mcp get jina` で `bearer_token_env_var: JINA_API_KEY` が確認できる。
 - `NIX_HOME_MCP_DEFAULT_ENABLED=1 make mcp` 実行後、`jq '.mcpServers.jina.headers.Authorization' ~/.config/gemini/.gemini/settings.json` が `"Bearer ${JINA_API_KEY}"` を返す。

@@ -70,6 +70,8 @@ in
     sops
     age
     ssh-to-age
+    deno
+    go
   ]) ++ (with pkgs.llm-agents; [
     # AI CLI tools (from numtide/llm-agents.nix, daily updates)
     codex

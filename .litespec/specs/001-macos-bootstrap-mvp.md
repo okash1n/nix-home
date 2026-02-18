@@ -118,7 +118,8 @@
 - `~/.config/ghostty/config` を Nix 管理で生成し、HackGen と `Hanabi`（`theme = hanabi`）を適用する。
 - `Terminal.app` は `Hanabi` プロファイルを既定に設定する。
 - `Terminal.app` の `Hanabi` プロファイルには HackGen 系フォント（優先: `HackGen Console NF`）を適用し、適用結果を検証する。
-- GUI セッションが有効な環境では、`Terminal.app` の起動有無に依存せずテーマ適用処理（import / defaults / フォント設定）を試行する。
+- `Terminal.app` のテーマ適用処理（import / defaults / フォント設定）は `make init` 実行時のみ試行し、`make switch` では実行しない。
+- GUI セッションが有効な環境では、`make init` 実行時に `Terminal.app` の起動有無に依存せずテーマ適用処理を試行する。
 - `Terminal.app` が起動中の場合、既存ウィンドウ/タブの current settings も `Hanabi` に合わせる。
 - `Hanabi` プロファイルの import 失敗時は `defaults` の既定設定更新を強行せず、失敗理由をログに出す。
 - `hanabi-theme` が未取得の場合は処理をスキップし、復旧手順をログに表示する。
@@ -170,6 +171,7 @@
 - `hanabi-theme` のテーマ資産を使って `Terminal.app` の既定プロファイルが `Hanabi` になる。
 - `Terminal.app` の `Hanabi` プロファイルに HackGen 系フォントが設定される。
 - GUI セッションの初回 `make init` 完了時に `Ghostty` が自動起動する。
+- `make switch` 実行時に `Terminal.app` と `Ghostty` が自動起動しない。
 - `~/.vim/colors/hanabi.vim` が存在し、`~/.vimrc` に `colorscheme hanabi` が入る。
 - `code --list-extensions` に `okash1n.hanabi-theme-vscode` が含まれる。
 - `home/dot_config/vscode/extensions.txt` が存在し、拡張IDを1行1件で保持する。

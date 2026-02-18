@@ -441,9 +441,11 @@ maybe_reload_login_shell() {
 NIX_CMD=(nix --extra-experimental-features "nix-command flakes")
 NIX_HOME_USERNAME=${NIX_HOME_USERNAME:-$(id -un)}
 NIX_HOME_SKIP_TERMINAL_THEME=${NIX_HOME_SKIP_TERMINAL_THEME:-0}
+NIX_HOME_ENABLE_TERMINAL_THEME_SETUP=${NIX_HOME_ENABLE_TERMINAL_THEME_SETUP:-1}
 TERMINAL_THEME_SKIP_MARKER="$LOG_DIR/skip-terminal-theme"
 export NIX_HOME_USERNAME
 export NIX_HOME_SKIP_TERMINAL_THEME
+export NIX_HOME_ENABLE_TERMINAL_THEME_SETUP
 
 if [ "$NIX_HOME_SKIP_TERMINAL_THEME" = "1" ]; then
   touch "$TERMINAL_THEME_SKIP_MARKER"
@@ -467,10 +469,10 @@ fi
 
 if [ "$(uname)" = "Darwin" ]; then
   echo "Applying nix-darwin: $TARGET"
-  if ! sudo -H NIX_HOME_USERNAME="$NIX_HOME_USERNAME" NIX_HOME_SKIP_TERMINAL_THEME="$NIX_HOME_SKIP_TERMINAL_THEME" "${NIX_CMD[@]}" run --impure nix-darwin -- switch --impure --flake "$TARGET"; then
+  if ! sudo -H NIX_HOME_USERNAME="$NIX_HOME_USERNAME" NIX_HOME_SKIP_TERMINAL_THEME="$NIX_HOME_SKIP_TERMINAL_THEME" NIX_HOME_ENABLE_TERMINAL_THEME_SETUP="$NIX_HOME_ENABLE_TERMINAL_THEME_SETUP" "${NIX_CMD[@]}" run --impure nix-darwin -- switch --impure --flake "$TARGET"; then
     if [ "$TARGET" != "$REPO_ROOT_DIR#default" ]; then
       echo "Falling back to default host"
-      sudo -H NIX_HOME_USERNAME="$NIX_HOME_USERNAME" NIX_HOME_SKIP_TERMINAL_THEME="$NIX_HOME_SKIP_TERMINAL_THEME" "${NIX_CMD[@]}" run --impure nix-darwin -- switch --impure --flake "$REPO_ROOT_DIR#default"
+      sudo -H NIX_HOME_USERNAME="$NIX_HOME_USERNAME" NIX_HOME_SKIP_TERMINAL_THEME="$NIX_HOME_SKIP_TERMINAL_THEME" NIX_HOME_ENABLE_TERMINAL_THEME_SETUP="$NIX_HOME_ENABLE_TERMINAL_THEME_SETUP" "${NIX_CMD[@]}" run --impure nix-darwin -- switch --impure --flake "$REPO_ROOT_DIR#default"
     else
       exit 1
     fi

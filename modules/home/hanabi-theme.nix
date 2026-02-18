@@ -28,7 +28,9 @@
   # Terminal.app Hanabi テーマセットアップ
   home.activation.setupTerminalHanabi = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if [ "$(/usr/bin/uname)" = "Darwin" ]; then
-      if [ "''${NIX_HOME_SKIP_TERMINAL_THEME:-0}" = "1" ] || [ -f "$HOME/.local/state/nix-home/skip-terminal-theme" ]; then
+      if [ "''${NIX_HOME_ENABLE_TERMINAL_THEME_SETUP:-0}" != "1" ]; then
+        echo "[nix-home] Skipping Terminal.app theme setup (init-only)."
+      elif [ "''${NIX_HOME_SKIP_TERMINAL_THEME:-0}" = "1" ] || [ -f "$HOME/.local/state/nix-home/skip-terminal-theme" ]; then
         echo "[nix-home] Skipping Terminal.app theme setup (NIX_HOME_SKIP_TERMINAL_THEME=1)."
       elif ! /usr/bin/pgrep -x WindowServer >/dev/null 2>&1; then
         echo "[nix-home] Skipping Terminal.app theme setup (no GUI session)."

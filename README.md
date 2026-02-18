@@ -47,6 +47,7 @@ fi
 - AI CLI の設定ディレクトリ: `~/.config/claude` `~/.config/codex` `~/.config/gemini` `~/.config/happy`
 - 個人用 skills: `~/nix-home/agent-skills` をソースとして、`make switch` / `make init` 時に `~/.config/claude/skills/`、`~/.config/codex/skills/`、`~/.config/gemini/.gemini/skills/` へシンボリックリンク同期
 - MCP 同期: `make switch` / `make init` 時に Claude / Codex / Gemini の MCP 設定を自動再同期し、`JINA_API_KEY` を `launchctl` に反映（手動再同期は `make mcp`、既定は `NIX_HOME_MCP_DEFAULT_ENABLED=0` + `NIX_HOME_MCP_FORCE_ENABLED=jina,claude-mem`）
+- MCP サーバー: `jina` / `claude-mem` / `asana` / `notion` を同期（`asana` / `notion` は既定でOFF）。Codex では `asana` / `notion` を `mcp-remote`（`npx -y mcp-remote <url>`）経由で登録
 - Claude Code Team 機能: `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`（Nix で配布）
 - `git` グローバル設定（`user.name` / `user.email` / global ignore）
 - `Ghostty` 本体（`/Applications/Nix Apps/Ghostty.app`）と `~/.config/ghostty/config`（HackGen + `theme = hanabi`）
@@ -62,12 +63,13 @@ MCP を一時的に有効化したい場合は `NIX_HOME_MCP_DEFAULT_ENABLED=1 m
 `athenai` コマンドは `ATHENAI_REPO`（既定: `~/ghq/github.com/athenai-dev/athenai`）を参照し、
 `bun run --cwd "$ATHENAI_REPO" src/cli/index.ts` をラップします。
 
-注: GUI セッションが無い実行（ヘッドレス VM など）では、
-`Terminal.app` へのテーマ適用は自動でスキップされます。
+注: `Terminal.app` のテーマ適用処理（import / defaults / フォント同期）は
+`make init` 時のみ試行し、`make switch` では実行しません。
+GUI セッションが無い実行（ヘッドレス VM など）では、
+`make init` 時でも `Terminal.app` へのテーマ適用は自動でスキップされます。
 明示的にスキップする場合は `NIX_HOME_SKIP_TERMINAL_THEME=1 make init` を使います。
-`Terminal.app` のテーマ適用処理（import / defaults / フォント同期）は、
-GUI セッションが有効なら `Terminal.app` 起動有無に依存せず試行します。
-`Terminal.app` が起動中なら、既存ウィンドウの設定も `Hanabi` に同期します。
+GUI セッションが有効なら `Terminal.app` 起動有無に依存せず試行し、
+`Terminal.app` が起動中なら既存ウィンドウの設定も `Hanabi` に同期します。
 `Hanabi` プロファイルの import が確認できない場合は、既定設定更新をスキップしてログに案内を出します。
 Ghostty 自動起動を抑止する場合は `NIX_HOME_OPEN_GHOSTTY=0 make init` を使います。
 

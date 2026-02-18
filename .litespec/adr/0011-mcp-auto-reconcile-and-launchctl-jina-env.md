@@ -20,7 +20,8 @@
 - MCP の例外は `NIX_HOME_MCP_FORCE_ENABLED` / `NIX_HOME_MCP_FORCE_DISABLED` で制御し、既定は `NIX_HOME_MCP_FORCE_ENABLED=jina,claude-mem` とする。
 - MCP 設定は「スキップ」ではなく再同期（reconcile）を基本にする。
   - Codex: `jina` を streamable HTTP + `bearer_token_env_var=JINA_API_KEY` で設定し、`enabled` フラグを `NIX_HOME_MCP_DEFAULT_ENABLED` に追従させる。
-  - Claude: `NIX_HOME_MCP_DEFAULT_ENABLED=1` で user scope の `codex` / `jina` を再設定し、`0` では remove する（disable 機能がないため）。
+  - Codex: `asana` / `notion` は OAuth 互換性のため `npx -y mcp-remote <url>`（stdio bridge）で設定し、`enabled` フラグを `NIX_HOME_MCP_DEFAULT_ENABLED` に追従させる。
+  - Claude: `NIX_HOME_MCP_DEFAULT_ENABLED` と force 例外に応じて user scope の `codex` / `jina` / `asana` / `notion` を再設定または remove する（disable 機能がないため）。
   - Gemini: `~/.config/gemini/.gemini/settings.json` の `mcpServers` を upsert し、`~/.config/gemini/.gemini/mcp-server-enablement.json` で enabled 状態を管理する。
 
 ## Alternatives Considered

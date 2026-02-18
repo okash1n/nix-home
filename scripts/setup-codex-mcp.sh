@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Codex MCP servers setup
-# MCP: jina, claude-mem
+# MCP: jina, claude-mem, asana, notion
 set -euo pipefail
 
 if ! command -v codex >/dev/null 2>&1; then
@@ -16,6 +16,9 @@ fi
 
 CLAUDE_MEM_MCP_SERVER="${CLAUDE_CONFIG_DIR:-$HOME/.config/claude}/plugins/marketplaces/thedotmack/plugin/scripts/mcp-server.cjs"
 JINA_URL="https://mcp.jina.ai/v1?include_tags=search,read&exclude_tools=search_images,search_jina_blog,capture_screenshot_url,search_web"
+ASANA_URL="https://mcp.asana.com/v2/mcp"
+NOTION_URL="https://mcp.notion.com/mcp"
+MCP_REMOTE_COMMAND="${MCP_REMOTE_COMMAND:-npx}"
 CODEX_CONFIG_FILE="${CODEX_HOME:-$HOME/.config/codex}/config.toml"
 MCP_DEFAULT_ENABLED_RAW="${NIX_HOME_MCP_DEFAULT_ENABLED:-0}"
 MCP_FORCE_ENABLED_RAW="${NIX_HOME_MCP_FORCE_ENABLED:-jina,claude-mem}"
@@ -177,6 +180,17 @@ ensure_server_enabled_state() {
 
 is_claude_mem_current() {
   local output
+  if [ "$HAS_JQ" -eq 1 ]; then
+    output=$(codex mcp get claude-mem --json 2>/dev/null || true)
+    [ -n "$output" ] &&
+      jq -e --arg path "$CLAUDE_MEM_MCP_SERVER" '
+        .transport.type == "stdio" and
+        .transport.command == "node" and
+        (.transport.args // []) == [$path]
+      ' >/dev/null <<<"$output"
+    return $?
+  fi
+
   output=$(codex mcp get claude-mem 2>/dev/null || true)
   [ -n "$output" ] &&
     echo "$output" | grep -Fq "transport: stdio" &&
@@ -186,11 +200,62 @@ is_claude_mem_current() {
 
 is_jina_current() {
   local output
+  if [ "$HAS_JQ" -eq 1 ]; then
+    output=$(codex mcp get jina --json 2>/dev/null || true)
+    [ -n "$output" ] &&
+      jq -e --arg url "$JINA_URL" '
+        .transport.type == "streamable_http" and
+        .transport.url == $url and
+        .transport.bearer_token_env_var == "JINA_API_KEY"
+      ' >/dev/null <<<"$output"
+    return $?
+  fi
+
   output=$(codex mcp get jina 2>/dev/null || true)
   [ -n "$output" ] &&
     echo "$output" | grep -Fq "transport: streamable_http" &&
     echo "$output" | grep -Fq "url: $JINA_URL" &&
     echo "$output" | grep -Fq "bearer_token_env_var: JINA_API_KEY"
+}
+
+is_asana_current() {
+  local output
+  if [ "$HAS_JQ" -eq 1 ]; then
+    output=$(codex mcp get asana --json 2>/dev/null || true)
+    [ -n "$output" ] &&
+      jq -e --arg command "$MCP_REMOTE_COMMAND" --arg url "$ASANA_URL" '
+        .transport.type == "stdio" and
+        .transport.command == $command and
+        (.transport.args // []) == ["-y", "mcp-remote", $url]
+      ' >/dev/null <<<"$output"
+    return $?
+  fi
+
+  output=$(codex mcp get asana 2>/dev/null || true)
+  [ -n "$output" ] &&
+    echo "$output" | grep -Fq "transport: stdio" &&
+    echo "$output" | grep -Fq "command: $MCP_REMOTE_COMMAND" &&
+    echo "$output" | grep -Fq "args: -y mcp-remote $ASANA_URL"
+}
+
+is_notion_current() {
+  local output
+  if [ "$HAS_JQ" -eq 1 ]; then
+    output=$(codex mcp get notion --json 2>/dev/null || true)
+    [ -n "$output" ] &&
+      jq -e --arg command "$MCP_REMOTE_COMMAND" --arg url "$NOTION_URL" '
+        .transport.type == "stdio" and
+        .transport.command == $command and
+        (.transport.args // []) == ["-y", "mcp-remote", $url]
+      ' >/dev/null <<<"$output"
+    return $?
+  fi
+
+  output=$(codex mcp get notion 2>/dev/null || true)
+  [ -n "$output" ] &&
+    echo "$output" | grep -Fq "transport: stdio" &&
+    echo "$output" | grep -Fq "command: $MCP_REMOTE_COMMAND" &&
+    echo "$output" | grep -Fq "args: -y mcp-remote $NOTION_URL"
 }
 
 # claude-mem (stdio)
@@ -211,7 +276,30 @@ else
   reconcile_server "jina" --url "$JINA_URL" --bearer-token-env-var JINA_API_KEY
 fi
 
+# Asana/Notion は OAuth が必須で、Codex の URL 直接追加では
+# サーバー側の client registration ポリシーと噛み合わない場合がある。
+# mcp-remote の stdio ブリッジ経由で登録し、初回利用時に OAuth を完了させる。
+if ! command -v "$MCP_REMOTE_COMMAND" >/dev/null 2>&1; then
+  echo "[warn] asana/notion: $MCP_REMOTE_COMMAND not found, skipping"
+else
+  # asana (stdio via mcp-remote)
+  if is_asana_current; then
+    echo "[skip] asana: already up to date"
+  else
+    reconcile_server "asana" -- "$MCP_REMOTE_COMMAND" -y mcp-remote "$ASANA_URL"
+  fi
+
+  # notion (stdio via mcp-remote)
+  if is_notion_current; then
+    echo "[skip] notion: already up to date"
+  else
+    reconcile_server "notion" -- "$MCP_REMOTE_COMMAND" -y mcp-remote "$NOTION_URL"
+  fi
+fi
+
 ensure_server_enabled_state "claude-mem" "$(desired_enabled_for_server "claude-mem")"
 ensure_server_enabled_state "jina" "$(desired_enabled_for_server "jina")"
+ensure_server_enabled_state "asana" "$(desired_enabled_for_server "asana")"
+ensure_server_enabled_state "notion" "$(desired_enabled_for_server "notion")"
 
 echo "=== Codex MCP setup complete ==="
