@@ -72,6 +72,7 @@ in
     ssh-to-age
     deno
     go
+    playwright-driver.browsers
   ]) ++ (with pkgs.llm-agents; [
     # AI CLI tools (from numtide/llm-agents.nix, daily updates)
     codex

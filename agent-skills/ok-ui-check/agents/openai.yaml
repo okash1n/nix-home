@@ -1,0 +1,4 @@
+interface:
+  display_name: "OK UI Check"
+  short_description: "Route UI checks to playwright-cli or agent-browser"
+  default_prompt: "Use $ok-ui-check to pick the right browser CLI and execute UI checks."
