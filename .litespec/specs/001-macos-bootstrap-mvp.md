@@ -62,6 +62,7 @@
 - `make update` は `nix flake update` 後に `build` → `switch` の順で実行する（検証方針「switch 前に build」に準拠）。
 - `make switch` / `make init` は Home Manager activation を通じて、各 AI CLI の MCP セットアップを自動実行する。
 - MCP 自動セットアップ時は `sops-env.sh` から環境変数を読み込み、`launchctl` に `JINA_API_KEY` を同期する。
+- `make switch` / `make init` は Home Manager activation を通じて、`llm-agents` 自動更新用 launchd agent（`com.okash1n.nix-home.llm-agents-update`）を登録・再同期する。
 - MCP の既定モードは `NIX_HOME_MCP_DEFAULT_ENABLED=0`（OFF）とし、`NIX_HOME_MCP_DEFAULT_ENABLED=1` を指定した場合のみ既定ONで同期する。
 - MCP の例外は `NIX_HOME_MCP_FORCE_ENABLED` / `NIX_HOME_MCP_FORCE_DISABLED`（カンマ区切り）で制御し、既定は `NIX_HOME_MCP_FORCE_ENABLED=jina,claude-mem` とする。
 - `make mcp` は上記と同じセットアップ処理を手動で再実行する。
@@ -172,6 +173,7 @@
 - `Terminal.app` の `Hanabi` プロファイルに HackGen 系フォントが設定される。
 - GUI セッションの初回 `make init` 完了時に `Ghostty` が自動起動する。
 - `make switch` 実行時に `Terminal.app` と `Ghostty` が自動起動しない。
+- `make switch` / `make init` 実行後、`com.okash1n.nix-home.llm-agents-update` launchd agent が存在する。
 - `~/.vim/colors/hanabi.vim` が存在し、`~/.vimrc` に `colorscheme hanabi` が入る。
 - `code --list-extensions` に `okash1n.hanabi-theme-vscode` が含まれる。
 - `home/dot_config/vscode/extensions.txt` が存在し、拡張IDを1行1件で保持する。

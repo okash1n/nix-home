@@ -6,6 +6,7 @@
     ../modules/home/git.nix
     ../modules/home/ai-agents.nix
     ../modules/home/mcp.nix
+    ../modules/home/llm-agents-auto-update.nix
     ../modules/home/agent-skills.nix
     ../modules/home/vim.nix
     ../modules/home/ghostty.nix

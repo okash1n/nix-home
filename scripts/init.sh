@@ -349,6 +349,20 @@ maybe_open_ghostty() {
   echo "[nix-home] Ghostty is not available yet; skipping auto-launch."
 }
 
+setup_llm_agents_auto_update() {
+  local setup_script
+  setup_script="$REPO_ROOT_DIR/scripts/setup-llm-agents-auto-update.sh"
+
+  if [ ! -x "$setup_script" ]; then
+    echo "[nix-home] llm-agents auto-update setup script is unavailable: $setup_script"
+    return 0
+  fi
+
+  if ! "$setup_script"; then
+    echo "[nix-home] llm-agents auto-update registration failed (non-fatal)."
+  fi
+}
+
 ensure_login_shell() {
   if [ "$(uname)" != "Darwin" ]; then
     return 0
@@ -481,6 +495,8 @@ else
   echo "Non-macOS is not supported yet."
   exit 1
 fi
+
+setup_llm_agents_auto_update
 
 ensure_login_shell
 

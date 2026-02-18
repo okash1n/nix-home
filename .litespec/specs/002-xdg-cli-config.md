@@ -23,6 +23,7 @@
 - Git template hooks でプロジェクトの `AGENTS.md` から `CLAUDE.md` へのシンボリックリンクを自動作成する。
 - Vim の設定ディレクトリを `~/.config/vim/` に移行する。
 - `athenai` ラッパーコマンドを Nix 管理で提供する。
+- launchd で `llm-agents` 入力の定期更新を実行し、`switch` / `init` 時に未登録なら自動登録する。
 
 ## 非スコープ
 
@@ -108,6 +109,16 @@
 - `scripts/setup-gemini-mcp.sh` は `~/.config/gemini/.gemini/mcp-server-enablement.json` を更新し、`NIX_HOME_MCP_DEFAULT_ENABLED` に応じて server ごとの enabled 状態を反映する。
 - MCP 同期は「既存ならスキップ」ではなく差分再同期（reconcile）を基本とし、キー更新時にも追従する。
 
+### FR-003d llm-agents 入力の定期更新
+
+- `scripts/auto-update-llm-agents.sh` を追加し、`nix flake lock --update-input llm-agents` を実行できるようにする。
+- `scripts/setup-llm-agents-auto-update.sh` を追加し、`~/Library/LaunchAgents/com.okash1n.nix-home.llm-agents-update.plist` を作成・再同期する。
+- launchd agent のスケジュールは毎日 `10:30` / `22:30`（ローカル時刻）とする。
+- launchd agent は `RunAtLoad=true` とし、ログを `~/.local/state/nix-home/llm-agents-auto-update.launchd.log` に出力する。
+- `home.activation.setupLlmAgentsAutoUpdate` を追加し、`make switch` / `make init` 時に未登録なら自動登録する。
+- `scripts/init.sh` は `nix-darwin switch` 後に `setup-llm-agents-auto-update.sh` を実行し、初期化時も登録を試行する。
+- 更新処理は安全側に倒し、`main` 以外のブランチまたは `flake.lock` 以外の追跡変更がある場合は更新をスキップする。
+
 ### FR-004 Git template hooks によるCLAUDE.md自動リンク
 
 - `~/.config/git/template/hooks/` に以下のフックを配置する：
@@ -171,6 +182,8 @@
 - `~/.config/claude/settings.json` の `teammateMode` が未設定の場合、activation 後に `auto` が設定される。
 - `~/.config/gemini/settings.json` に `context.fileName` が設定されている。
 - `make switch` 後、`launchctl getenv JINA_API_KEY` が空でない。
+- `make switch` または `make init` 後、`launchctl print gui/$(id -u)/com.okash1n.nix-home.llm-agents-update` が成功する（環境により `user/$(id -u)` でも可）。
+- `~/Library/LaunchAgents/com.okash1n.nix-home.llm-agents-update.plist` の `StartCalendarInterval` に `{Hour=10, Minute=30}` と `{Hour=22, Minute=30}` が含まれる。
 - `NIX_HOME_MCP_DEFAULT_ENABLED=0 make mcp` 実行後、`codex mcp get jina --json | jq -r '.enabled'` が `true` を返す（force enabled）。
 - `NIX_HOME_MCP_DEFAULT_ENABLED=0 make mcp` 実行後、`claude mcp get jina` が利用可能である（force enabled）。
 - `NIX_HOME_MCP_DEFAULT_ENABLED=0 make mcp` 実行後、`claude mcp get codex` は見つからない状態になる（force 対象外のため user scope から remove）。
@@ -208,6 +221,8 @@
 - 正常系: `NIX_HOME_MCP_DEFAULT_ENABLED=0` でも、`NIX_HOME_MCP_FORCE_ENABLED` に含まれる server は enabled 状態で同期される。
 - 正常系: `NIX_HOME_MCP_DEFAULT_ENABLED=1` では Codex/Claude/Gemini の MCP が enabled 状態で同期される。
 - 正常系: `JINA_API_KEY` を更新した後の `make switch` で、各 CLI の `jina` 設定が新値に追従する。
+- 正常系: `make switch` 後に llm-agents 自動更新 launchd agent が登録済みである。
+- 正常系: `scripts/auto-update-llm-agents.sh` 実行時、`main` ブランチかつ `flake.lock` 以外の追跡変更がない場合のみ `llm-agents` 入力更新を試行する。
 - 正常系: `ghq get` で AGENTS.md を含むリポジトリを clone すると CLAUDE.md が自動作成される。
 - 正常系: `git pull` で AGENTS.md が追加された場合、CLAUDE.md が自動作成される。
 - 正常系: `athenai --help` が実行できる。

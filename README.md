@@ -34,6 +34,7 @@ fi
 - `hanabi-theme` repository の取得または更新（`ghq get -u`、配置先は `~/ghq/github.com/hanabi-works/hanabi-theme`）
 - `zsh` の履歴/キャッシュ用ディレクトリの事前作成（`~/.local/state/zsh` / `~/.cache/zsh`）
 - `nix-darwin` + `home-manager` の適用
+- `llm-agents` 自動更新用 launchd agent の登録（`~/Library/LaunchAgents/com.okash1n.nix-home.llm-agents-update.plist`）
 - GUI セッションの初回適用後に `Ghostty` を自動起動
 - 既存 dotfile 衝突時の自動バックアップ（`*.hm-bak`）
 - Nix Store の自動 GC / 最適化設定の適用（容量増加を抑制）
@@ -48,6 +49,7 @@ fi
 - 個人用 skills: `~/nix-home/agent-skills` をソースとして、`make switch` / `make init` 時に `~/.config/claude/skills/`、`~/.config/codex/skills/`、`~/.config/gemini/.gemini/skills/` へシンボリックリンク同期
 - MCP 同期: `make switch` / `make init` 時に Claude / Codex / Gemini の MCP 設定を自動再同期し、`JINA_API_KEY` を `launchctl` に反映（手動再同期は `make mcp`、既定は `NIX_HOME_MCP_DEFAULT_ENABLED=0` + `NIX_HOME_MCP_FORCE_ENABLED=jina,claude-mem`）
 - MCP サーバー: `jina` / `claude-mem` / `asana` / `notion` を同期（`asana` / `notion` は既定でOFF）。Codex では `asana` / `notion` を `mcp-remote` 経由で登録し、`startup_timeout_sec=60` を設定（`asana` は `ASANA_MCP_CLIENT_ID` / `ASANA_MCP_CLIENT_SECRET` が未設定時は自動で無効化。設定時の既定 callback は `http://127.0.0.1:9554/oauth/callback`）
+- `llm-agents` 入力の定期更新: launchd (`com.okash1n.nix-home.llm-agents-update`) で毎日 `10:30` / `22:30` に `nix flake lock --update-input llm-agents` を実行（`main` 以外のブランチや `flake.lock` 以外の追跡変更がある場合はスキップ）
 - Claude Code Team 機能: `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`（Nix で配布）
 - `git` グローバル設定（`user.name` / `user.email` / global ignore）
 - `Ghostty` 本体（`/Applications/Nix Apps/Ghostty.app`）と `~/.config/ghostty/config`（HackGen + `theme = hanabi`）
@@ -59,6 +61,7 @@ fi
 
 MCP を一時的に有効化したい場合は `NIX_HOME_MCP_DEFAULT_ENABLED=1 make mcp` を実行します。
 強制例外を変更する場合は `NIX_HOME_MCP_FORCE_ENABLED` / `NIX_HOME_MCP_FORCE_DISABLED` を使います（カンマ区切り、`force_disabled` 優先）。
+`llm-agents` 自動更新のログは `~/.local/state/nix-home/llm-agents-auto-update.launchd.log` に出力されます。
 
 `athenai` コマンドは `ATHENAI_REPO`（既定: `~/ghq/github.com/athenai-dev/athenai`）を参照し、
 `bun run --cwd "$ATHENAI_REPO" src/cli/index.ts` をラップします。
