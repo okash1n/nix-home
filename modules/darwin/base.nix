@@ -86,6 +86,13 @@ in
     pkgs.bash
   ];
 
+  # launchd から llm-agents 自動更新後に darwin-rebuild switch を無対話実行するための sudo 設定
+  security.sudo.extraConfig = ''
+    Defaults:${username} !requiretty
+    Cmnd_Alias NIX_HOME_DARWIN_REBUILD = /run/current-system/sw/bin/darwin-rebuild, /etc/profiles/per-user/${username}/bin/darwin-rebuild
+    ${username} ALL=(root) NOPASSWD: NIX_HOME_DARWIN_REBUILD
+  '';
+
   # システム全体の環境変数（GUI アプリからも参照可能）
   environment.variables = xdgCliEnv;
   launchd.user.envVariables = xdgCliEnvLaunchd;

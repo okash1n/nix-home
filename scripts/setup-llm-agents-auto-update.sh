@@ -48,15 +48,15 @@ cat > "$tmp_plist" <<EOF
   <array>
     <dict>
       <key>Hour</key>
-      <integer>10</integer>
+      <integer>6</integer>
       <key>Minute</key>
-      <integer>30</integer>
+      <integer>0</integer>
     </dict>
     <dict>
       <key>Hour</key>
-      <integer>22</integer>
+      <integer>18</integer>
       <key>Minute</key>
-      <integer>30</integer>
+      <integer>0</integer>
     </dict>
   </array>
   <key>StandardOutPath</key>
@@ -124,4 +124,3 @@ else
 fi
 
 "$launchctl_bin" enable "$loaded_domain/$LABEL" >/dev/null 2>&1 || true
-

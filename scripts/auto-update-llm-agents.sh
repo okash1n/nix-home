@@ -7,6 +7,8 @@ TARGET_BRANCH="${NIX_HOME_LLM_AGENTS_UPDATE_BRANCH:-main}"
 STATE_DIR="${NIX_HOME_STATE_DIR:-$HOME/.local/state/nix-home}"
 LOCK_DIR="$STATE_DIR/locks"
 LOCK_PATH="$LOCK_DIR/llm-agents-auto-update.lock"
+AUTO_APPLY_SWITCH="${NIX_HOME_LLM_AGENTS_AUTO_SWITCH:-1}"
+NIX_HOME_USERNAME="${NIX_HOME_USERNAME:-$(id -un 2>/dev/null || echo "$USER")}"
 
 if [ -d "/run/current-system/sw/bin" ]; then
   PATH="/run/current-system/sw/bin:$PATH"
@@ -21,6 +23,37 @@ if [ -d "$HOME/.nix-profile/bin" ]; then
   PATH="$HOME/.nix-profile/bin:$PATH"
 fi
 export PATH
+
+resolve_darwin_rebuild_bin() {
+  if [ -x "/run/current-system/sw/bin/darwin-rebuild" ]; then
+    printf '%s\n' "/run/current-system/sw/bin/darwin-rebuild"
+    return 0
+  fi
+
+  if [ -x "/etc/profiles/per-user/$NIX_HOME_USERNAME/bin/darwin-rebuild" ]; then
+    printf '%s\n' "/etc/profiles/per-user/$NIX_HOME_USERNAME/bin/darwin-rebuild"
+    return 0
+  fi
+
+  if command -v darwin-rebuild >/dev/null 2>&1; then
+    command -v darwin-rebuild
+    return 0
+  fi
+
+  return 1
+}
+
+resolve_flake_target() {
+  local host_short host_cfg
+  host_short="$(hostname -s 2>/dev/null || hostname)"
+  host_cfg="$NIX_HOME_DIR/hosts/darwin/$host_short.nix"
+
+  if [ -f "$host_cfg" ]; then
+    printf '%s\n' "$host_short"
+  else
+    printf '%s\n' "default"
+  fi
+}
 
 timestamp() {
   date '+%Y-%m-%d %H:%M:%S'
@@ -102,3 +135,29 @@ fi
 
 log "[done] flake.lock updated (llm-agents)"
 
+if [ "$AUTO_APPLY_SWITCH" != "1" ]; then
+  log "[info] switch auto-apply is disabled (NIX_HOME_LLM_AGENTS_AUTO_SWITCH=$AUTO_APPLY_SWITCH)"
+  exit 0
+fi
+
+if ! darwin_rebuild_bin="$(resolve_darwin_rebuild_bin)"; then
+  log "[warn] darwin-rebuild not found; skip build/switch"
+  exit 0
+fi
+
+target_name="$(resolve_flake_target)"
+flake_target="$NIX_HOME_DIR#$target_name"
+
+log "[info] building system: $flake_target"
+if ! NIX_HOME_USERNAME="$NIX_HOME_USERNAME" "$darwin_rebuild_bin" build --impure --flake "$flake_target"; then
+  log "[warn] darwin-rebuild build failed; skip switch"
+  exit 0
+fi
+
+log "[info] applying system switch: $flake_target"
+if ! sudo -n NIX_HOME_USERNAME="$NIX_HOME_USERNAME" "$darwin_rebuild_bin" switch --impure --flake "$flake_target"; then
+  log "[warn] sudo non-interactive switch failed; check security.sudo.extraConfig for darwin-rebuild NOPASSWD rule"
+  exit 0
+fi
+
+log "[done] darwin-rebuild switch applied"

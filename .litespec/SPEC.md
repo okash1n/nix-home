@@ -21,7 +21,7 @@
 - `make build` / `make switch` による日常のビルド・適用操作
 - `make update` による flake 入力の更新とビルド・適用
 - `make switch` / `make init` 時の AI CLI MCP 自動同期と `make mcp` による手動再同期
-- launchd による `llm-agents` 入力の定期更新（毎日 `10:30` / `22:30`）
+- launchd による `llm-agents` 入力の定期更新と自動適用（毎日 `06:00` / `18:00`）
 - `~/nix-home/agent-skills` から Claude / Codex / Gemini への skill symlink 同期
 - VS Code の設定（settings/keybindings/snippets）と拡張リストの宣言管理
 - シェル/CLI/フォント/テーマの再現（Ghostty / Terminal.app / Vim / VS Code）
@@ -52,7 +52,7 @@
 - `make update` で flake 入力を更新しビルド・適用できる。
 - `make switch` / `make init` 後に AI CLI の MCP 設定が自動同期される（未導入コマンドはスキップ、既定は `NIX_HOME_MCP_DEFAULT_ENABLED=0` + `NIX_HOME_MCP_FORCE_ENABLED=jina,claude-mem`）。
 - `make mcp` で AI CLI の MCP 設定を手動で再同期できる。
-- `make switch` / `make init` 後、`com.okash1n.nix-home.llm-agents-update` launchd agent が登録済みである。
+- `make switch` / `make init` 後、`com.okash1n.nix-home.llm-agents-update` launchd agent が登録済みで、`llm-agents` 更新時は `darwin-rebuild switch` まで自動適用される。
 
 ## 詳細仕様一覧
 
