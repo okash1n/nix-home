@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Codex MCP servers setup
-# MCP: jina, claude-mem, asana, notion
+# MCP: jina, claude-mem, asana, notion, box
 set -euo pipefail
 
 if ! command -v codex >/dev/null 2>&1; then
@@ -18,6 +18,7 @@ CLAUDE_MEM_MCP_SERVER="${CLAUDE_MEM_MCP_SERVER:-${NIX_HOME_GLOBAL_CLAUDE_CONFIG_
 JINA_URL="https://mcp.jina.ai/v1?include_tags=search,read&exclude_tools=search_images,search_jina_blog,capture_screenshot_url,search_web"
 ASANA_URL="https://mcp.asana.com/v2/mcp"
 NOTION_URL="https://mcp.notion.com/mcp"
+BOX_URL="https://mcp.box.com"
 MCP_REMOTE_COMMAND="${MCP_REMOTE_COMMAND:-npx}"
 MCP_REMOTE_STARTUP_TIMEOUT_SEC="${MCP_REMOTE_STARTUP_TIMEOUT_SEC:-60}"
 ASANA_MCP_CALLBACK_HOST="${ASANA_MCP_CALLBACK_HOST:-127.0.0.1}"
@@ -25,6 +26,11 @@ ASANA_MCP_CALLBACK_PORT="${ASANA_MCP_CALLBACK_PORT:-9554}"
 ASANA_MCP_CLIENT_ID="${ASANA_MCP_CLIENT_ID:-}"
 ASANA_MCP_CLIENT_SECRET="${ASANA_MCP_CLIENT_SECRET:-}"
 ASANA_MCP_CLIENT_INFO_FILE="${ASANA_MCP_CLIENT_INFO_FILE:-$HOME/.mcp-auth/mcp-remote-0.1.37/asana_client_info.json}"
+BOX_MCP_CALLBACK_HOST="${BOX_MCP_CALLBACK_HOST:-127.0.0.1}"
+BOX_MCP_CALLBACK_PORT="${BOX_MCP_CALLBACK_PORT:-9556}"
+BOX_MCP_CLIENT_ID="${BOX_MCP_CLIENT_ID:-}"
+BOX_MCP_CLIENT_SECRET="${BOX_MCP_CLIENT_SECRET:-}"
+BOX_MCP_CLIENT_INFO_FILE="${BOX_MCP_CLIENT_INFO_FILE:-$HOME/.mcp-auth/mcp-remote-0.1.37/box_client_info.json}"
 CODEX_CONFIG_FILE="${CODEX_HOME:-$HOME/.config/codex}/config.toml"
 MCP_DEFAULT_ENABLED_RAW="${NIX_HOME_MCP_DEFAULT_ENABLED:-0}"
 MCP_FORCE_ENABLED_RAW="${NIX_HOME_MCP_FORCE_ENABLED:-jina,claude-mem}"
@@ -39,17 +45,29 @@ normalize_bool() {
   esac
 }
 
+trim_whitespace() {
+  local value="$1"
+  value="${value#"${value%%[![:space:]]*}"}"
+  value="${value%"${value##*[![:space:]]}"}"
+  printf '%s' "$value"
+}
+
 MCP_DEFAULT_ENABLED="$(normalize_bool "$MCP_DEFAULT_ENABLED_RAW")"
 ASANA_STATIC_CLIENT_READY=0
 ASANA_CLIENT_INFO_ARG=""
+BOX_STATIC_CLIENT_READY=0
+BOX_CLIENT_INFO_ARG=""
 
 prepare_asana_static_client_info() {
   local tmp
+  local client_id client_secret
 
   ASANA_STATIC_CLIENT_READY=0
   ASANA_CLIENT_INFO_ARG=""
 
-  if [ -z "$ASANA_MCP_CLIENT_ID" ] || [ -z "$ASANA_MCP_CLIENT_SECRET" ]; then
+  client_id="$(trim_whitespace "$ASANA_MCP_CLIENT_ID")"
+  client_secret="$(trim_whitespace "$ASANA_MCP_CLIENT_SECRET")"
+  if [ -z "$client_id" ] || [ -z "$client_secret" ]; then
     return 1
   fi
 
@@ -60,7 +78,7 @@ prepare_asana_static_client_info() {
 
   mkdir -p "$(dirname "$ASANA_MCP_CLIENT_INFO_FILE")"
   tmp=$(mktemp)
-  jq -cn --arg id "$ASANA_MCP_CLIENT_ID" --arg secret "$ASANA_MCP_CLIENT_SECRET" \
+  jq -cn --arg id "$client_id" --arg secret "$client_secret" \
     '{client_id: $id, client_secret: $secret}' > "$tmp" || {
       rm -f "$tmp"
       return 1
@@ -83,6 +101,51 @@ prepare_asana_static_client_info() {
 if ! prepare_asana_static_client_info; then
   ASANA_STATIC_CLIENT_READY=0
   ASANA_CLIENT_INFO_ARG=""
+fi
+
+prepare_box_static_client_info() {
+  local tmp
+  local client_id client_secret
+
+  BOX_STATIC_CLIENT_READY=0
+  BOX_CLIENT_INFO_ARG=""
+
+  client_id="$(trim_whitespace "$BOX_MCP_CLIENT_ID")"
+  client_secret="$(trim_whitespace "$BOX_MCP_CLIENT_SECRET")"
+  if [ -z "$client_id" ] || [ -z "$client_secret" ]; then
+    return 1
+  fi
+
+  if [ "$HAS_JQ" -ne 1 ]; then
+    echo "[warn] box: jq not found; static OAuth client info generation is unavailable"
+    return 1
+  fi
+
+  mkdir -p "$(dirname "$BOX_MCP_CLIENT_INFO_FILE")"
+  tmp=$(mktemp)
+  jq -cn --arg id "$client_id" --arg secret "$client_secret" \
+    '{client_id: $id, client_secret: $secret}' > "$tmp" || {
+      rm -f "$tmp"
+      return 1
+    }
+  chmod 600 "$tmp" || {
+    rm -f "$tmp"
+    return 1
+  }
+  mv "$tmp" "$BOX_MCP_CLIENT_INFO_FILE" || {
+    rm -f "$tmp"
+    return 1
+  }
+  chmod 600 "$BOX_MCP_CLIENT_INFO_FILE" || return 1
+
+  BOX_STATIC_CLIENT_READY=1
+  BOX_CLIENT_INFO_ARG="@$BOX_MCP_CLIENT_INFO_FILE"
+  return 0
+}
+
+if ! prepare_box_static_client_info; then
+  BOX_STATIC_CLIENT_READY=0
+  BOX_CLIENT_INFO_ARG=""
 fi
 
 contains_csv_token() {
@@ -113,6 +176,20 @@ desired_enabled_for_server() {
     if contains_csv_token "$MCP_FORCE_ENABLED_RAW" "$server" || [ "$MCP_DEFAULT_ENABLED" = "1" ]; then
       echo "[warn] asana: forcing disabled because ASANA_MCP_CLIENT_ID / ASANA_MCP_CLIENT_SECRET are not set" >&2
       echo "[warn] asana: Asana MCP v2 requires pre-registered OAuth client info (no dynamic client registration)" >&2
+    fi
+    echo "false"
+    return
+  fi
+
+  if [ "$server" = "box" ] && [ "$BOX_STATIC_CLIENT_READY" -ne 1 ]; then
+    if contains_csv_token "$MCP_FORCE_DISABLED_RAW" "$server"; then
+      echo "false"
+      return
+    fi
+
+    if contains_csv_token "$MCP_FORCE_ENABLED_RAW" "$server" || [ "$MCP_DEFAULT_ENABLED" = "1" ]; then
+      echo "[warn] box: forcing disabled because BOX_MCP_CLIENT_ID / BOX_MCP_CLIENT_SECRET are not set" >&2
+      echo "[warn] box: Box remote MCP requires pre-registered OAuth client info" >&2
     fi
     echo "false"
     return
@@ -243,7 +320,7 @@ ensure_server_enabled_state() {
     return 0
   fi
 
-  current_enabled=$(codex mcp get "$name" --json 2>/dev/null | jq -r '.enabled // empty')
+  current_enabled=$(codex mcp get "$name" --json 2>/dev/null | jq -r '.enabled // empty' 2>/dev/null || true)
   if [ -n "$current_enabled" ] && [ "$current_enabled" = "$desired_enabled" ]; then
     return 0
   fi
@@ -261,7 +338,7 @@ ensure_server_startup_timeout() {
     return 0
   fi
 
-  current_timeout=$(codex mcp get "$name" --json 2>/dev/null | jq -r '.startup_timeout_sec // empty')
+  current_timeout=$(codex mcp get "$name" --json 2>/dev/null | jq -r '.startup_timeout_sec // empty' 2>/dev/null || true)
   if [ "$current_timeout" = "$desired_timeout" ] || [ "$current_timeout" = "${desired_timeout}.0" ]; then
     return 0
   fi
@@ -371,6 +448,31 @@ is_notion_current() {
     echo "$output" | grep -Fq "args: -y mcp-remote $NOTION_URL"
 }
 
+is_box_current() {
+  local output
+  if [ "$HAS_JQ" -eq 1 ]; then
+    output=$(codex mcp get box --json 2>/dev/null || true)
+    [ -n "$output" ] &&
+      jq -e \
+        --arg command "$MCP_REMOTE_COMMAND" \
+        --arg url "$BOX_URL" \
+        --arg port "$BOX_MCP_CALLBACK_PORT" \
+        --arg host "$BOX_MCP_CALLBACK_HOST" \
+        --arg client_info_arg "$BOX_CLIENT_INFO_ARG" '
+          .transport.type == "stdio" and
+          .transport.command == $command and
+          (.transport.args // []) == ["-y", "mcp-remote", $url, $port, "--host", $host, "--static-oauth-client-info", $client_info_arg]
+        ' >/dev/null <<<"$output"
+    return $?
+  fi
+
+  output=$(codex mcp get box 2>/dev/null || true)
+  [ -n "$output" ] &&
+    echo "$output" | grep -Fq "transport: stdio" &&
+    echo "$output" | grep -Fq "command: $MCP_REMOTE_COMMAND" &&
+    echo "$output" | grep -Fq "args: -y mcp-remote $BOX_URL $BOX_MCP_CALLBACK_PORT --host $BOX_MCP_CALLBACK_HOST --static-oauth-client-info $BOX_CLIENT_INFO_ARG"
+}
+
 # claude-mem (stdio)
 if [ ! -f "$CLAUDE_MEM_MCP_SERVER" ]; then
   echo "[warn] claude-mem: mcp-server.cjs not found at $CLAUDE_MEM_MCP_SERVER, skipping"
@@ -389,12 +491,14 @@ else
   reconcile_server "jina" --url "$JINA_URL" --bearer-token-env-var JINA_API_KEY
 fi
 
-# Asana/Notion は OAuth が必須。
+# Asana/Notion/Box は OAuth が必須。
 # Notion は mcp-remote のデフォルト OAuth で接続できるが、
 # Asana v2 は動的クライアント登録を受け付けないため、
 # 事前登録済み client info（ASANA_MCP_CLIENT_ID / ASANA_MCP_CLIENT_SECRET）が必要。
+# Box remote MCP も事前登録済み client info
+# （BOX_MCP_CLIENT_ID / BOX_MCP_CLIENT_SECRET）が必要。
 if ! command -v "$MCP_REMOTE_COMMAND" >/dev/null 2>&1; then
-  echo "[warn] asana/notion: $MCP_REMOTE_COMMAND not found, skipping"
+  echo "[warn] asana/notion/box: $MCP_REMOTE_COMMAND not found, skipping"
 else
   # asana (stdio via mcp-remote)
   if [ "$ASANA_STATIC_CLIENT_READY" -ne 1 ]; then
@@ -415,13 +519,28 @@ else
   else
     reconcile_server "notion" -- "$MCP_REMOTE_COMMAND" -y mcp-remote "$NOTION_URL"
   fi
+
+  # box (stdio via mcp-remote)
+  if [ "$BOX_STATIC_CLIENT_READY" -ne 1 ]; then
+    echo "[warn] box: static OAuth client info is not configured; skip reconcile"
+  elif is_box_current; then
+    echo "[skip] box: already up to date"
+  else
+    reconcile_server \
+      "box" -- \
+      "$MCP_REMOTE_COMMAND" -y mcp-remote "$BOX_URL" "$BOX_MCP_CALLBACK_PORT" \
+      --host "$BOX_MCP_CALLBACK_HOST" \
+      --static-oauth-client-info "$BOX_CLIENT_INFO_ARG"
+  fi
 fi
 
 ensure_server_enabled_state "claude-mem" "$(desired_enabled_for_server "claude-mem")"
 ensure_server_enabled_state "jina" "$(desired_enabled_for_server "jina")"
 ensure_server_enabled_state "asana" "$(desired_enabled_for_server "asana")"
 ensure_server_enabled_state "notion" "$(desired_enabled_for_server "notion")"
+ensure_server_enabled_state "box" "$(desired_enabled_for_server "box")"
 ensure_server_startup_timeout "asana" "$MCP_REMOTE_STARTUP_TIMEOUT_SEC"
 ensure_server_startup_timeout "notion" "$MCP_REMOTE_STARTUP_TIMEOUT_SEC"
+ensure_server_startup_timeout "box" "$MCP_REMOTE_STARTUP_TIMEOUT_SEC"
 
 echo "=== Codex MCP setup complete ==="

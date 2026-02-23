@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Gemini CLI MCP servers setup
-# MCP: codex, jina, claude-mem, asana, notion
+# MCP: codex, jina, claude-mem, asana, notion, box
 set -euo pipefail
 
 GEMINI_HOME="${GEMINI_CLI_HOME:-$HOME/.config/gemini}"
@@ -11,6 +11,7 @@ CLAUDE_MEM_MCP_SERVER="${CLAUDE_MEM_MCP_SERVER:-${NIX_HOME_GLOBAL_CLAUDE_CONFIG_
 JINA_URL="https://mcp.jina.ai/v1?include_tags=search,read&exclude_tools=search_images,search_jina_blog,capture_screenshot_url,search_web"
 ASANA_URL="https://mcp.asana.com/v2/mcp"
 NOTION_URL="https://mcp.notion.com/mcp"
+BOX_URL="https://mcp.box.com"
 MCP_DEFAULT_ENABLED_RAW="${NIX_HOME_MCP_DEFAULT_ENABLED:-0}"
 MCP_FORCE_ENABLED_RAW="${NIX_HOME_MCP_FORCE_ENABLED:-jina,claude-mem}"
 MCP_FORCE_DISABLED_RAW="${NIX_HOME_MCP_FORCE_DISABLED:-}"
@@ -181,7 +182,11 @@ upsert_mcp_server "asana" "$ASANA_CONFIG"
 NOTION_CONFIG=$(jq -nc --arg url "$NOTION_URL" '{url: $url, type: "http"}')
 upsert_mcp_server "notion" "$NOTION_CONFIG"
 
-for server_name in codex jina claude-mem asana notion; do
+# box (http / OAuth)
+BOX_CONFIG=$(jq -nc --arg url "$BOX_URL" '{url: $url, type: "http"}')
+upsert_mcp_server "box" "$BOX_CONFIG"
+
+for server_name in codex jina claude-mem asana notion box; do
   if ! jq -e ".mcpServers.\"$server_name\"" "$SETTINGS_FILE" >/dev/null 2>&1; then
     continue
   fi

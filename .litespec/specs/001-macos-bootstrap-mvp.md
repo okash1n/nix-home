@@ -63,7 +63,7 @@
 - `make switch` / `make init` は Home Manager activation を通じて、各 AI CLI の MCP セットアップを自動実行する。
 - MCP 自動セットアップ時は `sops-env.sh` から環境変数を読み込み、`launchctl` に `JINA_API_KEY` を同期する。
 - `make switch` / `make init` は Home Manager activation を通じて、`llm-agents` 自動更新用 launchd agent（`com.okash1n.nix-home.llm-agents-update`）を登録・再同期する。
-- `llm-agents` 自動更新で `flake.lock` が更新された場合、`darwin-rebuild build` と `darwin-rebuild switch` を自動実行する。
+- `llm-agents` 自動更新は、専用 clean worktree 上で `nix flake lock --update-input llm-agents` を実行し、`home-manager switch` を自動実行する。
 - MCP の既定モードは `NIX_HOME_MCP_DEFAULT_ENABLED=0`（OFF）とし、`NIX_HOME_MCP_DEFAULT_ENABLED=1` を指定した場合のみ既定ONで同期する。
 - MCP の例外は `NIX_HOME_MCP_FORCE_ENABLED` / `NIX_HOME_MCP_FORCE_DISABLED`（カンマ区切り）で制御し、既定は `NIX_HOME_MCP_FORCE_ENABLED=jina,claude-mem` とする。
 - `make mcp` は上記と同じセットアップ処理を手動で再実行する。
@@ -175,7 +175,7 @@
 - GUI セッションの初回 `make init` 完了時に `Ghostty` が自動起動する。
 - `make switch` 実行時に `Terminal.app` と `Ghostty` が自動起動しない。
 - `make switch` / `make init` 実行後、`com.okash1n.nix-home.llm-agents-update` launchd agent が存在する。
-- `llm-agents` 自動更新で `flake.lock` に差分が発生した場合、自動で `darwin-rebuild switch` が完了する。
+- `llm-agents` 自動更新実行時、作業中ワークツリーに依存せず自動で `home-manager switch` が完了し、`codex` / `claude` / `gemini` が更新される。
 - `~/.vim/colors/hanabi.vim` が存在し、`~/.vimrc` に `colorscheme hanabi` が入る。
 - `code --list-extensions` に `okash1n.hanabi-theme-vscode` が含まれる。
 - `home/dot_config/vscode/extensions.txt` が存在し、拡張IDを1行1件で保持する。

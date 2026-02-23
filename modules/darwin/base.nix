@@ -28,6 +28,7 @@ let
     GEMINI_CLI_HOME = "$HOME/.config/gemini";
     HAPPY_HOME_DIR = "$HOME/.config/happy";
     NIX_HOME_AGENT_SKILLS_DIR = "$HOME/nix-home/agent-skills";
+    NIX_HOME_LLM_AGENTS_AUTO_SWITCH = "1";
     NIX_HOME_MCP_DEFAULT_ENABLED = "0";
     NIX_HOME_MCP_FORCE_ENABLED = "jina,claude-mem";
     NIX_HOME_MCP_FORCE_DISABLED = "";
@@ -40,6 +41,7 @@ let
     GEMINI_CLI_HOME = "/Users/${username}/.config/gemini";
     HAPPY_HOME_DIR = "/Users/${username}/.config/happy";
     NIX_HOME_AGENT_SKILLS_DIR = "/Users/${username}/nix-home/agent-skills";
+    NIX_HOME_LLM_AGENTS_AUTO_SWITCH = "1";
     NIX_HOME_MCP_DEFAULT_ENABLED = "0";
     NIX_HOME_MCP_FORCE_ENABLED = "jina,claude-mem";
     NIX_HOME_MCP_FORCE_DISABLED = "";
@@ -86,7 +88,7 @@ in
     pkgs.bash
   ];
 
-  # launchd から llm-agents 自動更新後に darwin-rebuild switch を無対話実行するための sudo 設定
+  # 将来の無対話 darwin-rebuild 運用に備えた sudo 設定
   security.sudo.extraConfig = ''
     Defaults:${username} !requiretty
     Cmnd_Alias NIX_HOME_DARWIN_REBUILD = /run/current-system/sw/bin/darwin-rebuild, /etc/profiles/per-user/${username}/bin/darwin-rebuild

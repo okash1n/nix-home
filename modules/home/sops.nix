@@ -11,6 +11,8 @@
     secrets.vsce-pat = {};
     secrets.asana-mcp-client-id = {};
     secrets.asana-mcp-client-secret = {};
+    secrets.box-mcp-client-id = {};
+    secrets.box-mcp-client-secret = {};
 
     templates."sops-env.sh" = {
       mode = "0400";
@@ -19,6 +21,8 @@ export JINA_API_KEY="${config.sops.placeholder.jina-api-key}"
 export VSCE_PAT="${config.sops.placeholder.vsce-pat}"
 export ASANA_MCP_CLIENT_ID="${config.sops.placeholder.asana-mcp-client-id}"
 export ASANA_MCP_CLIENT_SECRET="${config.sops.placeholder.asana-mcp-client-secret}"
+export BOX_MCP_CLIENT_ID="${config.sops.placeholder.box-mcp-client-id}"
+export BOX_MCP_CLIENT_SECRET="${config.sops.placeholder.box-mcp-client-secret}"
 '';
     };
   };

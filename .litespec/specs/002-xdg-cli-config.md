@@ -100,12 +100,15 @@
 - MCP 既定有効状態は `NIX_HOME_MCP_DEFAULT_ENABLED` で制御する（既定: `0` = OFF、`1` = ON）。
 - MCP 例外は `NIX_HOME_MCP_FORCE_ENABLED` / `NIX_HOME_MCP_FORCE_DISABLED`（カンマ区切り）で制御する（既定: `NIX_HOME_MCP_FORCE_ENABLED=jina,claude-mem`）。
 - `scripts/setup-codex-mcp.sh` は Codex の `jina` MCP を streamable HTTP + `bearer_token_env_var=JINA_API_KEY` で再設定し、`config.toml` の `enabled` フラグを `NIX_HOME_MCP_DEFAULT_ENABLED` に追従させる。
-- `scripts/setup-codex-mcp.sh` は Codex の `asana` / `notion` MCP を `mcp-remote`（stdio bridge）で再設定し、`enabled` フラグを `NIX_HOME_MCP_DEFAULT_ENABLED` と force 例外に追従させる。加えて `startup_timeout_sec` を既定 `60` 秒で設定し、初回起動時の handshake timeout を緩和する。
+- `scripts/setup-codex-mcp.sh` は Codex の `asana` / `notion` / `box` MCP を `mcp-remote`（stdio bridge）で再設定し、`enabled` フラグを `NIX_HOME_MCP_DEFAULT_ENABLED` と force 例外に追従させる。加えて `startup_timeout_sec` を既定 `60` 秒で設定し、初回起動時の handshake timeout を緩和する。
 - `asana` は Asana MCP v2 の制約（dynamic client registration 非対応）により、`ASANA_MCP_CLIENT_ID` / `ASANA_MCP_CLIENT_SECRET` がない場合は Codex で強制 `enabled=false` とし、起動失敗を回避する。
 - `ASANA_MCP_CLIENT_ID` / `ASANA_MCP_CLIENT_SECRET` がある場合、`setup-codex-mcp.sh` は `--static-oauth-client-info @<path>` を使って Asana を登録する（`ASANA_MCP_CLIENT_INFO_FILE` / `ASANA_MCP_CALLBACK_HOST` / `ASANA_MCP_CALLBACK_PORT` で上書き可、既定 callback は `http://127.0.0.1:9554/oauth/callback`）。
-- `scripts/setup-claude-mcp.sh` は Claude の user scope `codex` / `jina` / `asana` / `notion` MCP を再設定または remove し、`NIX_HOME_MCP_DEFAULT_ENABLED` と force 例外に追従させる（Claude CLI に disable 機能がないため）。
+- `box` は Box remote MCP の制約（統合資格情報が必要）により、`BOX_MCP_CLIENT_ID` / `BOX_MCP_CLIENT_SECRET` がない場合は Codex で強制 `enabled=false` とし、起動失敗を回避する。
+- `BOX_MCP_CLIENT_ID` / `BOX_MCP_CLIENT_SECRET` がある場合、`setup-codex-mcp.sh` は `--static-oauth-client-info @<path>` を使って Box を登録する（`BOX_MCP_CLIENT_INFO_FILE` / `BOX_MCP_CALLBACK_HOST` / `BOX_MCP_CALLBACK_PORT` で上書き可、既定 callback は `http://127.0.0.1:9556/oauth/callback`）。
+- `ASANA_MCP_CLIENT_ID` / `ASANA_MCP_CLIENT_SECRET` / `BOX_MCP_CLIENT_ID` / `BOX_MCP_CLIENT_SECRET` は `sops-env.sh` から供給し、空白のみの値は未設定として扱う。
+- `scripts/setup-claude-mcp.sh` は Claude の user scope `codex` / `jina` / `asana` / `notion` / `box` MCP を再設定または remove し、`NIX_HOME_MCP_DEFAULT_ENABLED` と force 例外に追従させる（Claude CLI に disable 機能がないため）。
 - `scripts/setup-gemini-mcp.sh` は `~/.config/gemini/.gemini/settings.json` の `mcpServers` を upsert し、`jina.headers.Authorization` に `Bearer ${JINA_API_KEY}` を保持する。
-- `scripts/setup-gemini-mcp.sh` は `asana` / `notion` を `https://mcp.asana.com/v2/mcp` / `https://mcp.notion.com/mcp` の HTTP MCP として upsert する。
+- `scripts/setup-gemini-mcp.sh` は `asana` / `notion` / `box` を `https://mcp.asana.com/v2/mcp` / `https://mcp.notion.com/mcp` / `https://mcp.box.com` の HTTP MCP として upsert する。
 - `scripts/setup-gemini-mcp.sh` は `~/.config/gemini/.gemini/mcp-server-enablement.json` を更新し、`NIX_HOME_MCP_DEFAULT_ENABLED` に応じて server ごとの enabled 状態を反映する。
 - MCP 同期は「既存ならスキップ」ではなく差分再同期（reconcile）を基本とし、キー更新時にも追従する。
 
@@ -117,9 +120,9 @@
 - launchd agent は `RunAtLoad=true` とし、ログを `~/.local/state/nix-home/llm-agents-auto-update.launchd.log` に出力する。
 - `home.activation.setupLlmAgentsAutoUpdate` を追加し、`make switch` / `make init` 時に未登録なら自動登録する。
 - `scripts/init.sh` は `nix-darwin switch` 後に `setup-llm-agents-auto-update.sh` を実行し、初期化時も登録を試行する。
-- `scripts/auto-update-llm-agents.sh` は `flake.lock` 更新後に `darwin-rebuild build` / `darwin-rebuild switch` を実行して自動適用する。
-- `darwin-rebuild switch` を launchd から無対話実行できるよう、`modules/darwin/base.nix` で `security.sudo.extraConfig` に `NOPASSWD` ルールを設定する。
-- 更新処理は安全側に倒し、`main` 以外のブランチまたは `flake.lock` 以外の追跡変更がある場合は更新をスキップする。
+- `scripts/auto-update-llm-agents.sh` は `~/nix-home` とは別の専用 clean worktree を使って `nix flake lock --update-input llm-agents` を実行し、`home-manager switch --flake <worktree>#<username>` を自動実行する。
+- system 設定の適用（`darwin-rebuild switch`）は手動運用とし、定期ジョブの対象外とする。
+- 更新処理は `NIX_HOME_LLM_AGENTS_UPDATE_REMOTE/NIX_HOME_LLM_AGENTS_UPDATE_BRANCH` を基準に専用 worktree を毎回クリーン化して実行し、`~/nix-home` 側のブランチや追跡変更の有無に依存しない。
 
 ### FR-004 Git template hooks によるCLAUDE.md自動リンク
 
@@ -186,12 +189,13 @@
 - `make switch` 後、`launchctl getenv JINA_API_KEY` が空でない。
 - `make switch` または `make init` 後、`launchctl print gui/$(id -u)/com.okash1n.nix-home.llm-agents-update` が成功する（環境により `user/$(id -u)` でも可）。
 - `~/Library/LaunchAgents/com.okash1n.nix-home.llm-agents-update.plist` の `StartCalendarInterval` に `{Hour=6, Minute=0}` と `{Hour=18, Minute=0}` が含まれる。
-- `scripts/auto-update-llm-agents.sh` 実行で `flake.lock` 更新が発生した場合、ログに `darwin-rebuild switch applied` が出力される。
+- `scripts/auto-update-llm-agents.sh` 実行時、`~/nix-home` に `flake.lock` 以外の追跡変更があっても専用 clean worktree 側で処理が継続される。
+- `scripts/auto-update-llm-agents.sh` 実行で `home-manager switch applied` がログに出力される。
 - `NIX_HOME_MCP_DEFAULT_ENABLED=0 make mcp` 実行後、`codex mcp get jina --json | jq -r '.enabled'` が `true` を返す（force enabled）。
 - `NIX_HOME_MCP_DEFAULT_ENABLED=0 make mcp` 実行後、`claude mcp get jina` が利用可能である（force enabled）。
 - `NIX_HOME_MCP_DEFAULT_ENABLED=0 make mcp` 実行後、`claude mcp get codex` は見つからない状態になる（force 対象外のため user scope から remove）。
-- `NIX_HOME_MCP_DEFAULT_ENABLED=0 make mcp` 実行後、`jq -r '.jina.enabled, .\"claude-mem\".enabled, .codex.enabled' ~/.config/gemini/.gemini/mcp-server-enablement.json` が `true, true, false` を返す。
-- `NIX_HOME_MCP_DEFAULT_ENABLED=0 make mcp` 実行後、`codex mcp get asana --json | jq -r '.enabled'` と `codex mcp get notion --json | jq -r '.enabled'` が `false` を返す。
+- `NIX_HOME_MCP_DEFAULT_ENABLED=0 make mcp` 実行後、`jq -r '.jina.enabled, .\"claude-mem\".enabled, .codex.enabled, .box.enabled' ~/.config/gemini/.gemini/mcp-server-enablement.json` が `true, true, false, false` を返す。
+- `NIX_HOME_MCP_DEFAULT_ENABLED=0 make mcp` 実行後、`codex mcp get asana --json` / `codex mcp get notion --json` / `codex mcp get box --json` が取得できる場合、各 `.enabled` は `false` である（未登録時は取得失敗を許容）。
 - `NIX_HOME_MCP_DEFAULT_ENABLED=0 make mcp` 実行後でも、`NIX_HOME_MCP_FORCE_ENABLED` に含まれる server（既定: `jina`, `claude-mem`）は enabled 状態で維持される。
 - `NIX_HOME_MCP_DEFAULT_ENABLED=1 make mcp` 実行後、`codex mcp get jina` で `bearer_token_env_var: JINA_API_KEY` が確認できる。
 - `NIX_HOME_MCP_DEFAULT_ENABLED=1 make mcp` 実行後、`jq '.mcpServers.jina.headers.Authorization' ~/.config/gemini/.gemini/settings.json` が `"Bearer ${JINA_API_KEY}"` を返す。
@@ -225,8 +229,8 @@
 - 正常系: `NIX_HOME_MCP_DEFAULT_ENABLED=1` では Codex/Claude/Gemini の MCP が enabled 状態で同期される。
 - 正常系: `JINA_API_KEY` を更新した後の `make switch` で、各 CLI の `jina` 設定が新値に追従する。
 - 正常系: `make switch` 後に llm-agents 自動更新 launchd agent が登録済みである。
-- 正常系: `scripts/auto-update-llm-agents.sh` 実行時、`main` ブランチかつ `flake.lock` 以外の追跡変更がない場合のみ `llm-agents` 入力更新を試行する。
-- 正常系: `scripts/auto-update-llm-agents.sh` 実行で `flake.lock` が更新された場合、`darwin-rebuild build/switch` が連続実行される。
+- 正常系: `scripts/auto-update-llm-agents.sh` 実行時、`~/nix-home` 側のブランチや追跡変更に依存せず、専用 clean worktree 上で `llm-agents` 入力更新を試行する。
+- 正常系: `scripts/auto-update-llm-agents.sh` 実行で、`~/nix-home` のワークツリーが dirty でも `home-manager switch` が実行される。
 - 正常系: `ghq get` で AGENTS.md を含むリポジトリを clone すると CLAUDE.md が自動作成される。
 - 正常系: `git pull` で AGENTS.md が追加された場合、CLAUDE.md が自動作成される。
 - 正常系: `athenai --help` が実行できる。

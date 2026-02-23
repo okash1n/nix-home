@@ -20,8 +20,8 @@
 - MCP の例外は `NIX_HOME_MCP_FORCE_ENABLED` / `NIX_HOME_MCP_FORCE_DISABLED` で制御し、既定は `NIX_HOME_MCP_FORCE_ENABLED=jina,claude-mem` とする。
 - MCP 設定は「スキップ」ではなく再同期（reconcile）を基本にする。
   - Codex: `jina` を streamable HTTP + `bearer_token_env_var=JINA_API_KEY` で設定し、`enabled` フラグを `NIX_HOME_MCP_DEFAULT_ENABLED` に追従させる。
-  - Codex: `asana` / `notion` は `mcp-remote`（stdio bridge）で設定し、`enabled` フラグを `NIX_HOME_MCP_DEFAULT_ENABLED` に追従させる。`asana` は Asana MCP v2 の制約（dynamic client registration 非対応）により、`ASANA_MCP_CLIENT_ID` / `ASANA_MCP_CLIENT_SECRET` がない場合は強制 `enabled=false` とする。
-  - Claude: `NIX_HOME_MCP_DEFAULT_ENABLED` と force 例外に応じて user scope の `codex` / `jina` / `asana` / `notion` を再設定または remove する（disable 機能がないため）。
+  - Codex: `asana` / `notion` / `box` は `mcp-remote`（stdio bridge）で設定し、`enabled` フラグを `NIX_HOME_MCP_DEFAULT_ENABLED` に追従させる。`asana` は Asana MCP v2 の制約（dynamic client registration 非対応）により、`ASANA_MCP_CLIENT_ID` / `ASANA_MCP_CLIENT_SECRET` がない場合は強制 `enabled=false` とする。`box` は統合資格情報が必須のため、`BOX_MCP_CLIENT_ID` / `BOX_MCP_CLIENT_SECRET` がない場合は強制 `enabled=false` とする。
+  - Claude: `NIX_HOME_MCP_DEFAULT_ENABLED` と force 例外に応じて user scope の `codex` / `jina` / `asana` / `notion` / `box` を再設定または remove する（disable 機能がないため）。
   - Gemini: `~/.config/gemini/.gemini/settings.json` の `mcpServers` を upsert し、`~/.config/gemini/.gemini/mcp-server-enablement.json` で enabled 状態を管理する。
 
 ## Alternatives Considered
@@ -34,6 +34,6 @@
 
 - `make switch` / `make init` で MCP 設定が自動同期され、手動の `make mcp` は再同期用途に限定される。
 - `JINA_API_KEY` 更新後の追従性が改善され、Codex の Jina 認証失敗を回避しやすくなる。
-- Asana 用 OAuth クレデンシャル未設定時は Codex 側で `asana` が自動無効化されるため、MCP 起動失敗でセッション全体がノイズ化しにくくなる。
+- Asana/Box 用 OAuth クレデンシャル未設定時は Codex 側で `asana` / `box` が自動無効化されるため、MCP 起動失敗でセッション全体がノイズ化しにくくなる。
 - MCP 設定不整合の自己修復が可能になる一方、各 CLI 設定への再書き込み頻度は増える。
 - Claude は既定OFF時に server remove となるため、既定ON運用へ切り替える際は `NIX_HOME_MCP_DEFAULT_ENABLED=1 make mcp`（または `make switch`）が必要になる。

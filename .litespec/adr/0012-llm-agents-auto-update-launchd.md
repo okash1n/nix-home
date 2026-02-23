@@ -12,13 +12,13 @@
 
 ## Decision
 
-- `scripts/auto-update-llm-agents.sh` を追加し、`nix flake lock --update-input llm-agents` を実行し、差分が出た場合は `darwin-rebuild build/switch` まで自動実行する。
+- `scripts/auto-update-llm-agents.sh` は `~/nix-home` とは別の専用 clean worktree を使って `nix flake lock --update-input llm-agents` を実行し、`home-manager switch` を自動実行する。
 - `scripts/setup-llm-agents-auto-update.sh` を追加し、`~/Library/LaunchAgents/com.okash1n.nix-home.llm-agents-update.plist` を生成・再同期する。
 - launchd の `StartCalendarInterval` は 2 本（`06:00` / `18:00`）で構成し、`RunAtLoad=true` を有効化する。
 - Home Manager に `home.activation.setupLlmAgentsAutoUpdate` を追加し、`make switch` / `make init`（= switch 経由）時に毎回登録チェックを実施する。
 - `scripts/init.sh` にもセットアップスクリプト呼び出しを追加し、初期化時に明示的に登録処理を試行する。
-- `darwin-rebuild switch` を launchd から無対話実行できるよう、`modules/darwin/base.nix` の `security.sudo.extraConfig` に `darwin-rebuild` の `NOPASSWD` ルールを追加する。
-- 自動更新スクリプトは安全側で動作し、`main` 以外のブランチまたは `flake.lock` 以外の追跡変更がある場合は更新をスキップする。
+- 自動更新スクリプトは `NIX_HOME_LLM_AGENTS_UPDATE_REMOTE/NIX_HOME_LLM_AGENTS_UPDATE_BRANCH` を基準に専用 worktree を毎回クリーン化して実行し、`~/nix-home` 側のブランチや追跡変更の有無に依存しない。
+- system 設定の適用（`darwin-rebuild switch`）は手動運用に分離する。
 
 ## Alternatives Considered
 
@@ -28,7 +28,7 @@
 
 ## Consequences
 
-- `llm-agents` 入力の更新と system 適用（`darwin-rebuild switch`）を 1 日 2 回自動試行できる。
+- `llm-agents` 入力更新と Home Manager 適用（`home-manager switch`）を 1 日 2 回自動試行できる。
 - `make switch` / `make init` 実行時に launchd 未登録状態が残りにくくなる。
-- `flake.lock` は自動更新対象になるため、手元作業中の変更状況によっては更新がスキップされる（安全優先）。
-- `darwin-rebuild` への `NOPASSWD` 付与により、ユーザーセッションから無対話で system 適用できる一方、sudo 権限の境界は緩くなる。
+- `~/nix-home` 側の手元変更と自動更新処理を分離できるため、作業中でも定期更新フローを継続しやすい。
+- 定期ジョブは root 権限に依存しないため、App Management 制約による停止要因を切り離せる。

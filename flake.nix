@@ -20,6 +20,13 @@
       lib = nixpkgs.lib;
       system = "aarch64-darwin";
       defaultUsername = "okash1n";
+      unfreeNames = [
+        "claude-code"
+        "codex"
+        "gemini-cli"
+        "vscode"
+        "vscode-unwrapped"
+      ];
       # builtins.getEnv は --impure フラグが必須（pure evaluation では常に空文字列）
       # 使用例: NIX_HOME_USERNAME=other make switch
       username =
@@ -52,8 +59,34 @@
       mkHost = file:
         let host = lib.removeSuffix ".nix" file;
         in { name = host; value = mkDarwin host; };
+
+      mkHomePkgs = targetSystem: import nixpkgs {
+        system = targetSystem;
+        overlays = [ llm-agents.overlays.default ];
+        config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) unfreeNames;
+      };
+
+      mkHome = user: home-manager.lib.homeManagerConfiguration {
+        pkgs = mkHomePkgs system;
+        extraSpecialArgs = { username = user; };
+        modules = [
+          sops-nix.homeManagerModules.sops
+          ./home/default.nix
+        ];
+      };
+
+      mkHomeEntry = user: {
+        name = user;
+        value = mkHome user;
+      };
+
+      homeConfigUsers = lib.unique [
+        defaultUsername
+        username
+      ];
     in
     {
       darwinConfigurations = builtins.listToAttrs (map mkHost hostFiles);
+      homeConfigurations = builtins.listToAttrs (map mkHomeEntry homeConfigUsers);
     };
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Claude Code MCP servers setup
-# MCP: codex, jina, asana, notion
+# MCP: codex, jina, asana, notion, box
 set -euo pipefail
 
 if ! command -v claude >/dev/null 2>&1; then
@@ -15,6 +15,7 @@ MCP_FORCE_DISABLED_RAW="${NIX_HOME_MCP_FORCE_DISABLED:-}"
 JINA_URL="https://mcp.jina.ai/v1?include_tags=search,read&exclude_tools=search_images,search_jina_blog,capture_screenshot_url,search_web"
 ASANA_URL="https://mcp.asana.com/v2/mcp"
 NOTION_URL="https://mcp.notion.com/mcp"
+BOX_URL="https://mcp.box.com"
 
 normalize_bool() {
   case "${1:-}" in
@@ -109,6 +110,15 @@ is_notion_current() {
     echo "$output" | grep -Fq "URL: $NOTION_URL"
 }
 
+is_box_current() {
+  local output
+  output=$(claude mcp get box 2>/dev/null || true)
+  [ -n "$output" ] &&
+    echo "$output" | grep -Fq "Scope: User config" &&
+    echo "$output" | grep -Fq "Type: http" &&
+    echo "$output" | grep -Fq "URL: $BOX_URL"
+}
+
 if [ "$(desired_enabled_for_server "codex")" = "true" ]; then
   # codex (stdio)
   if is_codex_current; then
@@ -163,6 +173,18 @@ if [ "$(desired_enabled_for_server "notion")" = "true" ]; then
   fi
 else
   remove_user_server "notion"
+fi
+
+if [ "$(desired_enabled_for_server "box")" = "true" ]; then
+  if is_box_current; then
+    echo "[skip] box: already up to date"
+  else
+    remove_user_server "box"
+    claude mcp add --scope user --transport http box "$BOX_URL"
+    echo "[done] box: configured"
+  fi
+else
+  remove_user_server "box"
 fi
 
 echo "=== Claude Code MCP setup complete ==="
