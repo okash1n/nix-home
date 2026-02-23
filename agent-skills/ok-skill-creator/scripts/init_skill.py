@@ -4,10 +4,12 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import subprocess
 import sys
 import unicodedata
+from datetime import date
 from pathlib import Path
 
 from generate_openai_yaml import write_openai_yaml
@@ -15,6 +17,7 @@ from generate_openai_yaml import write_openai_yaml
 MAX_SKILL_NAME_LENGTH = 64
 ALLOWED_RESOURCES = {"scripts", "references", "assets"}
 DEFAULT_COMPATIBILITY = "claude,codex,gemini"
+DEFAULT_SOURCE_MANIFEST_PATH = "references/source-manifest.json"
 
 DEFAULT_DESCRIPTION = (
     "[TODO: Explain what this skill does and exactly when to use it. "
@@ -37,6 +40,23 @@ BODY_TEMPLATE = """# {title}
 1. [TODO: Step 1]
 2. [TODO: Step 2]
 3. [TODO: Step 3]
+
+## Source Evidence
+
+- [TODO: Record source snapshots in references/source-manifest.json]
+- [TODO: Add kb note IDs and evidence paths for each external source]
+
+## Implementation Strategy
+
+- [TODO: Compare official CLI / SDK / direct HTTP and choose one]
+- [TODO: Explain why the selected path is best for this skill]
+- [TODO: If official CLI is selected, document Nix attr and install path via ok-search + ok-install]
+
+## API Preflight
+
+- [TODO: Confirm official primary docs before implementation]
+- [TODO: Run minimum viable call with real URL/auth using curl or official CLI/SDK]
+- [TODO: Record success/failure conditions (HTTP code, required headers, auth assumptions)]
 
 ## Agent Compatibility
 
@@ -121,8 +141,8 @@ def parse_resources(raw_resources: str) -> list[str]:
     return deduped
 
 
-def parse_key_values(values: list[str], label: str) -> dict[str, str]:
-    result: dict[str, str] = {}
+def parse_key_values(values: list[str], label: str) -> dict[str, object]:
+    result: dict[str, object] = {}
     for item in values:
         if "=" not in item:
             raise ValueError(f"Invalid --{label} value '{item}'. Expected key=value")
@@ -152,7 +172,7 @@ def create_frontmatter(
     license_name: str | None,
     compatibility: str,
     allowed_tools: str | None,
-    metadata: dict[str, str],
+    metadata: dict[str, object],
 ) -> dict:
     frontmatter: dict = {
         "name": skill_name,
@@ -218,6 +238,55 @@ def create_resource_dirs(skill_dir: Path, resources: list[str], examples: bool) 
             (target / "example.txt").write_text(EXAMPLE_ASSET_TEXT, encoding="utf-8")
 
 
+def resolve_skill_relative_path(skill_dir: Path, raw_path: str, label: str) -> Path:
+    text = raw_path.strip()
+    if not text:
+        raise ValueError(f"{label} must not be empty")
+
+    relative = Path(text)
+    if relative.is_absolute():
+        raise ValueError(f"{label} must be a relative path inside the skill directory")
+
+    skill_root = skill_dir.resolve()
+    target = (skill_dir / relative).resolve()
+
+    try:
+        target.relative_to(skill_root)
+    except ValueError as exc:
+        raise ValueError(f"{label} must stay inside the skill directory") from exc
+    return target
+
+
+def create_source_manifest(skill_dir: Path, manifest_path: str) -> Path:
+    target = resolve_skill_relative_path(
+        skill_dir, manifest_path, "--source-manifest-path"
+    )
+    if target.exists():
+        raise ValueError(f"Source manifest already exists: {target}")
+
+    target.parent.mkdir(parents=True, exist_ok=True)
+
+    today = date.today().isoformat()
+    payload = {
+        "version": 1,
+        "generated_at": today,
+        "sources": [
+            {
+                "id": "example-source",
+                "kind": "web",
+                "uri": "https://example.com/docs",
+                "snapshot": "replace-with-commit-or-version",
+                "retrieved_at": today,
+                "kb_refs": [],
+                "evidence_path": "references/notes/example-source.md",
+                "notes": "Replace this entry with real source evidence before shipping.",
+            }
+        ],
+    }
+    target.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    return target
+
+
 def run_quick_validate(skill_dir: Path) -> bool:
     validator = Path(__file__).with_name("quick_validate.py")
     if not validator.exists():
@@ -278,6 +347,16 @@ def main() -> int:
         action="store_true",
         help="Skip agents/openai.yaml generation",
     )
+    parser.add_argument(
+        "--with-source-manifest",
+        action="store_true",
+        help="Create references/source-manifest.json and register it in metadata",
+    )
+    parser.add_argument(
+        "--source-manifest-path",
+        default=DEFAULT_SOURCE_MANIFEST_PATH,
+        help=f"Relative source manifest path (default: {DEFAULT_SOURCE_MANIFEST_PATH})",
+    )
     args = parser.parse_args()
 
     try:
@@ -285,6 +364,12 @@ def main() -> int:
         validate_skill_name(skill_name)
         resources = parse_resources(args.resources)
         metadata = parse_key_values(args.metadata, "metadata")
+
+        if args.with_source_manifest:
+            if "references" not in resources:
+                resources.append("references")
+            metadata.setdefault("source_manifest", args.source_manifest_path.strip())
+            metadata.setdefault("source_manifest_required", True)
     except ValueError as exc:
         print(f"[ERROR] {exc}")
         return 1
@@ -313,6 +398,14 @@ def main() -> int:
     )
     skill_md = write_skill_md(skill_dir, frontmatter, title_case(skill_name))
     create_resource_dirs(skill_dir, resources, args.examples)
+
+    if args.with_source_manifest:
+        try:
+            source_manifest = create_source_manifest(skill_dir, args.source_manifest_path)
+            print(f"[OK] Created {source_manifest}")
+        except ValueError as exc:
+            print(f"[ERROR] {exc}")
+            return 1
 
     if not args.no_openai_yaml:
         try:

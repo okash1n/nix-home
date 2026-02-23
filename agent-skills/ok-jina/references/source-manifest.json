@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "generated_at": "2026-02-23",
+  "sources": [
+    {
+      "id": "jina-mcp-readme",
+      "kind": "web",
+      "uri": "https://github.com/jina-ai/MCP/blob/main/README.md",
+      "snapshot": "commit:b59ed178608c44571ef5bce1414e2981068ff931",
+      "retrieved_at": "2026-02-23",
+      "kb_refs": [],
+      "evidence_path": "references/jina-mcp-parity.md",
+      "notes": "Tool catalog and API key requirements for read/search tools."
+    },
+    {
+      "id": "jina-mcp-read-impl",
+      "kind": "web",
+      "uri": "https://raw.githubusercontent.com/jina-ai/MCP/main/src/utils/read.ts",
+      "snapshot": "commit:b59ed178608c44571ef5bce1414e2981068ff931;blob:cf2d24befc3f20be0ca845ec38079715cbfb17cb",
+      "retrieved_at": "2026-02-23",
+      "kb_refs": [],
+      "evidence_path": "references/jina-mcp-parity.md",
+      "notes": "read_url and parallel_read_url header/payload behavior."
+    },
+    {
+      "id": "jina-mcp-search-impl",
+      "kind": "web",
+      "uri": "https://raw.githubusercontent.com/jina-ai/MCP/main/src/utils/search.ts",
+      "snapshot": "commit:b59ed178608c44571ef5bce1414e2981068ff931;blob:250fbaba0c971890054d1f11dd9543d2556aa90b",
+      "retrieved_at": "2026-02-23",
+      "kb_refs": [],
+      "evidence_path": "references/jina-mcp-parity.md",
+      "notes": "search_arxiv and search_ssrn request shape against svip.jina.ai."
+    },
+    {
+      "id": "jina-mcp-bibtex-impl",
+      "kind": "web",
+      "uri": "https://raw.githubusercontent.com/jina-ai/MCP/main/src/utils/bibtex.ts",
+      "snapshot": "commit:b59ed178608c44571ef5bce1414e2981068ff931;blob:1c136803170673ac8a085c501f7eb0c3844644fe",
+      "retrieved_at": "2026-02-23",
+      "kb_refs": [],
+      "evidence_path": "references/jina-mcp-parity.md",
+      "notes": "search_bibtex provider selection and deduplication strategy."
+    },
+    {
+      "id": "nix-home-jina-filter",
+      "kind": "local",
+      "uri": "/Users/okash1n/nix-home/scripts/setup-codex-mcp.sh",
+      "snapshot": "git:060a734231b5671d56429cfa989c0d7593de0914",
+      "retrieved_at": "2026-02-23",
+      "kb_refs": [],
+      "evidence_path": "references/jina-mcp-parity.md",
+      "notes": "Current MCP filter: include_tags=search,read and excluded tools."
+    }
+  ]
+}

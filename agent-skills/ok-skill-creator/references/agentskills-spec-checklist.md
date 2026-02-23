@@ -23,6 +23,12 @@
 
 - `SKILL.md` は必須。
 - `scripts/` `references/` `assets/` は任意。
+- 外部根拠を使う skill では `references/source-manifest.json` を推奨。
+
+## 実装方式
+
+- 公式CLI / SDK / 直接HTTP を比較して選定理由を残す。
+- 公式CLIを使う場合は Nix 経由で導入する（`ok-search` + `ok-install`）。
 
 ## 検証コマンド
 

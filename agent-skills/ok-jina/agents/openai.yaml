@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ok Jina"
+  short_description: "Run Jina read/search APIs without MCP"
+  default_prompt: "Use $ok-jina to execute Jina read_url/search_arxiv/search_ssrn/search_bibtex workflows via local scripts without MCP."

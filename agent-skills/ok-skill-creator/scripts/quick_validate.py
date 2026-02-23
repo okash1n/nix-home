@@ -13,16 +13,21 @@ This validator is intentionally stricter than the baseline quick validator:
 from __future__ import annotations
 
 import argparse
+import json
+import re
 import shutil
 import subprocess
 import sys
 import unicodedata
+from datetime import date
 from pathlib import Path
 
 MAX_SKILL_NAME_LENGTH = 64
 MAX_DESCRIPTION_LENGTH = 1024
 MAX_COMPATIBILITY_LENGTH = 500
 REQUIRED_COMPAT_AGENTS = ("claude", "codex", "gemini")
+DEFAULT_SOURCE_MANIFEST_PATH = "references/source-manifest.json"
+ALLOWED_SOURCE_KINDS = {"git", "web", "local", "api", "other"}
 ALLOWED_FIELDS = {
     "name",
     "description",
@@ -31,6 +36,7 @@ ALLOWED_FIELDS = {
     "metadata",
     "allowed-tools",
 }
+ULID_PATTERN = re.compile(r"^[0-9A-HJKMNP-TV-Z]{26}$")
 
 
 def find_skill_md(skill_dir: Path) -> Path | None:
@@ -204,6 +210,160 @@ def validate_metadata_field(metadata: object) -> list[str]:
     return errors
 
 
+def resolve_skill_relative_path(skill_dir: Path, raw_path: str) -> Path:
+    relative = Path(raw_path)
+    if relative.is_absolute():
+        raise ValueError("source manifest path must be relative")
+
+    skill_root = skill_dir.resolve()
+    target = (skill_dir / relative).resolve()
+    try:
+        target.relative_to(skill_root)
+    except ValueError as exc:
+        raise ValueError("source manifest path must stay inside the skill directory") from exc
+    return target
+
+
+def parse_bool_setting(value: object, field_name: str) -> tuple[bool, str | None]:
+    if isinstance(value, bool):
+        return value, None
+
+    if isinstance(value, str):
+        lowered = value.strip().lower()
+        if lowered == "true":
+            return True, None
+        if lowered == "false":
+            return False, None
+
+    return False, f"metadata.{field_name} must be true or false"
+
+
+def is_iso_date(value: object) -> bool:
+    if not isinstance(value, str) or not value.strip():
+        return False
+    try:
+        date.fromisoformat(value.strip())
+    except ValueError:
+        return False
+    return True
+
+
+def validate_source_entry(entry: object, index: int) -> list[str]:
+    errors: list[str] = []
+    prefix = f"source-manifest.sources[{index}]"
+    if not isinstance(entry, dict):
+        return [f"{prefix} must be an object"]
+
+    required_fields = ("id", "kind", "uri", "snapshot", "retrieved_at")
+    for field_name in required_fields:
+        value = entry.get(field_name)
+        if not isinstance(value, str) or not value.strip():
+            errors.append(f"{prefix}.{field_name} must be a non-empty string")
+
+    kind = entry.get("kind")
+    if isinstance(kind, str) and kind.strip() and kind not in ALLOWED_SOURCE_KINDS:
+        allowed = ", ".join(sorted(ALLOWED_SOURCE_KINDS))
+        errors.append(f"{prefix}.kind must be one of: {allowed}")
+
+    if not is_iso_date(entry.get("retrieved_at")):
+        errors.append(f"{prefix}.retrieved_at must be ISO date (YYYY-MM-DD)")
+
+    kb_refs = entry.get("kb_refs")
+    if kb_refs is not None:
+        if not isinstance(kb_refs, list):
+            errors.append(f"{prefix}.kb_refs must be a list when provided")
+        else:
+            for item_index, kb_ref in enumerate(kb_refs):
+                if not isinstance(kb_ref, str) or not kb_ref.strip():
+                    errors.append(f"{prefix}.kb_refs[{item_index}] must be a non-empty string")
+                    continue
+                if not ULID_PATTERN.match(kb_ref.strip()):
+                    errors.append(
+                        f"{prefix}.kb_refs[{item_index}] must be a ULID-like identifier"
+                    )
+
+    return errors
+
+
+def validate_source_manifest(
+    skill_dir: Path,
+    metadata: dict[str, object] | None,
+) -> list[str]:
+    errors: list[str] = []
+    metadata_map = metadata if isinstance(metadata, dict) else {}
+
+    source_manifest_value = metadata_map.get("source_manifest")
+    source_manifest_required_value = metadata_map.get("source_manifest_required", False)
+    source_manifest_required, required_error = parse_bool_setting(
+        source_manifest_required_value,
+        "source_manifest_required",
+    )
+    if required_error:
+        errors.append(required_error)
+        return errors
+
+    manifest_rel_path: str | None = None
+    if source_manifest_value is not None:
+        if not isinstance(source_manifest_value, str) or not source_manifest_value.strip():
+            errors.append("metadata.source_manifest must be a non-empty string path")
+            return errors
+        manifest_rel_path = source_manifest_value.strip()
+
+    default_manifest = skill_dir / DEFAULT_SOURCE_MANIFEST_PATH
+    if manifest_rel_path is None and default_manifest.exists():
+        manifest_rel_path = DEFAULT_SOURCE_MANIFEST_PATH
+
+    if source_manifest_required and manifest_rel_path is None:
+        errors.append(
+            "metadata.source_manifest_required=true requires metadata.source_manifest"
+        )
+        return errors
+
+    if manifest_rel_path is None:
+        return errors
+
+    try:
+        manifest_path = resolve_skill_relative_path(skill_dir, manifest_rel_path)
+    except ValueError as exc:
+        errors.append(str(exc))
+        return errors
+
+    if not manifest_path.exists():
+        errors.append(f"source manifest not found: {manifest_rel_path}")
+        return errors
+    if not manifest_path.is_file():
+        errors.append(f"source manifest is not a file: {manifest_rel_path}")
+        return errors
+
+    try:
+        manifest_data = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        errors.append(f"source manifest is not valid JSON: {exc}")
+        return errors
+
+    if not isinstance(manifest_data, dict):
+        errors.append("source manifest root must be an object")
+        return errors
+
+    version = manifest_data.get("version")
+    if not isinstance(version, int) or version <= 0:
+        errors.append("source manifest 'version' must be a positive integer")
+
+    generated_at = manifest_data.get("generated_at")
+    if generated_at is not None and not is_iso_date(generated_at):
+        errors.append("source manifest 'generated_at' must be ISO date (YYYY-MM-DD)")
+
+    sources = manifest_data.get("sources")
+    if not isinstance(sources, list) or not sources:
+        errors.append("source manifest 'sources' must be a non-empty list")
+        return errors
+
+    for index, entry in enumerate(sources):
+        errors.extend(validate_source_entry(entry, index))
+
+    return errors
+
+
 def validate_frontmatter(metadata: dict, skill_dir: Path) -> list[str]:
     errors: list[str] = []
 
@@ -231,8 +391,14 @@ def validate_frontmatter(metadata: dict, skill_dir: Path) -> list[str]:
     else:
         errors.extend(validate_compatibility(metadata["compatibility"]))
 
+    metadata_map = metadata.get("metadata")
     if "metadata" in metadata:
-        errors.extend(validate_metadata_field(metadata["metadata"]))
+        errors.extend(validate_metadata_field(metadata_map))
+
+    if isinstance(metadata_map, dict):
+        errors.extend(validate_source_manifest(skill_dir, metadata_map))
+    else:
+        errors.extend(validate_source_manifest(skill_dir, None))
 
     return errors
 
