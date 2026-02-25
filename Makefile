@@ -26,7 +26,10 @@ update:
 	$(MAKE) switch
 
 mcp:
-	./scripts/setup-mcp.sh
+	@echo "[info] setup-mcp は廃止されました。ok-mcp-toggle を使用してください。"
+	./agent-skills/ok-mcp-toggle/scripts/mcp_toggle.sh list
+	@echo "[hint] 例1: ./agent-skills/ok-mcp-toggle/scripts/mcp_toggle.sh enable --scope project"
+	@echo "[hint] 例2: ./agent-skills/ok-mcp-toggle/scripts/mcp_toggle.sh add box --preset box --scope project"
 
 secret:
 	./scripts/set-sops-env.sh

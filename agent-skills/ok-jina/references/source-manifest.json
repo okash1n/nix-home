@@ -45,12 +45,12 @@
     {
       "id": "nix-home-jina-filter",
       "kind": "local",
-      "uri": "/Users/okash1n/nix-home/scripts/setup-codex-mcp.sh",
-      "snapshot": "git:060a734231b5671d56429cfa989c0d7593de0914",
-      "retrieved_at": "2026-02-23",
+      "uri": "/Users/okash1n/nix-home/agent-skills/ok-mcp-toggle/scripts/mcp_toggle.sh",
+      "snapshot": "workspace:local",
+      "retrieved_at": "2026-02-25",
       "kb_refs": [],
       "evidence_path": "references/jina-mcp-parity.md",
-      "notes": "Current MCP filter: include_tags=search,read and excluded tools."
+      "notes": "Current Jina preset template defines include_tags=search,read and excluded tools."
     }
   ]
 }

@@ -1,0 +1,117 @@
+{
+  "version": 1,
+  "servers": [
+    {
+      "name": "notion",
+      "scope": "project",
+      "auth": "oauth",
+      "default_enabled": false,
+      "clients_supported": [
+        "claude",
+        "gemini"
+      ],
+      "env_requirements": [],
+      "description": "Notion MCP (HTTP)",
+      "template": {
+        "claude": {
+          "transport": "http",
+          "url": "https://mcp.notion.com/mcp",
+          "headers": []
+        },
+        "gemini": {
+          "type": "http",
+          "url": "https://mcp.notion.com/mcp",
+          "oauth": {
+            "enabled": true,
+            "authorizationUrl": "https://mcp.notion.com/authorize",
+            "tokenUrl": "https://mcp.notion.com/token",
+            "registrationUrl": "https://mcp.notion.com/register"
+          }
+        }
+      },
+      "source": {
+        "kind": "preset",
+        "official_url": "https://developers.notion.com/docs/mcp"
+      }
+    },
+    {
+      "name": "asana",
+      "scope": "project",
+      "auth": "oauth",
+      "default_enabled": false,
+      "clients_supported": [
+        "claude",
+        "gemini"
+      ],
+      "env_requirements": [
+        "ASANA_MCP_CLIENT_ID",
+        "ASANA_MCP_CLIENT_SECRET"
+      ],
+      "description": "Asana MCP (HTTP)",
+      "template": {
+        "claude": {
+          "transport": "http",
+          "url": "https://mcp.asana.com/v2/mcp",
+          "headers": [],
+          "oauth": {
+            "client_id_env": "ASANA_MCP_CLIENT_ID",
+            "client_secret_env": "ASANA_MCP_CLIENT_SECRET",
+            "callback_port": 9554
+          }
+        },
+        "gemini": {
+          "type": "http",
+          "url": "https://mcp.asana.com/mcp",
+          "oauth": {
+            "enabled": true,
+            "authorizationUrl": "https://mcp.asana.com/authorize",
+            "tokenUrl": "https://mcp.asana.com/token",
+            "registrationUrl": "https://mcp.asana.com/register",
+            "scopes": [
+              "default"
+            ]
+          }
+        }
+      },
+      "source": {
+        "kind": "preset",
+        "official_url": "https://developers.asana.com/docs/using-asanas-mcp-server"
+      }
+    },
+    {
+      "name": "box",
+      "scope": "project",
+      "auth": "oauth",
+      "default_enabled": false,
+      "clients_supported": [
+        "claude",
+        "gemini"
+      ],
+      "env_requirements": [
+        "BOX_MCP_CLIENT_ID",
+        "BOX_MCP_CLIENT_SECRET"
+      ],
+      "description": "Box MCP (HTTP)",
+      "template": {
+        "claude": {
+          "transport": "http",
+          "url": "https://mcp.box.com",
+          "headers": [],
+          "oauth": {
+            "client_id_env": "BOX_MCP_CLIENT_ID",
+            "client_secret_env": "BOX_MCP_CLIENT_SECRET",
+            "callback_port": 9556
+          }
+        },
+        "gemini": {
+          "type": "http",
+          "url": "https://mcp.box.com"
+        }
+      },
+      "source": {
+        "kind": "preset",
+        "official_url": "https://developer.box.com/guides/box-ai/mcp/"
+      }
+    }
+  ]
+}

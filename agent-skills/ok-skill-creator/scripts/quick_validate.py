@@ -37,6 +37,11 @@ ALLOWED_FIELDS = {
     "allowed-tools",
 }
 ULID_PATTERN = re.compile(r"^[0-9A-HJKMNP-TV-Z]{26}$")
+REQUIRED_BODY_HEADING_GROUPS = (
+    ("## Trigger Examples", "## トリガー例"),
+    ("## Workflow", "## 作業フロー"),
+    ("## User Interaction Contract", "## ユーザー操作契約"),
+)
 
 
 def find_skill_md(skill_dir: Path) -> Path | None:
@@ -403,6 +408,44 @@ def validate_frontmatter(metadata: dict, skill_dir: Path) -> list[str]:
     return errors
 
 
+def validate_body_contract(body: str) -> list[str]:
+    errors: list[str] = []
+    normalized = body.strip()
+
+    for group in REQUIRED_BODY_HEADING_GROUPS:
+        if not any(heading in normalized for heading in group):
+            labels = " / ".join(group)
+            errors.append(f"SKILL.md body must include section: {labels}")
+
+    if not re.search(
+        r"ユーザー.{0,30}直接.{0,30}(cli|コマンド|スクリプト).{0,30}(要求しない|させない|禁止)",
+        normalized,
+        flags=re.IGNORECASE,
+    ):
+        errors.append(
+            "SKILL.md body must state that users are not required to execute CLI/scripts directly"
+        )
+
+    if not re.search(
+        r"(エージェント|skill).{0,30}(実行|代行|吸収)",
+        normalized,
+    ):
+        errors.append(
+            "SKILL.md body must state that the agent executes/absorbs operational commands"
+        )
+
+    if not re.search(
+        r"(状態変更|変更系|mutating).{0,60}(確認ターン|確認|confirmation|confirm).{0,60}(実行|before|前)",
+        normalized,
+        flags=re.IGNORECASE,
+    ):
+        errors.append(
+            "SKILL.md body must require one confirmation turn before mutating operations"
+        )
+
+    return errors
+
+
 def run_skills_ref_if_available(skill_dir: Path) -> list[str]:
     if shutil.which("skills-ref") is None:
         return []
@@ -443,6 +486,8 @@ def validate_skill(skill_dir: Path, with_skills_ref: bool = True) -> list[str]:
 
     if not body.strip():
         errors.append("SKILL.md body is empty")
+    else:
+        errors.extend(validate_body_contract(body))
 
     if with_skills_ref:
         errors.extend(run_skills_ref_if_available(skill_dir))

@@ -29,9 +29,6 @@ let
     HAPPY_HOME_DIR = "$HOME/.config/happy";
     NIX_HOME_AGENT_SKILLS_DIR = "$HOME/nix-home/agent-skills";
     NIX_HOME_LLM_AGENTS_AUTO_SWITCH = "1";
-    NIX_HOME_MCP_DEFAULT_ENABLED = "0";
-    NIX_HOME_MCP_FORCE_ENABLED = "jina,claude-mem";
-    NIX_HOME_MCP_FORCE_DISABLED = "";
     VIMINIT = "source $HOME/.config/vim/vimrc";
   };
   xdgCliEnvLaunchd = {
@@ -42,9 +39,6 @@ let
     HAPPY_HOME_DIR = "/Users/${username}/.config/happy";
     NIX_HOME_AGENT_SKILLS_DIR = "/Users/${username}/nix-home/agent-skills";
     NIX_HOME_LLM_AGENTS_AUTO_SWITCH = "1";
-    NIX_HOME_MCP_DEFAULT_ENABLED = "0";
-    NIX_HOME_MCP_FORCE_ENABLED = "jina,claude-mem";
-    NIX_HOME_MCP_FORCE_DISABLED = "";
     VIMINIT = "source /Users/${username}/.config/vim/vimrc";
   };
 in

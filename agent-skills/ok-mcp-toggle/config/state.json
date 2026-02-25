@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "servers": {
+    "asana": {
+      "preauth_status": {
+        "claude": "pending_user_auth",
+        "gemini": "ok"
+      },
+      "last_preauth_at": "2026-02-25T06:07:36Z",
+      "last_error": "oauth browser auth required"
+    },
+    "notion": {
+      "preauth_status": {
+        "claude": "pending_user_auth",
+        "gemini": "pending_user_auth"
+      },
+      "last_preauth_at": "2026-02-25T06:07:38Z",
+      "last_error": "oauth browser auth required"
+    },
+    "box": {
+      "preauth_status": {
+        "claude": "ok",
+        "gemini": "ok"
+      },
+      "last_preauth_at": "2026-02-24T17:48:18Z",
+      "last_error": ""
+    }
+  }
+}

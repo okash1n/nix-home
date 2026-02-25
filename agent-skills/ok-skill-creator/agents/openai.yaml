@@ -1,4 +1,4 @@
 interface:
   display_name: "OK Skill Creator"
   short_description: "Create higher-quality, spec-aligned skills"
-  default_prompt: "Use $ok-skill-creator to design and validate a production-ready skill."
+  default_prompt: "Use $ok-skill-creator to design and validate a production-ready skill. The resulting skill must not require users to execute CLI/scripts directly; the agent must absorb and execute operational steps. For mutating operations, require one explicit confirmation turn before execution."

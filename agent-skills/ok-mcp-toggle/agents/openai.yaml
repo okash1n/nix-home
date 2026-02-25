@@ -1,4 +1,4 @@
 interface:
   display_name: "OK MCP Toggle"
-  short_description: "Toggle setup-mcp managed MCPs per project"
-  default_prompt: "Use $ok-mcp-toggle to toggle setup-mcp managed MCP servers for this project, then restore the minimal MCP set."
+  short_description: "Toggle global/project MCPs for claude/gemini with registry+state management"
+  default_prompt: "Use $ok-mcp-toggle to manage MCP servers for claude/gemini in global/project scope. codex is out of scope. Do not ask users to run CLI/scripts directly. Before any mutating action (add/enable/disable/remove/preauth), ask one explicit confirmation turn with scope/clients/ignore policy and only then execute."

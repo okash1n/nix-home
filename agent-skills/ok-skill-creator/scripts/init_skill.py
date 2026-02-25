@@ -41,6 +41,13 @@ BODY_TEMPLATE = """# {title}
 2. [TODO: Step 2]
 3. [TODO: Step 3]
 
+## User Interaction Contract
+
+- ユーザーに直接CLI/スクリプト実行を要求しない。
+- 実行手順はエージェントが吸収し、必要なコマンドはエージェントが実行する。
+- ユーザーへの依頼は意図確認・選択入力に限定する。
+- 状態変更操作は、実行前に必ず1回の確認ターンを挟んでから実行する。
+
 ## Source Evidence
 
 - [TODO: Record source snapshots in references/source-manifest.json]

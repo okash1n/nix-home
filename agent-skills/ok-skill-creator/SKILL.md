@@ -11,6 +11,19 @@ compatibility: claude,codex,gemini
 `~/nix-home/agent-skills` で、Claude/Codex/Gemini の3エージェントから同じように使える Skill を作成・更新する。  
 この skill はシステム側の `skill-creator` の有無を前提にしない。
 
+## Trigger Examples
+
+- 「新しい skill を作って」
+- 「この既存 skill を改善して」
+- 「外部API連携の skill を追加したい」
+
+## User Interaction Contract
+
+- ユーザーに直接 CLI / スクリプト実行を要求しない。
+- 実行手順は Skill 側で吸収し、エージェントが実行を代行する。
+- ユーザーには意図確認と選択入力のみ求める。
+- 状態変更を伴う操作（追加・更新・削除・有効化・無効化など）は、実行前に必ず1回の確認ターンを挟む。
+
 ## 必須要件
 
 - 具体的な利用例を収集し、発火条件を明確化する。
@@ -20,6 +33,9 @@ compatibility: claude,codex,gemini
 - 実装方式は毎回比較して選ぶ（公式CLI / SDK / 直接HTTP）。固定しない。
 - 公式CLIが最適な場合は Nix 経由で導入する（`ok-search` で attr 探索 → `ok-install` で導入）。
 - 外部API系の skill は実装前に必ずプリフライト疎通を行う（実URL・実認証・最小リクエスト）。
+- ユーザーに直接 CLI / スクリプト実行を要求しない（有効化・無効化・設定反映を含む）。
+- 実行手順は Skill 側で吸収し、エージェントがコマンド実行を代行する。
+- ユーザーへの入力要求は「意図確認」「選択肢回答」に限定する。
 - 追加の品質ゲートを適用する:
   - Agent Skills 仕様に沿った frontmatter 検証
   - ディレクトリ名と skill 名の整合検証
@@ -53,6 +69,13 @@ compatibility: claude,codex,gemini
 - 壊れやすい処理: `scripts/`
 - 長文知識: `references/`
 - 出力資産: `assets/`
+
+### 2.5 ユーザー体験契約を先に固定する
+
+- 「ユーザーは何を言うだけで良いか」を1文で定義する。
+- 「ユーザーが手で実行する前提のコマンド」が設計に混ざっていないことを確認する。
+- CLIコマンドは Skill の内部実装として扱い、ユーザー向け手順としては提示しない。
+- 状態変更コマンドは、エージェントが推測で実行せず、確認ターン後にのみ実行する。
 
 ### 3. 雛形を作成する
 
@@ -117,7 +140,7 @@ scripts/init_skill.py <skill-name> --with-source-manifest
 - 直接グローバルインストールはしない
 - `ok-search` で Nix attr を特定する
 - `ok-install` で `~/nix-home` 経由で導入し、`make build` / `make switch` / `command -v` まで確認する
-- Skill 本文には利用するCLIコマンドと失敗時分岐を明記する
+- Skill 本文には利用するCLIコマンドと失敗時分岐を明記する（実行主体は常にエージェント）
 
 ### 6. SKILL.md を仕様意識で記述する
 
@@ -178,6 +201,9 @@ scripts/sync_links.py
 - 外部情報を使う skill では `source-manifest` があり、検証を通る
 - 公式CLI採用時は Nix 経由で導入され、再現手順が Skill に明記されている
 - 外部API系の skill はプリフライト疎通の結果（成功/失敗条件）が Skill または references に記録されている
+- ユーザーに直接CLI実行を要求する記述がない
+- `User Interaction Contract` で「エージェントが実行する」ことが明記されている
+- 状態変更系の実行前確認（確認ターン必須）が `User Interaction Contract` に明記されている
 - 検証スクリプトが通る
 - リソースが最小限で実用的
 - 不要ドキュメントを作っていない

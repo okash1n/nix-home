@@ -47,8 +47,8 @@ fi
 - CLI: `git` `curl` `wget` `jq` `fzf` `fd` `rg` `ghq` `awk` `grep` `sed` `tmux` `dust` `yazi` `node` `pnpm` `bun` `python3` `uv` `caddy` `marp` `vim` `playwright` `codex` `claude` `gemini` `happy` `agent-browser` `athenai`
 - AI CLI の設定ディレクトリ: `~/.config/claude` `~/.config/codex` `~/.config/gemini` `~/.config/happy`
 - 個人用 skills: `~/nix-home/agent-skills` をソースとして、`make switch` / `make init` 時に `~/.config/claude/skills/`、`~/.config/codex/skills/`、`~/.config/gemini/.gemini/skills/` へシンボリックリンク同期
-- MCP 同期: `make switch` / `make init` 時に Claude / Codex / Gemini の MCP 設定を自動再同期し、`JINA_API_KEY` を `launchctl` に反映（手動再同期は `make mcp`、既定は `NIX_HOME_MCP_DEFAULT_ENABLED=0` + `NIX_HOME_MCP_FORCE_ENABLED=jina,claude-mem`）
-- MCP サーバー: `jina` / `claude-mem` / `asana` / `notion` / `box` を同期（`asana` / `notion` / `box` は既定でOFF）。Codex では `asana` / `notion` / `box` を `mcp-remote` 経由で登録し、`startup_timeout_sec=60` を設定（`asana` は `ASANA_MCP_CLIENT_ID` / `ASANA_MCP_CLIENT_SECRET`、`box` は `BOX_MCP_CLIENT_ID` / `BOX_MCP_CLIENT_SECRET` が未設定時に自動で無効化。既定 callback は `asana: http://127.0.0.1:9554/oauth/callback`、`box: http://127.0.0.1:9556/oauth/callback`）
+- MCP 運用: `ok-mcp-toggle` スキルで MCP を global/project scope で有効化/無効化（対象クライアントは `claude` / `gemini`、`codex` は管理対象外）
+- MCP 管理定義: `agent-skills/ok-mcp-toggle/config/registry.json`（動的状態は `agent-skills/ok-mcp-toggle/config/state.json`）
 - `llm-agents` 入力の定期更新: launchd (`com.okash1n.nix-home.llm-agents-update`) で毎日 `06:00` / `18:00` に専用 clean worktree 上で `nix flake lock --update-input llm-agents` を実行し、`home-manager switch` を自動実行（リトライ付き）。作業中の `~/nix-home` ワークツリー状態には依存しない。
 - Claude Code Team 機能: `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`（Nix で配布）
 - `git` グローバル設定（`user.name` / `user.email` / global ignore）
@@ -59,8 +59,14 @@ fi
 - `Vim` の `colorscheme hanabi`（`~/.config/vim/colors/hanabi.vim` / `~/.config/vim/vimrc`）
 - Nix Store の自動メンテナンス（GC / optimise）
 
-MCP を一時的に有効化したい場合は `NIX_HOME_MCP_DEFAULT_ENABLED=1 make mcp` を実行します。
-強制例外を変更する場合は `NIX_HOME_MCP_FORCE_ENABLED` / `NIX_HOME_MCP_FORCE_DISABLED` を使います（カンマ区切り、`force_disabled` 優先）。
+MCP の切り替えは `./agent-skills/ok-mcp-toggle/scripts/mcp_toggle.sh list|add|remove|enable|disable|status|preauth` を使います（`--scope global|project|all` 対応）。
+`enable` で project scope 対象を反映する場合、対話で `.gitignore` / `.git/info/exclude` への ignore 追加有無を選択できます。
+non-interactive 実行では暗黙選択を行わないため、`--clients` と対象MCP、project 時は `--ignore-target` を明示します。
+`oauth` サーバーの `preauth` は設定反映までを自動化し、`status` で `needs-auth` / `pending_user_auth` が出る場合はクライアント側で 1 回ログインが必要です。
+Gemini 向けの `asana` / `notion` は、`/mcp auth` の互換性のため OAuth エンドポイントをサーバー定義に明示して反映します。
+`asana` の endpoint はクライアント別に管理し、Claude は `https://mcp.asana.com/v2/mcp`、Gemini は `https://mcp.asana.com/mcp` を使用します。
+`box` は callback ベースではなく、`https://mcp.box.com` の HTTP MCP として `claude/gemini` に登録します。
+`make mcp` は `ok-mcp-toggle` の入口（管理対象表示）として利用できます。
 `llm-agents` 自動更新のログは `~/.local/state/nix-home/llm-agents-auto-update.launchd.log` に出力されます。
 システム側の変更（nix-darwin）は必要時に `make switch` で手動適用します。
 

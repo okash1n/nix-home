@@ -20,7 +20,8 @@
 - `init.sh` と `make init` による一発初期化
 - `make build` / `make switch` による日常のビルド・適用操作
 - `make update` による flake 入力の更新とビルド・適用
-- `make switch` / `make init` 時の AI CLI MCP 自動同期と `make mcp` による手動再同期
+- `make mcp` と `ok-mcp-toggle` による MCP 管理導線
+- `ok-mcp-toggle` による MCP レジストリ管理（`global/project` 両対応、`claude` / `gemini` 対象、対話中心運用）
 - launchd による `llm-agents` 入力の定期更新と Home Manager 自動適用（毎日 `06:00` / `18:00`、作業ツリー非依存）
 - `~/nix-home/agent-skills` から Claude / Codex / Gemini への skill symlink 同期
 - VS Code の設定（settings/keybindings/snippets）と拡張リストの宣言管理
@@ -50,8 +51,8 @@
 - `make build` でビルドが成功する。
 - `make switch` でシステム適用が成功する。
 - `make update` で flake 入力を更新しビルド・適用できる。
-- `make switch` / `make init` 後に AI CLI の MCP 設定が自動同期される（未導入コマンドはスキップ、既定は `NIX_HOME_MCP_DEFAULT_ENABLED=0` + `NIX_HOME_MCP_FORCE_ENABLED=jina,claude-mem`）。
-- `make mcp` で AI CLI の MCP 設定を手動で再同期できる。
+- `make mcp` で `ok-mcp-toggle` の管理対象を確認できる。
+- MCP は `ok-mcp-toggle` で有効化/無効化/状態確認できる。
 - `make switch` / `make init` 後、`com.okash1n.nix-home.llm-agents-update` launchd agent が登録済みで、`llm-agents` 更新時は `home-manager switch` により `codex` / `claude` / `gemini` 更新が自動適用される。
 
 ## 詳細仕様一覧
@@ -59,6 +60,7 @@
 - [MVP: macOS ブートストラップ仕様](./specs/001-macos-bootstrap-mvp.md)
 - [XDG準拠CLI設定とAGENTS.md統一](./specs/002-xdg-cli-config.md)
 - [未管理ファイル検出](./specs/003-unmanaged-files-check.md)
+- [ok-mcp-toggle MCP レジストリ管理](./specs/004-ok-mcp-toggle-global-registry.md)
 
 ## 変更ルール
 

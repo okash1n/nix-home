@@ -23,7 +23,7 @@ Excluded in current MCP filter:
 - Read behavior: `src/utils/read.ts`
 - arXiv/SSRN behavior: `src/utils/search.ts`
 - BibTeX behavior: `src/utils/bibtex.ts`
-- Local filter baseline: `scripts/setup-codex-mcp.sh` in this repository
+- Local filter baseline: `agent-skills/ok-mcp-toggle/scripts/mcp_toggle.sh` (jina preset template) in this repository
 
 ## API Mapping Used by This Skill
 

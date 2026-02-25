@@ -9,6 +9,7 @@
 # Nix
 result
 result-*
+.nix-home/
 
 # Secrets (防御的除外)
 secrets/*.env
