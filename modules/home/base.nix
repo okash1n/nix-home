@@ -80,6 +80,7 @@ in
     gemini-cli
     happy-coder
     agent-browser
+    copilot-cli
   ]);
 
   xdg.enable = true;

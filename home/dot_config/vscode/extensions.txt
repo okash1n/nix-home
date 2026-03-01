@@ -1,5 +1,8 @@
 alefragnani.project-manager
+anthropic.claude-code
 bbenoist.nix
+github.copilot-chat
+google.gemini-cli-vscode-ide-companion
 hancel.markdown-image
 marp-team.marp-vscode
 ms-python.debugpy
