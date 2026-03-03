@@ -77,9 +77,7 @@ in
     # AI CLI tools (from numtide/llm-agents.nix, daily updates)
     codex
     claude-code
-    gemini-cli
     happy-coder
-    agent-browser
     copilot-cli
   ]);
 
