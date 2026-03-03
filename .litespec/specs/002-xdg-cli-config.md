@@ -22,7 +22,6 @@
 - `~/nix-home/agent-skills` を個人用 skill ソースとして管理し、Claude / Codex / Gemini の skills ディレクトリへ自動同期する。
 - Git template hooks でプロジェクトの `AGENTS.md` から `CLAUDE.md` へのシンボリックリンクを自動作成する。
 - Vim の設定ディレクトリを `~/.config/vim/` に移行する。
-- `athenai` ラッパーコマンドを Nix 管理で提供する。
 - launchd で `llm-agents` 入力の定期更新を実行し、`switch` / `init` 時に未登録なら自動登録する。
 
 ## 非スコープ
@@ -127,13 +126,6 @@
 - `~/.config/vim/colors/hanabi.vim` を配置する（activation script経由）。
 - 既存の `~/.vimrc` と `~/.vim/` への配置を廃止する。
 
-### FR-006 athenai ラッパーコマンド
-
-- `athenai` コマンドを Nix 管理で提供する。
-- 既定で `ATHENAI_REPO=~/ghq/github.com/athenai-dev/athenai` を参照し、`bun run --cwd "$ATHENAI_REPO" src/cli/index.ts` を実行する。
-- `ATHENAI_REPO` を指定した場合は指定先を優先する。
-- 参照先に `src/cli/index.ts` が見つからない場合は、明示的なエラーメッセージを表示して終了する。
-
 ## 非機能要件
 
 - 保守性: 1ソースで全AI CLIの指示ファイルを管理でき、変更が即座に全ツールに反映される。
@@ -178,8 +170,6 @@
 - `.gitconfig` に `init.templateDir` が設定されている。
 - `~/.config/vim/vimrc` が存在し、`colorscheme hanabi` を含む。
 - `~/.config/vim/colors/hanabi.vim` が存在する。
-- `command -v athenai` が成功する。
-- `ATHENAI_REPO=~/ghq/github.com/athenai-dev/athenai athenai --help` が成功する。
 - `ghq get` で AGENTS.md を含むリポジトリを clone すると、CLAUDE.md シンボリックリンクが自動作成される。
 - `make init` 2回連続実行で破綻しない。
 
@@ -188,7 +178,6 @@
 - 001-macos-bootstrap-mvp が適用済みであること。
 - Claude Code / Codex / Gemini / Happy がインストール済みであること。
 - 個人用 skill ソースを `~/nix-home/agent-skills` で管理すること。
-- `athenai` リポジトリが `~/ghq/github.com/athenai-dev/athenai` に存在するか、`ATHENAI_REPO` で参照先を指定できること。
 
 ## テスト観点
 
@@ -205,7 +194,6 @@
 - 正常系: `scripts/auto-update-llm-agents.sh` 実行で、`~/nix-home` のワークツリーが dirty でも `home-manager switch` が実行される。
 - 正常系: `ghq get` で AGENTS.md を含むリポジトリを clone すると CLAUDE.md が自動作成される。
 - 正常系: `git pull` で AGENTS.md が追加された場合、CLAUDE.md が自動作成される。
-- 正常系: `athenai --help` が実行できる。
 - 回帰: 既存のzsh / ghostty / git設定が引き続き動作する。
 - 移行: 既存の `~/.claude/` 等がある状態から移行しても問題ない。
 - 冪等性: Gemini の `context.fileName` は既に設定済みなら再設定されない。

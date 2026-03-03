@@ -42,7 +42,7 @@
 
 - クリーン macOS で `make init` 後、`zsh` が利用可能である（既定プロンプトは `powerlevel10k`、配色は `Hanabi`）。
 - クリーン macOS で `make init` 後、ログインシェルが `nix` 管理の `zsh` に設定される。
-- `git` / `nix` / `zsh` / `playwright` / `codex` / `claude` / `gemini` / `happy` / `agent-browser` / `athenai` / `caddy` / `marp` がコマンド実行可能である。
+- `git` / `nix` / `zsh` / `playwright` / `codex` / `claude` / `gemini` / `happy` / `agent-browser` / `caddy` / `marp` がコマンド実行可能である。
 - Claude Code Team 機能の前提環境変数（`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`）が有効である。
 - `~/nix-home/agent-skills` 配下の有効な skill（`SKILL.md` を持つディレクトリ）が、`~/.config/claude/skills/`、`~/.config/codex/skills/`、`~/.config/gemini/.gemini/skills/` にシンボリックリンクとして同期される。
 - `Ghostty` / `Terminal.app` / `Vim` / `VS Code` に `Hanabi Theme` が適用される。

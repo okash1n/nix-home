@@ -44,7 +44,7 @@ fi
 
 - `zsh`（既定プロンプト: `powerlevel10k` + `Hanabi` 配色、切替: `NIX_HOME_ZSH_PROMPT=hanabi`）
 - `dotfiles` 由来の `zsh` aliases / functions（`fgh` を含む）
-- CLI: `git` `curl` `wget` `jq` `fzf` `fd` `rg` `ghq` `awk` `grep` `sed` `tmux` `dust` `yazi` `node` `pnpm` `bun` `python3` `uv` `caddy` `marp` `vim` `playwright` `codex` `claude` `gemini` `happy` `agent-browser` `athenai`
+- CLI: `git` `curl` `wget` `jq` `fzf` `fd` `rg` `ghq` `awk` `grep` `sed` `tmux` `dust` `yazi` `pnpm` `python3` `uv` `caddy` `marp` `vim` `playwright` `codex` `claude` `gemini` `happy` `agent-browser`
 - AI CLI の設定ディレクトリ: `~/.config/claude` `~/.config/codex` `~/.config/gemini` `~/.config/happy`
 - 個人用 skills: `~/nix-home/agent-skills` をソースとして、`make switch` / `make init` 時に `~/.config/claude/skills/`、`~/.config/codex/skills/`、`~/.config/gemini/.gemini/skills/` へシンボリックリンク同期
 - MCP 運用: `ok-mcp-toggle` スキルで MCP を global/project scope で有効化/無効化（対象クライアントは `claude` / `gemini`、`codex` は管理対象外）
@@ -69,9 +69,6 @@ Gemini 向けの `asana` / `notion` は、`/mcp auth` の互換性のため OAut
 `make mcp` は `ok-mcp-toggle` の入口（管理対象表示）として利用できます。
 `llm-agents` 自動更新のログは `~/.local/state/nix-home/llm-agents-auto-update.launchd.log` に出力されます。
 システム側の変更（nix-darwin）は必要時に `make switch` で手動適用します。
-
-`athenai` コマンドは `ATHENAI_REPO`（既定: `~/ghq/github.com/athenai-dev/athenai`）を参照し、
-`bun run --cwd "$ATHENAI_REPO" src/cli/index.ts` をラップします。
 
 注: `Terminal.app` のテーマ適用処理（import / defaults / フォント同期）は
 `make init` 時のみ試行し、`make switch` では実行しません。

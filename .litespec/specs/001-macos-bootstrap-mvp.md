@@ -85,14 +85,13 @@
 - `git`、`curl`、`wget`、`jq`、`fzf`、`fd`、`rg`、`ghq`、`awk`、`grep`、`sed` を導入する。
 - `zsh` は macOS 標準ではなくパッケージ版を導入する。
 - `bash` もパッケージ版を導入する。
-- `node` / `pnpm` / `bun` を導入する。
+- `pnpm` を導入する。
 - `python3` / `uv` を導入する。
 - `tmux` を導入する。
 - `dust` / `yazi` を導入する。
 - `vim` を導入する。
 - AI CLI（Codex / Claude Code / Gemini / Happy / Agent Browser）をコマンド実行可能にする。
 - `playwright` CLI をコマンド実行可能にする。
-- `athenai` ラッパーコマンドを配置し、`~/ghq/github.com/athenai-dev/athenai` の CLI を起動できるようにする（`ATHENAI_REPO` で上書き可能）。
 - `git` のグローバル設定（`user.name` / `user.email` / global ignore）を Nix 管理で復元する。
 
 ### FR-005 冪等性
@@ -160,8 +159,8 @@
 - `/Applications/Nix Apps` 配下に `Ghostty.app` が作成される。
 - `~/.config/ghostty/config` が存在し、HackGen と `theme = hanabi` が反映される。
 - 主要 alias / functions が機能する。
-- `command -v git nix zsh playwright codex claude gemini happy agent-browser athenai caddy marp` が成功する。
-- `command -v rg bun node pnpm uv python3 tmux wget` が成功する。
+- `command -v git nix zsh playwright codex claude gemini happy agent-browser caddy marp` が成功する。
+- `command -v rg pnpm uv python3 tmux wget` が成功する。
 - `command -v dust yazi` が成功する。
 - `command -v vim` が成功する。
 - `git config --global user.name` と `git config --global user.email` が期待値を返す。

@@ -1,27 +1,4 @@
 { pkgs, username, ... }:
-let
-  athenaiCli = pkgs.writeShellScriptBin "athenai" ''
-    ATHENAI_REPO="''${ATHENAI_REPO:-$HOME/ghq/github.com/athenai-dev/athenai}"
-
-    # bin/athenai が存在すれば委譲（新方式）
-    if [ -x "$ATHENAI_REPO/bin/athenai" ]; then
-      exec "$ATHENAI_REPO/bin/athenai" "$@"
-    fi
-
-    # フォールバック: bin/athenai が未配置の場合は従来方式で起動
-    if ! command -v bun >/dev/null 2>&1; then
-      echo "[athenai] bun is required but not found in PATH" >&2
-      exit 1
-    fi
-    if [ ! -f "$ATHENAI_REPO/src/cli/index.ts" ]; then
-      echo "[athenai] athenai repo not found at $ATHENAI_REPO" >&2
-      echo "[athenai] set ATHENAI_REPO to the correct path" >&2
-      exit 1
-    fi
-    echo "[athenai] warning: bin/athenai not found, using legacy --cwd mode" >&2
-    exec bun run --cwd "$ATHENAI_REPO" src/cli/index.ts "$@"
-  '';
-in
 {
   home.username = username;
   home.homeDirectory = "/Users/${username}";
@@ -46,11 +23,8 @@ in
     zellij
     dust
     yazi
-    nodejs
     pnpm
-    bun
     playwright-test
-    athenaiCli
     rustup
     wrangler
     cloudflared
