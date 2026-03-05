@@ -25,8 +25,7 @@ compatibility: claude,codex,gemini
 
 ### 1. 追加対象を決める
 
-- 通常のパッケージは `pkgs` セットに追加する（例: `caddy`, `marp-cli`）。
-- `pkgs.llm-agents` 由来のパッケージだけ `llm-agents` セットに追加する（例: `codex`, `claude-code` など）。
+- パッケージは `pkgs` セットに追加する（例: `caddy`, `marp-cli`）。
 
 ### 2. package を追加する
 
@@ -40,10 +39,10 @@ scripts/install_tool.sh --attr <nix-attr> --verify <command-name>
 scripts/install_tool.sh --attr marp-cli --verify marp
 ```
 
-`llm-agents` へ追加する場合:
+AI CLI を追加する場合の例:
 
 ```bash
-scripts/install_tool.sh --attr codex --group llm-agents --verify codex
+scripts/install_tool.sh --attr codex --verify codex
 ```
 
 ### 3. 失敗時の扱い

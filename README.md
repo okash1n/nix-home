@@ -31,10 +31,12 @@ fi
 `init.sh` は以下を実行します。
 
 - Xcode CLT / GitHub SSH の preflight チェック
+- Homebrew の導入（未導入時）
+- Homebrew 経由で `node`（`npm` 同梱）と `bun` を導入
 - `hanabi-theme` repository の取得または更新（`ghq get -u`、配置先は `~/ghq/github.com/hanabi-works/hanabi-theme`）
 - `zsh` の履歴/キャッシュ用ディレクトリの事前作成（`~/.local/state/zsh` / `~/.cache/zsh`）
 - `nix-darwin` + `home-manager` の適用
-- `llm-agents` 自動更新用 launchd agent の登録（`~/Library/LaunchAgents/com.okash1n.nix-home.llm-agents-update.plist`）
+- `make update` 相当の夜間実行用 launchd agent の登録（`~/Library/LaunchAgents/com.okash1n.nix-home.make-update-nightly.plist`）
 - GUI セッションの初回適用後に `Ghostty` を自動起動
 - 既存 dotfile 衝突時の自動バックアップ（`*.hm-bak`）
 - Nix Store の自動 GC / 最適化設定の適用（容量増加を抑制）
@@ -44,16 +46,18 @@ fi
 
 - `zsh`（既定プロンプト: `powerlevel10k` + `Hanabi` 配色、切替: `NIX_HOME_ZSH_PROMPT=hanabi`）
 - `dotfiles` 由来の `zsh` aliases / functions（`fgh` を含む）
-- CLI: `git` `curl` `wget` `jq` `fzf` `fd` `rg` `ghq` `awk` `grep` `sed` `tmux` `dust` `yazi` `pnpm` `python3` `uv` `caddy` `marp` `vim` `playwright` `codex` `claude` `gemini` `happy` `agent-browser`
+- CLI: `git` `curl` `wget` `jq` `fzf` `fd` `rg` `ghq` `awk` `grep` `sed` `tmux` `dust` `yazi` `node` `npm` `pnpm` `bun` `python3` `uv` `caddy` `marp` `vim` `playwright` `codex` `claude` `gemini` `happy` `agent-browser`
 - AI CLI の設定ディレクトリ: `~/.config/claude` `~/.config/codex` `~/.config/gemini` `~/.config/happy`
+- Copilot CLI のユーザー設定（Home Manager 管理）: `~/.copilot/config.json` `~/.copilot/mcp-config.json` `~/.copilot/lsp-config.json` `~/.copilot/instructions/*.instructions.md`
 - 個人用 skills: `~/nix-home/agent-skills` をソースとして、`make switch` / `make init` 時に `~/.config/claude/skills/`、`~/.config/codex/skills/`、`~/.config/gemini/.gemini/skills/` へシンボリックリンク同期
 - MCP 運用: `ok-mcp-toggle` スキルで MCP を global/project scope で有効化/無効化（対象クライアントは `claude` / `gemini`、`codex` は管理対象外）
 - MCP 管理定義: `agent-skills/ok-mcp-toggle/config/registry.json`（動的状態は `agent-skills/ok-mcp-toggle/config/state.json`）
-- `llm-agents` 入力の定期更新: launchd (`com.okash1n.nix-home.llm-agents-update`) で毎日 `06:00` / `18:00` に専用 clean worktree 上で `nix flake lock --update-input llm-agents` を実行し、`home-manager switch` を自動実行（リトライ付き）。作業中の `~/nix-home` ワークツリー状態には依存しない。
+- 夜間更新: launchd (`com.okash1n.nix-home.make-update-nightly`) で毎日 `01:00` に `scripts/auto-update-make.sh` を実行し、`make update` 相当（`nix flake update` / `npm update -g` / `claude update` / `brew update && brew upgrade` / `build` / `switch`）を実行
 - Claude Code Team 機能: `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`（Nix で配布）
 - `git` グローバル設定（`user.name` / `user.email` / global ignore）
 - `Ghostty` 本体（`/Applications/Nix Apps/Ghostty.app`）と `~/.config/ghostty/config`（HackGen + `theme = hanabi`）
-- `VS Code` 本体（`/Applications/Nix Apps/Visual Studio Code.app`）と Marketplace 拡張 `okash1n.hanabi-theme-vscode`（`workbench.colorTheme = Hanabi`）
+- `VS Code` 本体は Nix 管理対象外（例: `/Applications/Visual Studio Code.app` を手動導入）
+- `VS Code` の設定/拡張は Nix 管理を維持（`settings.json`/`keybindings.json`/snippets のリンク管理 + `extensions.txt` 同期、`code` 未設定時はアプリ同梱 CLI へフォールバック）
 - フォント: HackGen NF / LINE Seed JP / IBM Plex Sans JP / IBM Plex Mono
 - `Terminal.app` の `Hanabi` 既定プロファイル設定
 - `Vim` の `colorscheme hanabi`（`~/.config/vim/colors/hanabi.vim` / `~/.config/vim/vimrc`）
@@ -67,7 +71,7 @@ Gemini 向けの `asana` / `notion` は、`/mcp auth` の互換性のため OAut
 `asana` の endpoint はクライアント別に管理し、Claude は `https://mcp.asana.com/v2/mcp`、Gemini は `https://mcp.asana.com/mcp` を使用します。
 `box` は callback ベースではなく、`https://mcp.box.com` の HTTP MCP として `claude/gemini` に登録します。
 `make mcp` は `ok-mcp-toggle` の入口（管理対象表示）として利用できます。
-`llm-agents` 自動更新のログは `~/.local/state/nix-home/llm-agents-auto-update.launchd.log` に出力されます。
+夜間更新の launchd ログは `~/.local/state/nix-home/make-update-nightly.launchd.log` に出力されます。
 システム側の変更（nix-darwin）は必要時に `make switch` で手動適用します。
 
 注: `Terminal.app` のテーマ適用処理（import / defaults / フォント同期）は

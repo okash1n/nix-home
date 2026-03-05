@@ -42,6 +42,86 @@ ensure_xcode_clt() {
   exit 1
 }
 
+detect_brew_bin() {
+  if [ -x "/opt/homebrew/bin/brew" ]; then
+    echo "/opt/homebrew/bin/brew"
+    return 0
+  fi
+  if [ -x "/usr/local/bin/brew" ]; then
+    echo "/usr/local/bin/brew"
+    return 0
+  fi
+  if command -v brew >/dev/null 2>&1; then
+    command -v brew
+    return 0
+  fi
+  return 1
+}
+
+setup_brew_shellenv() {
+  local brew_bin
+  if ! brew_bin=$(detect_brew_bin); then
+    return 1
+  fi
+  eval "$("$brew_bin" shellenv)"
+}
+
+ensure_homebrew() {
+  if [ "$(uname)" != "Darwin" ]; then
+    return 0
+  fi
+  if [ "${NIX_HOME_SKIP_BREW_SETUP:-0}" = "1" ]; then
+    echo "Skipping Homebrew setup (NIX_HOME_SKIP_BREW_SETUP=1)."
+    return 0
+  fi
+  if setup_brew_shellenv >/dev/null 2>&1; then
+    echo "Homebrew is ready."
+    return 0
+  fi
+
+  echo "Installing Homebrew..."
+  # 注意: ネットワーク経由のスクリプト実行（公式 install.sh）を使用。
+  # 公式手順だが、MITM 等のリスクを認識すること。
+  NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+  if ! setup_brew_shellenv; then
+    echo "Homebrew installation completed but shellenv setup failed."
+    echo "Run manually: eval \"\$(/opt/homebrew/bin/brew shellenv)\""
+    exit 1
+  fi
+}
+
+ensure_brew_node_bun() {
+  if [ "$(uname)" != "Darwin" ]; then
+    return 0
+  fi
+  if [ "${NIX_HOME_SKIP_BREW_SETUP:-0}" = "1" ]; then
+    return 0
+  fi
+  if ! setup_brew_shellenv; then
+    echo "Homebrew is not available; cannot install node/npm/bun."
+    exit 1
+  fi
+
+  local brew_bin
+  brew_bin=$(detect_brew_bin)
+
+  if ! "$brew_bin" list --versions node >/dev/null 2>&1; then
+    echo "Installing node (includes npm) via Homebrew..."
+    "$brew_bin" install node
+  fi
+
+  if ! "$brew_bin" list --versions bun >/dev/null 2>&1; then
+    echo "Installing bun via Homebrew..."
+    "$brew_bin" install bun
+  fi
+
+  if ! command -v npm >/dev/null 2>&1; then
+    echo "npm was not found after node installation."
+    exit 1
+  fi
+}
+
 ensure_github_ssh() {
   if [ "${NIX_HOME_SKIP_SSH_CHECK:-0}" = "1" ]; then
     echo "Skipping GitHub SSH check (NIX_HOME_SKIP_SSH_CHECK=1)."
@@ -131,6 +211,8 @@ sync_hanabi_theme() {
 }
 
 ensure_xcode_clt
+ensure_homebrew
+ensure_brew_node_bun
 
 if command -v sudo >/dev/null 2>&1; then
   if sudo -n true >/dev/null 2>&1; then
@@ -349,20 +431,6 @@ maybe_open_ghostty() {
   echo "[nix-home] Ghostty is not available yet; skipping auto-launch."
 }
 
-setup_llm_agents_auto_update() {
-  local setup_script
-  setup_script="$REPO_ROOT_DIR/scripts/setup-llm-agents-auto-update.sh"
-
-  if [ ! -x "$setup_script" ]; then
-    echo "[nix-home] llm-agents auto-update setup script is unavailable: $setup_script"
-    return 0
-  fi
-
-  if ! "$setup_script"; then
-    echo "[nix-home] llm-agents auto-update registration failed (non-fatal)."
-  fi
-}
-
 ensure_login_shell() {
   if [ "$(uname)" != "Darwin" ]; then
     return 0
@@ -495,8 +563,6 @@ else
   echo "Non-macOS is not supported yet."
   exit 1
 fi
-
-setup_llm_agents_auto_update
 
 ensure_login_shell
 

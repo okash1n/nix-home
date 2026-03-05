@@ -34,8 +34,23 @@ in
       PATH="/run/current-system/sw/bin:$PATH"
     fi
 
-    if ! command -v code >/dev/null 2>&1; then
-      echo "[nix-home] code command was not found; skipping VS Code extension setup."
+    code_bin=""
+    if command -v code >/dev/null 2>&1; then
+      code_bin="$(command -v code)"
+    elif [ "${isDarwin}" = "1" ]; then
+      for candidate in \
+        "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code" \
+        "$HOME/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code"
+      do
+        if [ -x "$candidate" ]; then
+          code_bin="$candidate"
+          break
+        fi
+      done
+    fi
+
+    if [ -z "$code_bin" ]; then
+      echo "[nix-home] VS Code CLI was not found; skipping VS Code extension setup."
     elif [ "${isDarwin}" = "1" ] && ! /usr/bin/pgrep -x WindowServer >/dev/null 2>&1; then
       echo "[nix-home] Skipping VS Code extension setup (no GUI session)."
     else
@@ -61,7 +76,7 @@ EXTENSIONS
       }' "${extensionsRepoFile}" | sort -fu > "$desired_extensions_file"
 
       # code の呼び出しに失敗した場合は空扱いにする
-      if ! code --list-extensions > "$installed_extensions_file" 2>/dev/null; then
+      if ! "$code_bin" --list-extensions > "$installed_extensions_file" 2>/dev/null; then
         : > "$installed_extensions_file"
       fi
       sort -fu "$installed_extensions_file" -o "$installed_extensions_file"
@@ -72,13 +87,13 @@ EXTENSIONS
         if grep -Fxiq "$extension" "$installed_extensions_file"; then
           continue
         fi
-        if ! code --install-extension "$extension" --force >/dev/null 2>&1; then
+        if ! "$code_bin" --install-extension "$extension" --force >/dev/null 2>&1; then
           echo "[nix-home] Failed to install VS Code extension: $extension"
         fi
       done < "$desired_extensions_file"
 
       # 再取得して、VSCode側で追加された拡張をリポジトリへ取り込む（additive sync）
-      if ! code --list-extensions > "$installed_extensions_file" 2>/dev/null; then
+      if ! "$code_bin" --list-extensions > "$installed_extensions_file" 2>/dev/null; then
         : > "$installed_extensions_file"
       fi
       sort -fu "$installed_extensions_file" -o "$installed_extensions_file"

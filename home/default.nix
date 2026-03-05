@@ -5,7 +5,8 @@
     ../modules/home/zsh.nix
     ../modules/home/git.nix
     ../modules/home/ai-agents.nix
-    ../modules/home/llm-agents-auto-update.nix
+    ../modules/home/copilot-cli.nix
+    ../modules/home/nightly-make-update.nix
     ../modules/home/agent-skills.nix
     ../modules/home/vim.nix
     ../modules/home/ghostty.nix

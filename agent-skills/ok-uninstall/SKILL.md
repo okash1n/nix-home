@@ -14,13 +14,12 @@ compatibility: claude,codex,gemini
 
 ### 1. 削除対象を決める
 
-- `pkgs` 由来なら `--group pkgs`
-- `pkgs.llm-agents` 由来なら `--group llm-agents`
+- `modules/home/base.nix` の `pkgs` から対象 attr を削除する。
 
 ### 2. 削除して反映する
 
 ```bash
-scripts/uninstall_tool.sh --attr <nix-attr> [--group pkgs|llm-agents]
+scripts/uninstall_tool.sh --attr <nix-attr>
 ```
 
 コマンド不在まで確認する場合:

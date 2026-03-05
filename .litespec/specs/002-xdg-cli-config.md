@@ -6,6 +6,7 @@
 - 4つのAI CLIが同じ指示ファイル（`AGENTS.md`）を参照する仕組みを構築する。
 - Nix管理の設定ファイル構造を展開先と対応させ、管理しやすくする。
 - Claude Code Team 機能を Nix 管理の設定で安定して有効化する。
+- Copilot CLI のユーザー設定（静的設定ファイル）を Home Manager で一元管理する。
 
 ## ユーザーストーリー
 
@@ -22,11 +23,12 @@
 - `~/nix-home/agent-skills` を個人用 skill ソースとして管理し、Claude / Codex / Gemini の skills ディレクトリへ自動同期する。
 - Git template hooks でプロジェクトの `AGENTS.md` から `CLAUDE.md` へのシンボリックリンクを自動作成する。
 - Vim の設定ディレクトリを `~/.config/vim/` に移行する。
-- launchd で `llm-agents` 入力の定期更新を実行し、`switch` / `init` 時に未登録なら自動登録する。
+- Copilot CLI の静的設定（`~/.copilot/config.json` / `mcp-config.json` / `lsp-config.json` / `instructions/*.instructions.md`）を Nix 管理で配置する。
 
 ## 非スコープ
 
 - AI CLIの認証情報や動的に生成されるファイルの管理（CLIに委ねる）。
+- Copilot CLI の runtime ディレクトリ（`~/.copilot/logs` / `session-state` / `ide`）の内容管理（配置のみ対象）。
 - XDG非対応かつ環境変数での変更も困難なアプリケーション（Bashなど）の対応。
 
 ## 機能要件
@@ -95,18 +97,6 @@
 - MCP 管理対象は `ok-mcp-toggle` のレジストリで定義し、`claude` / `gemini` を対象とする（`codex` は対象外）。
 - 詳細仕様は `004-ok-mcp-toggle-registry` を参照する。
 
-### FR-003d llm-agents 入力の定期更新
-
-- `scripts/auto-update-llm-agents.sh` を追加し、`nix flake lock --update-input llm-agents` を実行できるようにする。
-- `scripts/setup-llm-agents-auto-update.sh` を追加し、`~/Library/LaunchAgents/com.okash1n.nix-home.llm-agents-update.plist` を作成・再同期する。
-- launchd agent のスケジュールは毎日 `06:00` / `18:00`（ローカル時刻）とする。
-- launchd agent は `RunAtLoad=true` とし、ログを `~/.local/state/nix-home/llm-agents-auto-update.launchd.log` に出力する。
-- `home.activation.setupLlmAgentsAutoUpdate` を追加し、`make switch` / `make init` 時に未登録なら自動登録する。
-- `scripts/init.sh` は `nix-darwin switch` 後に `setup-llm-agents-auto-update.sh` を実行し、初期化時も登録を試行する。
-- `scripts/auto-update-llm-agents.sh` は `~/nix-home` とは別の専用 clean worktree を使って `nix flake lock --update-input llm-agents` を実行し、`home-manager switch --flake <worktree>#<username>` を自動実行する。
-- system 設定の適用（`darwin-rebuild switch`）は手動運用とし、定期ジョブの対象外とする。
-- 更新処理は `NIX_HOME_LLM_AGENTS_UPDATE_REMOTE/NIX_HOME_LLM_AGENTS_UPDATE_BRANCH` を基準に専用 worktree を毎回クリーン化して実行し、`~/nix-home` 側のブランチや追跡変更の有無に依存しない。
-
 ### FR-004 Git template hooks によるCLAUDE.md自動リンク
 
 - `~/.config/git/template/hooks/` に以下のフックを配置する：
@@ -125,6 +115,18 @@
 - `~/.config/vim/vimrc` を Nix 管理で配置する。
 - `~/.config/vim/colors/hanabi.vim` を配置する（activation script経由）。
 - 既存の `~/.vimrc` と `~/.vim/` への配置を廃止する。
+
+
+### FR-006 Copilot CLI ユーザー設定の Home Manager 管理
+
+- `home/dot_copilot/` を Copilot ユーザー設定のソースとして管理する。
+- 以下を `home.file` で配置する：
+  - `~/.copilot/config.json`
+  - `~/.copilot/mcp-config.json`
+  - `~/.copilot/lsp-config.json`
+  - `~/.copilot/instructions/*.instructions.md`
+- `~/.copilot` はディレクトリとして維持し、ランタイム生成物を書き込める状態を維持する。
+- `home.activation` で `~/.copilot/logs` / `~/.copilot/session-state` / `~/.copilot/ide` を事前作成する。
 
 ## 非機能要件
 
@@ -160,10 +162,6 @@
 - `~/nix-home/agent-skills/<skill-name>/SKILL.md` が存在する場合、`~/.config/claude/skills/<skill-name>` / `~/.config/codex/skills/<skill-name>` / `~/.config/gemini/.gemini/skills/<skill-name>` が同ソースへの symlink として存在する。
 - `~/.config/claude/settings.json` の `teammateMode` が未設定の場合、activation 後に `auto` が設定される。
 - `~/.config/gemini/settings.json` に `context.fileName` が設定されている。
-- `make switch` または `make init` 後、`launchctl print gui/$(id -u)/com.okash1n.nix-home.llm-agents-update` が成功する（環境により `user/$(id -u)` でも可）。
-- `~/Library/LaunchAgents/com.okash1n.nix-home.llm-agents-update.plist` の `StartCalendarInterval` に `{Hour=6, Minute=0}` と `{Hour=18, Minute=0}` が含まれる。
-- `scripts/auto-update-llm-agents.sh` 実行時、`~/nix-home` に `flake.lock` 以外の追跡変更があっても専用 clean worktree 側で処理が継続される。
-- `scripts/auto-update-llm-agents.sh` 実行で `home-manager switch applied` がログに出力される。
 - `make mcp` 実行後、`ok-mcp-toggle` の管理対象一覧と利用ヒントが表示される。
 - `./agent-skills/ok-mcp-toggle/scripts/mcp_toggle.sh status` で `claude` / `gemini` の状態が確認できる。
 - `~/.config/git/template/hooks/` に `post-checkout`、`post-merge`、`setup-claude-symlink` が存在する。
@@ -173,10 +171,14 @@
 - `ghq get` で AGENTS.md を含むリポジトリを clone すると、CLAUDE.md シンボリックリンクが自動作成される。
 - `make init` 2回連続実行で破綻しない。
 
+- `~/.copilot/config.json` / `~/.copilot/mcp-config.json` / `~/.copilot/lsp-config.json` が Home Manager 管理で存在する。
+- `~/.copilot/instructions/*.instructions.md` が Home Manager 管理で存在する。
+- `~/.copilot/logs` / `~/.copilot/session-state` / `~/.copilot/ide` がディレクトリとして存在する。
+
 ## 依存・前提
 
 - 001-macos-bootstrap-mvp が適用済みであること。
-- Claude Code / Codex / Gemini / Happy がインストール済みであること。
+- Claude Code / Codex / Gemini / Happy / Copilot CLI がインストール済みであること。
 - 個人用 skill ソースを `~/nix-home/agent-skills` で管理すること。
 
 ## テスト観点
@@ -189,9 +191,6 @@
 - 正常系: エージェント側に同名の通常ディレクトリがある場合、上書きせずにスキップされる。
 - 正常系: `make mcp` 実行で `ok-mcp-toggle` の管理対象一覧が表示される。
 - 正常系: MCP の有効化/無効化/認証は `ok-mcp-toggle` のコマンドで完結できる。
-- 正常系: `make switch` 後に llm-agents 自動更新 launchd agent が登録済みである。
-- 正常系: `scripts/auto-update-llm-agents.sh` 実行時、`~/nix-home` 側のブランチや追跡変更に依存せず、専用 clean worktree 上で `llm-agents` 入力更新を試行する。
-- 正常系: `scripts/auto-update-llm-agents.sh` 実行で、`~/nix-home` のワークツリーが dirty でも `home-manager switch` が実行される。
 - 正常系: `ghq get` で AGENTS.md を含むリポジトリを clone すると CLAUDE.md が自動作成される。
 - 正常系: `git pull` で AGENTS.md が追加された場合、CLAUDE.md が自動作成される。
 - 回帰: 既存のzsh / ghostty / git設定が引き続き動作する。

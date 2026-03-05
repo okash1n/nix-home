@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# Register launchd agent for llm-agents auto update
+# Register launchd agent for nightly `make update`.
 set -euo pipefail
 
-LABEL="${NIX_HOME_LLM_AGENTS_UPDATE_LABEL:-com.okash1n.nix-home.llm-agents-update}"
+LABEL="${NIX_HOME_MAKE_UPDATE_LABEL:-com.okash1n.nix-home.make-update-nightly}"
 NIX_HOME_DIR="${NIX_HOME_DIR:-$HOME/nix-home}"
 STATE_DIR="${NIX_HOME_STATE_DIR:-$HOME/.local/state/nix-home}"
 AGENTS_DIR="$HOME/Library/LaunchAgents"
 PLIST_PATH="$AGENTS_DIR/$LABEL.plist"
-UPDATE_SCRIPT_PATH="$NIX_HOME_DIR/scripts/auto-update-llm-agents.sh"
-LAUNCHD_LOG_PATH="$STATE_DIR/llm-agents-auto-update.launchd.log"
+UPDATE_SCRIPT_PATH="$NIX_HOME_DIR/scripts/auto-update-make.sh"
+LAUNCHD_LOG_PATH="$STATE_DIR/make-update-nightly.launchd.log"
 
 launchctl_bin="$(command -v launchctl 2>/dev/null || true)"
 if [ -z "$launchctl_bin" ] && [ -x "/bin/launchctl" ]; then
@@ -27,6 +27,10 @@ fi
 
 mkdir -p "$AGENTS_DIR" "$STATE_DIR"
 
+uid_value="$(id -u)"
+gui_domain="gui/$uid_value"
+user_domain="user/$uid_value"
+
 tmp_plist="$(mktemp)"
 cat > "$tmp_plist" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -43,22 +47,14 @@ cat > "$tmp_plist" <<EOF
   <key>WorkingDirectory</key>
   <string>$NIX_HOME_DIR</string>
   <key>RunAtLoad</key>
-  <true/>
+  <false/>
   <key>StartCalendarInterval</key>
-  <array>
-    <dict>
-      <key>Hour</key>
-      <integer>6</integer>
-      <key>Minute</key>
-      <integer>0</integer>
-    </dict>
-    <dict>
-      <key>Hour</key>
-      <integer>18</integer>
-      <key>Minute</key>
-      <integer>0</integer>
-    </dict>
-  </array>
+  <dict>
+    <key>Hour</key>
+    <integer>1</integer>
+    <key>Minute</key>
+    <integer>0</integer>
+  </dict>
   <key>StandardOutPath</key>
   <string>$LAUNCHD_LOG_PATH</string>
   <key>StandardErrorPath</key>
@@ -77,10 +73,6 @@ else
   rm -f "$tmp_plist"
   echo "[skip] launch agent plist is up to date: $PLIST_PATH"
 fi
-
-uid_value="$(id -u)"
-gui_domain="gui/$uid_value"
-user_domain="user/$uid_value"
 
 is_loaded_in_domain() {
   local domain="$1"

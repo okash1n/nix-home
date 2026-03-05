@@ -1,6 +1,6 @@
 ---
 name: ok-search
-description: nix-home でグローバルCLI候補を探索する。ユーザーが「このツール入る？」「attr は何？」「brew search 的に探して」などを依頼したときに使う。現在の nix-home 反映状況、nixpkgs 検索、llm-agents overlay 検索をまとめて実行する。
+description: nix-home でグローバルCLI候補を探索する。ユーザーが「このツール入る？」「attr は何？」「brew search 的に探して」などを依頼したときに使う。現在の nix-home 反映状況と nixpkgs 検索をまとめて実行する。
 compatibility: claude,codex,gemini
 ---
 
@@ -20,9 +20,8 @@ scripts/search_tool.sh --query <keyword>
 
 このコマンドは以下を表示する:
 
-- `modules/home/base.nix` の現在インストール済み attr（`pkgs` / `llm-agents`）
+- `modules/home/base.nix` の現在インストール済み attr（`pkgs`）
 - `nix search nixpkgs <query>` の結果
-- `llm-agents` overlay の一致 attr
 
 ### 2. 結果の扱い
 
@@ -33,7 +32,6 @@ scripts/search_tool.sh --query <keyword>
 
 - ローカル反映状況（installed）が表示される。
 - `nixpkgs` 検索が実行される（ネットワーク条件依存）。
-- `llm-agents` 検索結果が表示される。
 
 ## 実装補助
 

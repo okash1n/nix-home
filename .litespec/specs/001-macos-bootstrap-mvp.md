@@ -19,12 +19,13 @@
 - CLI と AI CLI の導入
 - フォント導入（HackGen NF、LINE Seed JP、IBM Plex Sans JP、IBM Plex Mono）
 - `Hanabi Theme`（`hanabi-works/hanabi-theme`）を使ったテーマ適用
-- `vim` / `VS Code` の導入とテーマ適用
+- `vim` の導入と `VS Code` の設定・拡張・テーマ適用
 - 再実行可能性（冪等）とバックアップ挙動
 
 ## 非スコープ
 
 - GUI アプリ設定の全面自動化（Karabiner、Raycast など）
+- `VS Code` 本体バイナリの導入方式統一（App Store/Homebrew/手動導入の選択は利用者判断）
 - secrets の完全自動配布（`sops-nix` は後続フェーズ）
 - Linux / WSL の本実装
 
@@ -59,9 +60,10 @@
 
 - `make build` は `darwin-rebuild build` を実行し、ビルドのみ行う（システム適用はしない）。
 - `make switch` は `darwin-rebuild switch` を実行し、システムに適用する。
-- `make update` は `nix flake update` 後に `build` → `switch` の順で実行する（検証方針「switch 前に build」に準拠）。
-- `make switch` / `make init` は Home Manager activation を通じて、`llm-agents` 自動更新用 launchd agent（`com.okash1n.nix-home.llm-agents-update`）を登録・再同期する。
-- `llm-agents` 自動更新は、専用 clean worktree 上で `nix flake lock --update-input llm-agents` を実行し、`home-manager switch` を自動実行する。
+- `make update` は `nix flake update` と `brew update && brew upgrade`（`brew` が存在する場合のみ）を実行後に `build` → `switch` の順で実行する（検証方針「switch 前に build」に準拠）。
+- `make update` は `npm update -g` と `claude update` も実行する（該当コマンドが存在する場合のみ）。
+- `make switch` / `make init` は Home Manager activation を通じて、`make update` 相当の夜間ジョブ（`com.okash1n.nix-home.make-update-nightly`）を launchd に登録・再同期する。
+- 夜間ジョブは毎日 `01:00` に `scripts/auto-update-make.sh` を実行し、`make update` 相当を実施する。
 - MCP 設定の自動同期は行わず、`make mcp` は `ok-mcp-toggle` の管理導線（一覧表示）として機能する。
 - MCP の有効化/無効化/事前認証は `agent-skills/ok-mcp-toggle/scripts/mcp_toggle.sh` で実施する（対象: `claude` / `gemini`、`codex` は対象外）。
 
@@ -85,6 +87,7 @@
 - `git`、`curl`、`wget`、`jq`、`fzf`、`fd`、`rg`、`ghq`、`awk`、`grep`、`sed` を導入する。
 - `zsh` は macOS 標準ではなくパッケージ版を導入する。
 - `bash` もパッケージ版を導入する。
+- Homebrew を導入し、`node`（`npm` 同梱）/ `bun` を導入する。
 - `pnpm` を導入する。
 - `python3` / `uv` を導入する。
 - `tmux` を導入する。
@@ -160,7 +163,7 @@
 - `~/.config/ghostty/config` が存在し、HackGen と `theme = hanabi` が反映される。
 - 主要 alias / functions が機能する。
 - `command -v git nix zsh playwright codex claude gemini happy agent-browser caddy marp` が成功する。
-- `command -v rg pnpm uv python3 tmux wget` が成功する。
+- `command -v rg node npm pnpm bun uv python3 tmux wget` が成功する。
 - `command -v dust yazi` が成功する。
 - `command -v vim` が成功する。
 - `git config --global user.name` と `git config --global user.email` が期待値を返す。
@@ -169,10 +172,10 @@
 - `Terminal.app` の `Hanabi` プロファイルに HackGen 系フォントが設定される。
 - GUI セッションの初回 `make init` 完了時に `Ghostty` が自動起動する。
 - `make switch` 実行時に `Terminal.app` と `Ghostty` が自動起動しない。
-- `make switch` / `make init` 実行後、`com.okash1n.nix-home.llm-agents-update` launchd agent が存在する。
-- `llm-agents` 自動更新実行時、作業中ワークツリーに依存せず自動で `home-manager switch` が完了し、`codex` / `claude` / `gemini` が更新される。
+- `make switch` / `make init` 実行後、`com.okash1n.nix-home.make-update-nightly` launchd agent が存在する。
+- `~/Library/LaunchAgents/com.okash1n.nix-home.make-update-nightly.plist` の `StartCalendarInterval` が `Hour=1` / `Minute=0` になっている。
 - `~/.vim/colors/hanabi.vim` が存在し、`~/.vimrc` に `colorscheme hanabi` が入る。
-- `code --list-extensions` に `okash1n.hanabi-theme-vscode` が含まれる。
+- `command -v code` または `/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code --list-extensions` で `okash1n.hanabi-theme-vscode` が確認できる。
 - `home/dot_config/vscode/extensions.txt` が存在し、拡張IDを1行1件で保持する。
 - `~/Library/Application Support/Code/User/settings.json` が Nix 管理リンクとして存在し、`workbench.colorTheme` が `Hanabi` になっている。
 - `~/Library/Application Support/Code/User/settings.json` が Nix 管理リンクとして存在し、`editor.fontFamily` が `HackGen Console NF` になっている。
@@ -194,6 +197,7 @@
 ## テスト観点
 
 - 正常系: クリーン環境で `make init` が完了し、主要コマンドが利用可能になる。
+- 正常系: `make switch` 実行後、`launchctl print gui/$(id -u)/com.okash1n.nix-home.make-update-nightly` が成功する（環境により `user/$(id -u)` でも可）。
 - 異常系: SSH 未設定、CLT 未導入、GUI なし環境で想定どおり fail fast / skip する。
 - 回帰: `make init` 再実行時に `.hm-bak` 方針で破綻しない。
 

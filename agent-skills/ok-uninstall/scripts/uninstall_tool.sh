@@ -7,7 +7,6 @@ Usage:
   uninstall_tool.sh --attr <nix-attr> [options]
 
 Options:
-  --group <pkgs|llm-agents>   Target package group (default: pkgs)
   --repo <path>               nix-home path (default: ~/nix-home)
   --verify <cmd1,cmd2,...>    Commands expected to be absent after switch
   --allow-present             Do not fail even if --verify command remains present
@@ -16,12 +15,10 @@ Options:
 Examples:
   scripts/uninstall_tool.sh --attr caddy --verify caddy
   scripts/uninstall_tool.sh --attr marp-cli --verify marp
-  scripts/uninstall_tool.sh --attr codex --group llm-agents --verify codex
 EOF
 }
 
 ATTR=""
-GROUP="pkgs"
 REPO="${NIX_HOME_REPO:-$HOME/nix-home}"
 VERIFY=""
 ALLOW_PRESENT=0
@@ -31,10 +28,6 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --attr)
       ATTR="${2:-}"
-      shift 2
-      ;;
-    --group)
-      GROUP="${2:-}"
       shift 2
       ;;
     --repo)
@@ -71,16 +64,11 @@ if [[ -z "$ATTR" ]]; then
   exit 1
 fi
 
-if [[ "$GROUP" != "pkgs" && "$GROUP" != "llm-agents" ]]; then
-  echo "[ERROR] --group must be pkgs or llm-agents" >&2
-  exit 1
-fi
-
 REPO="$(cd "$REPO" && pwd)"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo "[step] remove package attr from nix-home: attr=$ATTR group=$GROUP repo=$REPO"
-python3 "$SCRIPT_DIR/remove_package.py" --repo "$REPO" --attr "$ATTR" --group "$GROUP"
+echo "[step] remove package attr from nix-home: attr=$ATTR repo=$REPO"
+python3 "$SCRIPT_DIR/remove_package.py" --repo "$REPO" --attr "$ATTR"
 
 echo "[step] make build"
 (

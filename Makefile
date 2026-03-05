@@ -22,6 +22,29 @@ switch:
 
 update:
 	nix flake update
+	@if command -v npm >/dev/null 2>&1; then \
+		npm update -g; \
+	else \
+		echo "[skip] npm is not installed; skipping npm update -g"; \
+	fi
+	@if command -v claude >/dev/null 2>&1; then \
+		claude update; \
+	else \
+		echo "[skip] claude is not installed; skipping claude update"; \
+	fi
+	@BREW_BIN=""; \
+	if command -v brew >/dev/null 2>&1; then \
+		BREW_BIN="$$(command -v brew)"; \
+	elif [ -x "/opt/homebrew/bin/brew" ]; then \
+		BREW_BIN="/opt/homebrew/bin/brew"; \
+	elif [ -x "/usr/local/bin/brew" ]; then \
+		BREW_BIN="/usr/local/bin/brew"; \
+	fi; \
+	if [ -n "$$BREW_BIN" ]; then \
+		"$$BREW_BIN" update && "$$BREW_BIN" upgrade; \
+	else \
+		echo "[skip] brew is not installed; skipping brew update/upgrade"; \
+	fi
 	$(MAKE) build
 	$(MAKE) switch
 

@@ -10,36 +10,25 @@ from pathlib import Path
 
 
 PKGS_START = "home.packages = (with pkgs; ["
-LLM_START = "]) ++ (with pkgs.llm-agents; ["
 ATTR_PATTERN = re.compile(r"^[A-Za-z0-9._+-]+$")
 
 
-def find_block(lines: list[str], group: str) -> tuple[int, int]:
-    if group == "pkgs":
-        start = next((i for i, line in enumerate(lines) if PKGS_START in line), -1)
-        if start < 0:
-            raise ValueError(f"Could not find block start: {PKGS_START}")
-        end = next((i for i in range(start + 1, len(lines)) if LLM_START in lines[i]), -1)
-        if end < 0:
-            raise ValueError(f"Could not find block end: {LLM_START}")
-        return start, end
-
-    start = next((i for i, line in enumerate(lines) if LLM_START in line), -1)
+def find_block(lines: list[str]) -> tuple[int, int]:
+    start = next((i for i, line in enumerate(lines) if PKGS_START in line), -1)
     if start < 0:
-        raise ValueError(f"Could not find block start: {LLM_START}")
-
+        raise ValueError(f"Could not find block start: {PKGS_START}")
     end = -1
     for i in range(start + 1, len(lines)):
         if lines[i].strip() == "]);":
             end = i
             break
     if end < 0:
-        raise ValueError("Could not find llm-agents block end: ]);")
+        raise ValueError("Could not find block end: ]);")
     return start, end
 
 
-def extract_attrs(lines: list[str], group: str) -> list[str]:
-    start, end = find_block(lines, group)
+def extract_attrs(lines: list[str]) -> list[str]:
+    start, end = find_block(lines)
     attrs: list[str] = []
     for line in lines[start + 1 : end]:
         code = line.split("#", 1)[0].strip()
@@ -87,14 +76,12 @@ def main() -> int:
         raise SystemExit(f"[ERROR] Target file not found: {target}")
 
     lines = target.read_text(encoding="utf-8").splitlines()
-    pkgs = extract_attrs(lines, "pkgs")
-    llm = extract_attrs(lines, "llm-agents")
+    pkgs = extract_attrs(lines)
 
     result = {
         "query": args.query,
         "file": str(target),
         "pkgs": [attr for attr in pkgs if contains_query(attr, args.query)],
-        "llm_agents": [attr for attr in llm if contains_query(attr, args.query)],
     }
 
     if args.json:
@@ -105,13 +92,6 @@ def main() -> int:
     print("[installed] pkgs")
     if result["pkgs"]:
         for attr in result["pkgs"]:
-            print(f"  - {attr}")
-    else:
-        print("  (no match)")
-
-    print("[installed] llm-agents")
-    if result["llm_agents"]:
-        for attr in result["llm_agents"]:
             print(f"  - {attr}")
     else:
         print("  (no match)")

@@ -8,30 +8,19 @@ from pathlib import Path
 
 
 PKGS_START = "home.packages = (with pkgs; ["
-LLM_START = "]) ++ (with pkgs.llm-agents; ["
 
 
-def find_block(lines: list[str], group: str) -> tuple[int, int]:
-    if group == "pkgs":
-        start = next((i for i, line in enumerate(lines) if PKGS_START in line), -1)
-        if start < 0:
-            raise ValueError(f"Could not find block start: {PKGS_START}")
-        end = next((i for i in range(start + 1, len(lines)) if LLM_START in lines[i]), -1)
-        if end < 0:
-            raise ValueError(f"Could not find block end: {LLM_START}")
-        return start, end
-
-    start = next((i for i, line in enumerate(lines) if LLM_START in line), -1)
+def find_block(lines: list[str]) -> tuple[int, int]:
+    start = next((i for i, line in enumerate(lines) if PKGS_START in line), -1)
     if start < 0:
-        raise ValueError(f"Could not find block start: {LLM_START}")
-
+        raise ValueError(f"Could not find block start: {PKGS_START}")
     end = -1
     for i in range(start + 1, len(lines)):
         if lines[i].strip() == "]);":
             end = i
             break
     if end < 0:
-        raise ValueError("Could not find llm-agents block end: ]);")
+        raise ValueError("Could not find block end: ]);")
     return start, end
 
 
@@ -52,9 +41,9 @@ def has_attr(block_lines: list[str], attr: str) -> bool:
     return False
 
 
-def add_attr(content: str, attr: str, group: str) -> tuple[str, bool]:
+def add_attr(content: str, attr: str) -> tuple[str, bool]:
     lines = content.splitlines(keepends=True)
-    start, end = find_block(lines, group)
+    start, end = find_block(lines)
     block = lines[start + 1 : end]
 
     if has_attr(block, attr):
@@ -74,12 +63,6 @@ def resolve_target_file(repo: Path, file_arg: str | None) -> Path:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Add package attr to nix-home base.nix")
     parser.add_argument("--attr", required=True, help="Nix attribute name, e.g. caddy")
-    parser.add_argument(
-        "--group",
-        choices=["pkgs", "llm-agents"],
-        default="pkgs",
-        help="Target package group in base.nix",
-    )
     parser.add_argument(
         "--repo",
         default="~/nix-home",
@@ -104,13 +87,13 @@ def main() -> int:
         raise SystemExit(f"[ERROR] Target file not found: {target}")
 
     original = target.read_text(encoding="utf-8")
-    updated, changed = add_attr(original, args.attr, args.group)
+    updated, changed = add_attr(original, args.attr)
 
     if changed and not args.dry_run:
         target.write_text(updated, encoding="utf-8")
 
     status = "CHANGED" if changed else "UNCHANGED"
-    print(f"[{status}] group={args.group} attr={args.attr} file={target}")
+    print(f"[{status}] attr={args.attr} file={target}")
     return 0
 
 

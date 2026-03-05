@@ -20,9 +20,9 @@
 - `init.sh` と `make init` による一発初期化
 - `make build` / `make switch` による日常のビルド・適用操作
 - `make update` による flake 入力の更新とビルド・適用
+- launchd による `make update` 相当の定期実行（毎日 `01:00`）
 - `make mcp` と `ok-mcp-toggle` による MCP 管理導線
 - `ok-mcp-toggle` による MCP レジストリ管理（`global/project` 両対応、`claude` / `gemini` 対象、対話中心運用）
-- launchd による `llm-agents` 入力の定期更新と Home Manager 自動適用（毎日 `06:00` / `18:00`、作業ツリー非依存）
 - `~/nix-home/agent-skills` から Claude / Codex / Gemini への skill symlink 同期
 - VS Code の設定（settings/keybindings/snippets）と拡張リストの宣言管理
 - シェル/CLI/フォント/テーマの再現（Ghostty / Terminal.app / Vim / VS Code）
@@ -51,9 +51,9 @@
 - `make build` でビルドが成功する。
 - `make switch` でシステム適用が成功する。
 - `make update` で flake 入力を更新しビルド・適用できる。
+- `make switch` / `make init` 後、`com.okash1n.nix-home.make-update-nightly` launchd agent が登録済みで、毎日 `01:00` に `make update` 相当が実行される。
 - `make mcp` で `ok-mcp-toggle` の管理対象を確認できる。
 - MCP は `ok-mcp-toggle` で有効化/無効化/状態確認できる。
-- `make switch` / `make init` 後、`com.okash1n.nix-home.llm-agents-update` launchd agent が登録済みで、`llm-agents` 更新時は `home-manager switch` により `codex` / `claude` / `gemini` 更新が自動適用される。
 
 ## 詳細仕様一覧
 

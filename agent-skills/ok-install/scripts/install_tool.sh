@@ -7,7 +7,6 @@ Usage:
   install_tool.sh --attr <nix-attr> --verify <command> [options]
 
 Options:
-  --group <pkgs|llm-agents>   Target package group (default: pkgs)
   --repo <path>               nix-home path (default: ~/nix-home)
   --verify <cmd1,cmd2,...>    Commands to verify with `command -v` (default: attr)
   --no-switch                 Run build only
@@ -15,12 +14,10 @@ Options:
 Examples:
   scripts/install_tool.sh --attr caddy --verify caddy
   scripts/install_tool.sh --attr marp-cli --verify marp
-  scripts/install_tool.sh --attr codex --group llm-agents --verify codex
 EOF
 }
 
 ATTR=""
-GROUP="pkgs"
 REPO="${NIX_HOME_REPO:-$HOME/nix-home}"
 VERIFY=""
 NO_SWITCH=0
@@ -29,10 +26,6 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --attr)
       ATTR="${2:-}"
-      shift 2
-      ;;
-    --group)
-      GROUP="${2:-}"
       shift 2
       ;;
     --repo)
@@ -65,11 +58,6 @@ if [[ -z "$ATTR" ]]; then
   exit 1
 fi
 
-if [[ "$GROUP" != "pkgs" && "$GROUP" != "llm-agents" ]]; then
-  echo "[ERROR] --group must be pkgs or llm-agents" >&2
-  exit 1
-fi
-
 if [[ -z "$VERIFY" ]]; then
   VERIFY="$ATTR"
 fi
@@ -77,8 +65,8 @@ fi
 REPO="$(cd "$REPO" && pwd)"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-echo "[step] add package attr to nix-home: attr=$ATTR group=$GROUP repo=$REPO"
-python3 "$SCRIPT_DIR/add_package.py" --repo "$REPO" --attr "$ATTR" --group "$GROUP"
+echo "[step] add package attr to nix-home: attr=$ATTR repo=$REPO"
+python3 "$SCRIPT_DIR/add_package.py" --repo "$REPO" --attr "$ATTR"
 
 echo "[step] make build"
 (

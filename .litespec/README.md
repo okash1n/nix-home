@@ -38,8 +38,8 @@
 - `osascript -e 'tell application \"Terminal\" to font name of settings set \"Hanabi\"'` が HackGen 系名称を返すこと
 - `~/.config/vim/colors/hanabi.vim` が存在すること
 - `grep -n "colorscheme hanabi" ~/.config/vim/vimrc` が成功すること
-- `command -v code` が成功すること
-- `code --list-extensions | grep -n \"^okash1n\\.hanabi-theme-vscode$\"` が成功すること
+- `command -v code` もしくは `/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code` が利用可能であること
+- 上記 VS Code CLI の `--list-extensions` 結果に `okash1n.hanabi-theme-vscode` が含まれること
 - `home/dot_config/vscode/extensions.txt` が存在し、拡張IDが1行1件で記録されること
 - `~/Library/Application Support/Code/User/settings.json` が存在し、`\"workbench.colorTheme\": \"Hanabi\"` を含むこと
 - `~/Library/Application Support/Code/User/settings.json` が存在し、`\"editor.fontFamily\": \"HackGen Console NF\"` を含むこと

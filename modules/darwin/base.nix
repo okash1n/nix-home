@@ -28,7 +28,6 @@ let
     GEMINI_CLI_HOME = "$HOME/.config/gemini";
     HAPPY_HOME_DIR = "$HOME/.config/happy";
     NIX_HOME_AGENT_SKILLS_DIR = "$HOME/nix-home/agent-skills";
-    NIX_HOME_LLM_AGENTS_AUTO_SWITCH = "1";
     VIMINIT = "source $HOME/.config/vim/vimrc";
   };
   xdgCliEnvLaunchd = {
@@ -38,7 +37,6 @@ let
     GEMINI_CLI_HOME = "/Users/${username}/.config/gemini";
     HAPPY_HOME_DIR = "/Users/${username}/.config/happy";
     NIX_HOME_AGENT_SKILLS_DIR = "/Users/${username}/nix-home/agent-skills";
-    NIX_HOME_LLM_AGENTS_AUTO_SWITCH = "1";
     VIMINIT = "source /Users/${username}/.config/vim/vimrc";
   };
 in
@@ -52,14 +50,6 @@ in
   };
   nix.optimise.automatic = true;
   ids.gids.nixbld = 350;
-  nixpkgs.config.allowUnfreePredicate = pkg:
-    builtins.elem (lib.getName pkg) [
-      "claude-code"
-      "codex"
-      "gemini-cli"
-      "vscode"
-      "vscode-unwrapped"
-    ];
   fonts.packages = [
     pkgs.hackgen-nf-font
     lineSeedJp
@@ -73,7 +63,6 @@ in
   environment.systemPackages =
     (lib.optional (ghosttyPkg != null) ghosttyPkg)
     ++ [
-      pkgs.vscode
       pkgs.zsh
       pkgs.bash
     ];

@@ -6,6 +6,7 @@
     CLAUDE_SKILLS_ROOT="''${CLAUDE_SKILLS_DIR:-''${CLAUDE_CONFIG_DIR:-$HOME/.config/claude}/skills}"
     CODEX_SKILLS_ROOT="''${CODEX_SKILLS_DIR:-''${CODEX_HOME:-$HOME/.config/codex}/skills}"
     GEMINI_SKILLS_ROOT="''${GEMINI_SKILLS_DIR:-''${GEMINI_CLI_HOME:-$HOME/.config/gemini}/.gemini/skills}"
+    COPILOT_SKILLS_ROOT="''${COPILOT_SKILLS_DIR:-$HOME/.copilot/skills}"
 
     link_skill() {
       src="$1"
@@ -51,7 +52,7 @@
     }
 
     mkdir -p "$AGENT_SKILLS_ROOT"
-    mkdir -p "$CLAUDE_SKILLS_ROOT" "$CODEX_SKILLS_ROOT" "$GEMINI_SKILLS_ROOT"
+    mkdir -p "$CLAUDE_SKILLS_ROOT" "$CODEX_SKILLS_ROOT" "$GEMINI_SKILLS_ROOT" "$COPILOT_SKILLS_ROOT"
     AGENT_SKILLS_ROOT="$(cd "$AGENT_SKILLS_ROOT" && pwd)"
 
     managed_skills_file="$(mktemp)"
@@ -77,11 +78,13 @@
       link_skill "$skill_path" "$CLAUDE_SKILLS_ROOT/$skill_name"
       link_skill "$skill_path" "$CODEX_SKILLS_ROOT/$skill_name"
       link_skill "$skill_path" "$GEMINI_SKILLS_ROOT/$skill_name"
+      link_skill "$skill_path" "$COPILOT_SKILLS_ROOT/$skill_name"
     done
 
     cleanup_stale_links "$CLAUDE_SKILLS_ROOT"
     cleanup_stale_links "$CODEX_SKILLS_ROOT"
     cleanup_stale_links "$GEMINI_SKILLS_ROOT"
+    cleanup_stale_links "$COPILOT_SKILLS_ROOT"
 
     cleanup_managed_skills_file
     trap - EXIT
