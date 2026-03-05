@@ -13,6 +13,8 @@
     secrets.asana-mcp-client-secret = {};
     secrets.box-mcp-client-id = {};
     secrets.box-mcp-client-secret = {};
+    secrets.asana-cli-client-secret = {};
+    secrets.asana-cli-client-id = {};
 
     templates."sops-env.sh" = {
       mode = "0400";
@@ -23,6 +25,8 @@ export ASANA_MCP_CLIENT_ID="${config.sops.placeholder.asana-mcp-client-id}"
 export ASANA_MCP_CLIENT_SECRET="${config.sops.placeholder.asana-mcp-client-secret}"
 export BOX_MCP_CLIENT_ID="${config.sops.placeholder.box-mcp-client-id}"
 export BOX_MCP_CLIENT_SECRET="${config.sops.placeholder.box-mcp-client-secret}"
+export ASANA_CLI_CLIENT_SECRET="${config.sops.placeholder.asana-cli-client-secret}"
+export ASANA_CLI_CLIENT_ID="${config.sops.placeholder.asana-cli-client-id}"
 '';
     };
   };
